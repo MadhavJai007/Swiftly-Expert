@@ -1,20 +1,47 @@
 import logo from './logo.svg';
 import './App.css';
 import React, {Component, useState, useEffect, useRef} from 'react';
+import Splash from './components/Splash';
+import LoginPage from './pages/LoginPage';
 
 
 const App = () => {
-
+  const isMounted = useRef(false);
+  const [isDoneLoading, setIsDoneLoading] = useState(false);
+  
   // mimics component.onMount
   useEffect(() => {
+    isMounted.current = true;
     document.title = "Swiftly";
-  });
+    startSplashTimer(1000);
+  }, []);
 
-
-  return (
-    <>
-    
-    </>
+  const startSplashTimer = (time) => {
+    setTimeout(() => {
+      setIsDoneLoading(true);
+    }, time);
+  }
+  //when timer is not done loading, it will show splash screen
+  if(!isDoneLoading){
+    return (
+      <>
+        <div className=""> 
+          <Splash/>
+        </div>
+        
+      </>
+    )
+  }
+  else {
+    // return component view that shows a login page
+    return (
+      <>
+        <div>
+          <LoginPage/>
+        </div>
+      </>
+    )
+  }
     // <div className="App" > 
     //   <div className="bg-purple-600 bg-opacity-100">
 
@@ -36,7 +63,6 @@ const App = () => {
     //     </a>
     //   </header> */}
     // </div>
-  );
 }
 
 const backgroundStyle = {
