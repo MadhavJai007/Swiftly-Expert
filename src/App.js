@@ -2,7 +2,12 @@ import logo from './logo.svg';
 import './App.css';
 import React, {Component, useState, useEffect, useRef} from 'react';
 import Splash from './components/Splash';
-import LoginPage from './pages/LoginPage';
+import LoginPage from './components/LoginPage';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import Dashboard from './components/Dashboard';
+import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter as Router, Switch, Route} from 'react-router-dom'
 
 
 const App = () => {
@@ -13,7 +18,7 @@ const App = () => {
   useEffect(() => {
     isMounted.current = true;
     document.title = "Swiftly";
-    startSplashTimer(1000);
+    // startSplashTimer(1000);
   }, []);
 
   const startSplashTimer = (time) => {
@@ -22,26 +27,32 @@ const App = () => {
     }, time);
   }
   //when timer is not done loading, it will show splash screen
-  if(!isDoneLoading){
-    return (
-      <>
-        <div className=""> 
-          <Splash/>
-        </div>
+  // if(!isDoneLoading){
+  //   return (
+  //     <>
+  //       <div className=""> 
+  //         <Splash/>
+  //       </div>
         
-      </>
-    )
-  }
-  else {
+  //     </>
+  //   )
+  // }
+  // else {
     // return component view that shows a login page
     return (
-      <>
-        <div>
-          <LoginPage/>
-        </div>
-      </>
+      <div>
+        <Router>
+            <AuthProvider>
+              <Switch>
+                <Route exact path="/" component={Dashboard} />
+                <Route path="/signup" component={Signup} />
+                <Route path="/login" component={Login} />
+              </Switch>
+            </AuthProvider>
+        </Router>  
+      </div>
     )
-  }
+  // }
     // <div className="App" > 
     //   <div className="bg-purple-600 bg-opacity-100">
 
