@@ -1,13 +1,14 @@
 import React, {useRef, useState} from 'react'
 import {useAuth} from '../contexts/AuthContext'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 
 const Login = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
     const {login, currentUser} = useAuth();
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const history = useHistory();
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -16,6 +17,7 @@ const Login = () => {
             setError(null)
             setLoading(true)
             await login(emailRef.current.value, passwordRef.current.value)
+            history.push("/")
         }
         catch {
             setError('Failed to log in')
@@ -29,7 +31,7 @@ const Login = () => {
                 Login
             </div>
             <br/>
-            {currentUser && currentUser.email}
+            {/* <p>{currentUser ? `Currently signed in as: ${currentUser.email}` : `Not signed in`}</p> */}
             {error ? alert(error) : console.log("nothing happend")}
             <form onSubmit={handleSubmit}>
                 <label>Email</label>

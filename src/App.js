@@ -5,6 +5,7 @@ import Splash from './components/Splash';
 import LoginPage from './components/LoginPage';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Switch, Route} from 'react-router-dom'
@@ -44,7 +45,7 @@ const App = () => {
         <Router>
             <AuthProvider>
               <Switch>
-                <Route exact path="/" component={Dashboard} />
+                <PrivateRoute exact path="/" component={Dashboard} />
                 <Route path="/signup" component={Signup} />
                 <Route path="/login" component={Login} />
               </Switch>
