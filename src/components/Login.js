@@ -5,7 +5,7 @@ import {Link, useHistory} from 'react-router-dom'
 const Login = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
-    const {login, getUser, currentUser} = useAuth();
+    const {login, getUserEmail, currentUser} = useAuth();
     const [errorMsg, setErrorMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const history = useHistory();
@@ -20,7 +20,7 @@ const Login = () => {
             let statusCode = await login(emailRef.current.value, passwordRef.current.value)
             switch(statusCode.code) {
                 case "LOGIN_FOUND":
-                    let loginCode = await getUser(emailRef.current.value)
+                    let loginCode = await getUserEmail(emailRef.current.value)
                     console.log(loginCode)
                     if(loginCode.code === "LOGIN_SUCCESS"){
                         setLoading(true)

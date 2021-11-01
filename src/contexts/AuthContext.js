@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     const [currentUsername, setCurrentUsername] = useState();
     const [loading, setLoading] = useState(true);
 
-    const getUser = async email => {
+    const getUserEmail = async email => {
         let returnCode;
         let expertsRef = collection(db, "Experts");
         const q = query(expertsRef, where("email", "==", email))
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         // TODO: save querySnapshot.docs[0]["id"] with setCurrentUsername
 
         if(querySnapshot.docs.length === 0) {
-            returnCode = {"code": "LOGIN_FAIL", "details": "User was not found in Experts collection. Your email being used is not an Expert account"}
+            returnCode = {"code": "LOGIN_FAIL", "details": "User was not found in Experts collection. The email being used is not an Expert account"}
             return returnCode;
         }
 
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
             returnCode = {"code": "LOGIN_SUCCESS", "details": "User was found in the Experts collection. Logging you in..."}
         }
         else {
-            returnCode = {"code": "LOGIN_FAIL", "details": "Username document was found in Experts collection but mismatch in associated email. Your email being used is not an Expert account"}
+            returnCode = {"code": "LOGIN_FAIL", "details": "Username document was found in Experts collection but mismatch in associated email. The email being used is not an Expert account"}
         }
         return returnCode;
     }
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
-        getUser
+        getUserEmail
     }
 
     return (
