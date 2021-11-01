@@ -1,26 +1,53 @@
-import React, {useRef, useState} from 'react'
+import React, {useRef, useState, useEffect} from 'react'
 import {useAuth} from '../contexts/AuthContext'
 import {Link, useHistory} from 'react-router-dom'
 
 const Login = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
-    const {login, currentUser} = useAuth();
-    const [error, setError] = useState(null);
+    const {login, getUser, currentUser} = useAuth();
+    const [errorMsg, setErrorMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const history = useHistory();
 
+    // useEffect(() => {
+    //     console.log()
+    // }, [errorMsg])
+
     async function handleSubmit(e) {
         e.preventDefault();
-
         try {
-            setError(null)
-            setLoading(true)
-            await login(emailRef.current.value, passwordRef.current.value)
-            history.push("/")
+            let statusCode = await login(emailRef.current.value, passwordRef.current.value)
+            switch(statusCode.code) {
+                case "LOGIN_FOUND":
+                    let loginCode = await getUser(emailRef.current.value)
+                    console.log(loginCode)
+                    if(loginCode.code === "LOGIN_SUCCESS"){
+                        setLoading(true)
+                        setErrorMsg("")
+                        history.push("/")
+                    } 
+                    if (loginCode.code === "LOGIN_FAIL") {
+                        setErrorMsg(loginCode.details)
+                    } else {
+                        setErrorMsg("Fatal, unexpected error")
+                    }
+                    break;
+                case "INVALID_EMAIL":
+                    setErrorMsg("Invalid email detected")
+                    break;
+                case "WRONG_PASSWORD":
+                    setErrorMsg("Incorrect password")
+                    break;
+                case "UNEXPECTED_ERR":
+                    setErrorMsg("Unxpected error occured")
+                    break;
+                default:
+                    setErrorMsg("Unexpected error occured")
+            }            
         }
         catch {
-            setError('Failed to log in')
+            setErrorMsg('Failed to log in')
         }
         setLoading(false)
     }
@@ -32,7 +59,7 @@ const Login = () => {
             </div>
             <br/>
             {/* <p>{currentUser ? `Currently signed in as: ${currentUser.email}` : `Not signed in`}</p> */}
-            {error ? alert(error) : console.log("nothing happend")}
+            {errorMsg}
             <form onSubmit={handleSubmit}>
                 <label>Email</label>
                 <input type="email" className="" ref={emailRef} name="email" placeholder="enter your email" required/>

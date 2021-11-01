@@ -1,5 +1,6 @@
 import {initializeApp} from "firebase/app";
 import {getAuth} from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB5vSQaJd647yA8NOls-T6oFeHh434P99M",
@@ -13,5 +14,6 @@ const firebaseConfig = {
 
   const swiftlyFirestoreApp = initializeApp(firebaseConfig);
 
+  export const db = getFirestore();
   export const auth = getAuth();
   export default swiftlyFirestoreApp;

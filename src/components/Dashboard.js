@@ -19,9 +19,9 @@ const Dashboard = () => {
         }
     }
 
-    useEffect(()=>{ 
-        console.log(currentUser)
-    },[])
+    // useEffect(()=>{ 
+    //     console.log(currentUser)
+    // },[])
 
     return (
         <>
