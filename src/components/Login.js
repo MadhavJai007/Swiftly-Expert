@@ -16,6 +16,7 @@ const Login = () => {
 
     async function handleSubmit(e) {
         e.preventDefault();
+        setErrorMsg("")
         try {
             let statusCode = await login(emailRef.current.value, passwordRef.current.value)
             switch(statusCode.code) {

@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useEffect, useState} from 'react'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
-import { collection, doc, setDoc, getDocs, query, where } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, query, where } from 'firebase/firestore'
 import {auth, db} from '../firebase';
 
 const AuthContext = createContext();
@@ -13,6 +13,50 @@ export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState();
     const [currentUsername, setCurrentUsername] = useState();
     const [loading, setLoading] = useState(true);
+
+    const checkUsername = async username => {
+        let returnCode;
+        if(username === "") {
+            console.log(username)
+            returnCode = {"code": "EMPTY_STRING", "details": "Username used by another account. Please choose another"}
+            return returnCode;
+        }
+        else {
+            let expertsDocRef = doc(db, "Experts", username);
+            const expertDocSnap = await getDoc(expertsDocRef);
+            if(expertDocSnap.exists()){
+                returnCode = {"code": "USERNAME_TAKEN", "details": "Username used by another account. Please choose another"}
+                console.log("Username taken")
+            } else {
+                returnCode = {"code": "USERNAME_FREE", "details": "Username is free"}
+                console.log("Username free")
+            }
+            return returnCode;
+        }
+    }
+
+    const addUserToExperts = async (email, password, username, firstname, lastname, country, dob) => {
+        let returnCode;
+        let expertsDocRef = doc(db, "Experts", username);
+        console.log("Username is free. adding user")
+        await setDoc(expertsDocRef, {
+            "country": country,
+            "date_of_birth": dob,
+            "email": email,
+            "firstname": firstname,
+            "lastName": lastname,
+            "password": password,
+            "username": username
+        })
+        .then(res => {
+            // console.log(res);
+            returnCode = res;
+        })
+        .catch(err => {
+            console.log(err); 
+            returnCode = err;
+        })
+    }
 
     const getUserEmail = async email => {
         let returnCode;
@@ -39,9 +83,32 @@ export const AuthProvider = ({ children }) => {
         return returnCode;
     }
 
-    const signup = (email, password) => {
-        // returns a promise
-        return createUserWithEmailAndPassword(auth, email, password);
+    const signup = async (email, password) => {
+        let returnCode;
+        await createUserWithEmailAndPassword(auth, email, password)
+        .then(res => {
+            // console.log("res: " + JSON.stringify(res));
+            returnCode = {"code": "EMAIL_AVAILABLE"}
+        })
+        .catch(err => {
+            /* possible error codes identified:
+            {"code":"auth/email-already-in-use"}
+            {"code":"auth/weak-password"}
+            */
+            let errCode = err.code;
+            switch(errCode) {
+                case "auth/email-already-in-use":
+                    returnCode = {"code": "EMAIL_TAKEN", "details": "Email is used by another account, please use another"}
+                    break;
+                case "auth/weak-password":
+                    returnCode = {"code": "PASSWORD_TOO_WEAK", "details": "Password too weak. Make it more complex"}
+                    break;
+                default:
+                    console.log(JSON.stringify(err));
+                    returnCode = {"code": "UNEXPECTED_ERR", "details": "Unexpected error occured"}
+            }
+        })
+        return returnCode;
     }
 
     const login = async (email, password) => {
@@ -94,7 +161,9 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
-        getUserEmail
+        getUserEmail,
+        addUserToExperts,
+        checkUsername
     }
 
     return (
