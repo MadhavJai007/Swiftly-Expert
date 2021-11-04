@@ -55,25 +55,40 @@ const Login = () => {
 
     return (
         <>
-            <div>
-                Login
-            </div>
-            <br/>
+        <body class="bg-darkCustom">
             {/* <p>{currentUser ? `Currently signed in as: ${currentUser.email}` : `Not signed in`}</p> */}
-            {errorMsg}
-            <form onSubmit={handleSubmit}>
-                <label>Email</label>
-                <input type="email" className="" ref={emailRef} name="email" placeholder="enter your email" required/>
-                <br/>
-                <label>Password</label>
-                <input type="password" className="" ref={passwordRef} name="password" placeholder="enter your password" required/>
-                <br/>
-                <button disabled={loading} type="submit" className="">log in</button>
-            </form>
-            <br/>
-            <div>
-               Need an account? <Link to="/signup">Sign up</Link>
+
+            {/* Main UI for user login information (input fields, labels, etc.) */}
+            <div class = "h-screen flex flex-col items-center justify-center">
+                
+                    <p class="text-xl text-white mb-4"> Login to Swiftly </p>
+
+                    <p class="text-m text-red-500 mb-2">
+                        {errorMsg}
+                    </p>
+                    
+                    {/* Form for user logging in */}
+                    <form onSubmit = {handleSubmit}>
+
+                        <input type="email" ref={emailRef} name="email" placeholder="enter your email" required class="text-sm text-gray-base w-full 
+                              mr-3 py-5 px-4 h-2 border 
+                              border-gray-200 rounded mb-2" />
+                        <br/>
+
+                        <input type="password" ref={passwordRef} name="password" placeholder="enter your password" required class="text-sm text-gray-base w-full 
+                              mr-3 py-5 px-4 h-2 border 
+                              border-gray-200 rounded mb-2" />
+                        <br/>
+
+                        <button disabled={loading} type="submit" class="bg-white w-full mt-4 p-2 border 
+                              border-gray-200 rounded mb-2" > Login </button>
+
+                        <p class = "w-full mt-4 text-white">
+                            Need an account? <Link to="/signup">Sign up</Link>
+                        </p>
+                    </form>
             </div>
+        </body>
         </>
     )
 }
