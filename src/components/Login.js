@@ -55,11 +55,11 @@ const Login = () => {
 
     return (
         <>
-        <body class="bg-darkCustom">
+        <div className="bg-darkCustom">
             {/* <p>{currentUser ? `Currently signed in as: ${currentUser.email}` : `Not signed in`}</p> */}
 
             {/* Main UI for user login information (input fields, labels, etc.) */}
-            <div class = "h-screen flex flex-col items-center justify-center">
+            <div className = "h-screen flex flex-col items-center justify-center">
                 
                     <p class="text-xl text-white mb-4"> Login to Swiftly </p>
 
@@ -70,25 +70,24 @@ const Login = () => {
                     {/* Form for user logging in */}
                     <form onSubmit = {handleSubmit}>
 
-                        <input type="email" ref={emailRef} name="email" placeholder="enter your email" required class="text-sm text-gray-base w-full 
+                        <input type="email" ref={emailRef} name="email" placeholder="enter your email" required className="text-sm text-gray-base w-full 
                               mr-3 py-5 px-4 h-2 border 
                               border-gray-200 rounded mb-2" />
                         <br/>
 
-                        <input type="password" ref={passwordRef} name="password" placeholder="enter your password" required class="text-sm text-gray-base w-full 
+                        <input type="password" ref={passwordRef} name="password" placeholder="enter your password" required className="text-sm text-gray-base w-full 
                               mr-3 py-5 px-4 h-2 border 
                               border-gray-200 rounded mb-2" />
                         <br/>
 
-                        <button disabled={loading} type="submit" class="bg-white w-full mt-4 p-2 border 
-                              border-gray-200 rounded mb-2" > Login </button>
+                        <button disabled={loading} type="submit" className={ 'bg-green-500 hover:bg-green-700 ' + 'w-full mt-4 p-2 border border-gray-200 rounded mb-2'} > Login </button>
 
-                        <p class = "w-full mt-4 text-white">
+                        <p className = "w-full mt-4 text-white">
                             Need an account? <Link to="/signup">Sign up</Link>
                         </p>
                     </form>
             </div>
-        </body>
+        </div>
         </>
     )
 }

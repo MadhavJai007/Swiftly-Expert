@@ -53,8 +53,9 @@ export const AuthProvider = ({ children }) => {
             returnCode = res;
         })
         .catch(err => {
+            // TODO: identify possible error code. None found so far
             console.log(err); 
-            returnCode = err;
+            returnCode = {"code": "UNEXPECTED_SIGNUP_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"};
         })
     }
 
