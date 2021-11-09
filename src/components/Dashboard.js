@@ -10,7 +10,7 @@ const chapterObj = {
     chapter_difficulty: 1,
     chapter_icon_name: "folder.circle",
     chapter_number: 0,
-    chapter_length: 0,
+    chapter_length: 1,
     subscription_code: "N/A",
     lessons: [], // the lessons subcollection
     playground: [] // playgrounds subcollection
@@ -91,6 +91,13 @@ const Dashboard = () => {
         }
     }
 
+    const onInputChange = (e, input) => {
+        e.preventDefault();
+        let _chapterObj = {...selectedChapter}
+        _chapterObj[`${input}`] = e.target.value
+        setSelectedChapter(_chapterObj)
+    }
+
     const chapterCards = chapterList.map(chapter => {
         return <button  key={chapter.chapterId} onClick={() => { getChapter(chapter.chapterId) }}>
             <div className="shadow-lg rounded-xl max-w-xs p-4 bg-white dark:bg-gray-800 relative overflow-hidden"> 
@@ -139,25 +146,72 @@ const Dashboard = () => {
 
             <div className="flex flex-row space-x-4 m-3 h-screen">
                 <div className="w-3/4 h-5/6 rounded-l-md bg-purple-200 overflow-auto">
-                    <div className="font-sans text-center p-3 font-bold text-2xl">
-                        Editing panel
+                    <div className="font-sans text-center p-3 font-bold ">
+                        <div className="text-2xl my-7">Editing panel</div>
                         {/* TODO: Include OnChange handling for form elements */}
-                        <div className="flex flex-col items-center justify-center text-2xl font-bold space-y-6 pt-5 ">
-                            <div className="relative ">
-                                <label for="chapter-title" className="text-gray-700">
-                                    Chapter title
-                                </label>
-                                <input type="text" id="chapter-title" value={selectedChapter.chapter_title} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
+                        <div className="flex flex-col items-center justify-center font-bold space-y-6 pt-5 ">
+                            <div className="flex flex-row space-x-6">
+                                <div className="relative w-40">
+                                    <label  className="text-gray-700">
+                                        Chapter number
+                                    </label>
+                                    <input type="text" id="chapter-num" disabled={true} value={selectedChapter.chapter_number} name="chapter_num" placeholder="Not needed" className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" />
+                                </div>
+
+                                <div className="relative ">
+                                    <label  className="text-gray-700">
+                                        Chapter title
+                                    </label>
+                                    <input type="text" id="chapter-title" value={selectedChapter.chapter_title}  onChange={(e) => onInputChange(e,'chapter_title')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
+                                </div>
+                                
+                                <div className="relative w-40">
+                                    <label className="text-gray-700">
+                                        Subscription code
+                                    </label>
+                                    <input type="text" id="sub-code" value={selectedChapter.subscription_code}  onChange={(e) => onInputChange(e,'subscription_code')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="sub_code" placeholder="Enter a code"/>
+                                </div>
                             </div>
+                            
                             <div>
-                                <label class="text-gray-700" >
+                                <label className="text-gray-700"  >
                                    Chapter Description
                                 </label>
-                                 <textarea value={selectedChapter.chapter_desc} class="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter_desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
+                                 <textarea value={selectedChapter.chapter_desc} onChange={(e) => onInputChange(e,'chapter_desc')} className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter-desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
                                 </textarea>
                             </div>
+
+                            <div>
+                                <label className="text-gray-700" >
+                                    Chapter length: {`~ ${selectedChapter.chapter_length} minutes`}
+                                </label>
+                                <br/>
+                                {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
+                                <input id="chapter-length" type="range" min="1" max="120" step="1" value={selectedChapter.chapter_length} onChange={(e) => onInputChange(e, 'chapter_length')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
+                            </div>
+
+                            <div>
+                                <label className="text-gray-700" >
+                                    Chapter Difficulty: {selectedChapter.chapter_difficulty < 3 ? (selectedChapter.chapter_difficulty < 2 ? "Easy" : "Medium") : "Hard"}
+                                </label>
+                                <br/>
+                                {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
+                                <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e,'chapter_difficulty')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
+                            </div>
+                        </div>
+
+                        <div className="w-40 static ">
+                            <button type="button" className=" py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                <svg width="20" height="20" fill="currentColor" className="mr-2" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1344 1472q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28h-1472q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h427q21 56 70.5 92t110.5 36h256q61 0 110.5-36t70.5-92h427q40 0 68 28t28 68zm-325-648q-17 40-59 40h-256v448q0 26-19 45t-45 19h-256q-26 0-45-19t-19-45v-448h-256q-42 0-59-40-17-39 14-69l448-448q18-19 45-19t45 19l448 448q31 30 14 69z">
+                                    </path>
+                                </svg>
+                                Upload
+                            </button>
                         </div>
                     </div>
+
+                    
                 </div>
                 <div className="w-1/4 h-5/6 rounded-r-md bg-blue-400 overflow-auto">
                     <div className="font-sans text-center p-3 font-bold text-2xl">
