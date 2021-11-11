@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
-import { collection, doc, getDocs, getDoc } from 'firebase/firestore'
+import { collection, doc, getDocs, getDoc, listCollections } from 'firebase/firestore'
 import {db} from '../firebase';
+// import Tabs from './widgets/Tabs';
 
 const chapterObj = {
+    chapter_id: "",
     chapter_title: "",
     chapter_desc: "",
     chapter_difficulty: 1,
@@ -16,11 +18,29 @@ const chapterObj = {
     playground: [] // playgrounds subcollection
 }
 
+const tabSections = [
+    {
+        "number": 1,
+        "tabTitle": "metadata"
+    },
+    {
+        "number": 2,
+        "tabTitle": "lessons"
+    },
+    {
+        "number": 3,
+        "tabTitle": "playground"
+    }
+]
+
 const Dashboard = () => {
     const [error, setError] = useState("")
     const [chapterList, setChapterList] = useState([]);
     const [chaptersRetrieved, setChaptersRetrieved] = useState(false)
+    const [lessonContentRetrieved, setLessonContentRetrieved] = useState(false)
     const [selectedChapter, setSelectedChapter] = useState(chapterObj)
+    const [selectedLesson, setSelectedLesson] = useState(null)
+    const [openTab, setOpenTab] = useState(1);
     const {currentUser, logout} = useAuth()
     const history = useHistory()
 
@@ -41,8 +61,9 @@ const Dashboard = () => {
         //     setChaptersRetrieved(false)
         // }
         const querySnapshot = await getDocs(collection(db, "Chapters"));
+        let _chapterList = []
         querySnapshot.forEach(doc => {
-            chapterList.push({
+            _chapterList.push({
                 chapterId: doc.id,
                 chapterNumber: doc.data()["chapter_number"],
                 chapterTitle: doc.data()["chapter_title"],
@@ -51,12 +72,31 @@ const Dashboard = () => {
                 chapterLength: doc.data()["chapter_length"],
                 chapterSubCode: doc.data()["subscription_code"]
             })
+
             // console.log(doc.id, " => ", doc.data())
         })
+        setChapterList(_chapterList)
         setChaptersRetrieved(true)
     }
 
+    const getChapterLessons = async () => {
+        let chapterDocRef = doc(db, "Chapters", selectedChapter.chapter_id)
+        const querySnapshot = await getDocs(collection(chapterDocRef, "lessons"))
+        let lessons = []
+        querySnapshot.forEach(doc => {
+            lessons.push({
+                "lesson_id": doc.id,
+                "lesson_title":  doc.data().lesson_content[0],
+                "lesson_content": doc.data().lesson_content
+            })
+        })
+        setSelectedChapter({...selectedChapter, lessons: lessons});
+        setLessonContentRetrieved(true)
+    }
+
     const getChapter = async (docId) => {
+        setLessonContentRetrieved(false)
+        setOpenTab(1)
         const chapterDocRef = doc(db, "Chapters", docId);
         const chapterDocSnap = await getDoc(chapterDocRef);
         if(chapterDocSnap.exists()) {
@@ -74,7 +114,9 @@ const Dashboard = () => {
             // }
 
             // creating temp copy of the empty chapter object
+            console.log(docId)
             let _chapterObj = {...chapterObj};
+            _chapterObj.chapter_id = docId
             _chapterObj.chapter_title = chapterDocSnap.data().chapter_title
             _chapterObj.chapter_desc = chapterDocSnap.data().chapter_desc
             _chapterObj.chapter_difficulty = chapterDocSnap.data().chapter_difficulty
@@ -91,11 +133,26 @@ const Dashboard = () => {
         }
     }
 
-    const onInputChange = (e, input) => {
+    const onInputChange = (e, type, input) => {
         e.preventDefault();
-        let _chapterObj = {...selectedChapter}
-        _chapterObj[`${input}`] = e.target.value
-        setSelectedChapter(_chapterObj)
+        if(type === "chapter" ){
+            let _chapterObj = {...selectedChapter}
+            _chapterObj[`${input}`] = e.target.value
+            setSelectedChapter(_chapterObj)
+        }
+        else if(type === "lesson") {
+            let _lessonObj = {...selectedLesson}
+            _lessonObj[`${input}`] = e.target.value
+            setSelectedLesson(_lessonObj)
+        }
+    }
+
+    const onLessonSelect = (e) => {
+        let lessonId = e.target.value;
+        if(lessonId !== ""){
+            var chosenLesson = selectedChapter.lessons.find(lesson => lesson.lesson_id === lessonId)
+            setSelectedLesson(chosenLesson)
+        }
     }
 
     const chapterCards = chapterList.map(chapter => {
@@ -127,6 +184,38 @@ const Dashboard = () => {
         </button>
     })
 
+    const tabs = tabSections.map(tab => {
+        return <li className="mx-2 flex-auto text-center" key={tab.number}>
+            <a
+            className={
+                "text-xs font-bold px-5 py-3 shadow-lg rounded block leading-normal " +
+                (openTab === tab.number
+                ? "text-white bg-red-600"
+                : "text-red-600 bg-white")
+            }
+            onClick={e => {
+                e.preventDefault();
+                setOpenTab(tab.number)
+                if(tab.number === 2 && selectedChapter.chapter_id !== "") {
+                    if(!lessonContentRetrieved) {
+                        console.log("loading the lession content")
+                        getChapterLessons()
+                    }
+                }
+            }}
+            >
+                {tab.tabTitle}
+            </a>
+        </li>
+    })
+
+
+    const lessonOptions = selectedChapter.lessons.map(lesson => {
+        return <option key={lesson.lesson_id} value={lesson.lesson_id}>
+            {lesson.lesson_title}
+        </option>
+    })
+
     useEffect(()=>{ 
         console.log(currentUser.email)
         // if a currentUser exists (logged in)
@@ -140,6 +229,10 @@ const Dashboard = () => {
         console.log(selectedChapter)
     }, [selectedChapter])
 
+    useEffect(() => {
+        console.log(selectedLesson)
+    }, [selectedLesson])
+
     return (
       <>
         <div className="">
@@ -148,8 +241,18 @@ const Dashboard = () => {
                 <div className="w-3/4 h-5/6 rounded-l-md bg-purple-200 overflow-auto">
                     <div className="font-sans text-center p-3 font-bold ">
                         <div className="text-2xl my-7">Editing panel</div>
-                        {/* TODO: Include OnChange handling for form elements */}
-                        <div className="flex flex-col items-center justify-center font-bold space-y-6 pt-5 ">
+
+                        {/* <Tabs color="red" /> */}
+
+                        <div className="flex flex-wrap">
+                            <div className="w-full">
+                                <ul className="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">
+                                    {tabs}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className={"flex flex-col items-center justify-center font-bold space-y-6 pt-5 " + (openTab === 1 ? "block" : "hidden")}>
                             <div className="flex flex-row space-x-6">
                                 <div className="relative w-40">
                                     <label  className="text-gray-700">
@@ -162,22 +265,22 @@ const Dashboard = () => {
                                     <label  className="text-gray-700">
                                         Chapter title
                                     </label>
-                                    <input type="text" id="chapter-title" value={selectedChapter.chapter_title}  onChange={(e) => onInputChange(e,'chapter_title')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
+                                    <input type="text" id="chapter-title" value={selectedChapter.chapter_title}  onChange={(e) => onInputChange(e, 'chapter', 'chapter_title')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
                                 </div>
                                 
                                 <div className="relative w-40">
                                     <label className="text-gray-700">
                                         Subscription code
                                     </label>
-                                    <input type="text" id="sub-code" value={selectedChapter.subscription_code}  onChange={(e) => onInputChange(e,'subscription_code')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="sub_code" placeholder="Enter a code"/>
+                                    <input type="text" id="sub-code" value={selectedChapter.subscription_code}  onChange={(e) => onInputChange(e, 'chapter','subscription_code')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="sub_code" placeholder="Enter a code"/>
                                 </div>
                             </div>
                             
                             <div>
                                 <label className="text-gray-700"  >
-                                   Chapter Description
+                                Chapter Description
                                 </label>
-                                 <textarea value={selectedChapter.chapter_desc} onChange={(e) => onInputChange(e,'chapter_desc')} className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter-desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
+                                <textarea value={selectedChapter.chapter_desc} onChange={(e) => onInputChange(e, 'chapter','chapter_desc')} className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter-desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
                                 </textarea>
                             </div>
 
@@ -187,7 +290,7 @@ const Dashboard = () => {
                                 </label>
                                 <br/>
                                 {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
-                                <input id="chapter-length" type="range" min="1" max="120" step="1" value={selectedChapter.chapter_length} onChange={(e) => onInputChange(e, 'chapter_length')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
+                                <input id="chapter-length" type="range" min="1" max="120" step="1" value={selectedChapter.chapter_length} onChange={(e) => onInputChange(e, 'chapter', 'chapter_length')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
                             </div>
 
                             <div>
@@ -196,8 +299,39 @@ const Dashboard = () => {
                                 </label>
                                 <br/>
                                 {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
-                                <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e,'chapter_difficulty')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
+                                <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
                             </div>
+                        </div>
+                        
+                        <div className= {"flex flex-row " + (openTab === 2 ? "block" : "hidden")}>
+                            <div className="w-1/4 h-5/6 rounded-l-md bg-red-400 overflow-auto"> 
+                                <label className="text-gray-700" htmlFor="lessons">
+                                <div className="text-2xl my-7 text-left ">Lessons</div>
+                                    <select id="lessons" onChange={(e)=>{onLessonSelect(e)}} className="block w-52 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="lessons">
+                                        <option value="">
+                                            Select a lesson
+                                        </option>
+                                        {lessonOptions}
+                                    </select>
+                                </label>
+                            </div>
+                            <div className="w-3/4 h-full rounded-r-md bg-blue-400 overflow-auto">
+                                {selectedLesson ? 
+                                    <div className="font-sans text-center p-3 font-bold ">
+                                        <div>
+                                            <label  className="text-gray-700">
+                                            Lesson title
+                                            </label>
+                                            <input type="text" id="chapter-title" value={selectedLesson.lesson_title}  onChange={(e) => onInputChange(e, 'lesson','lesson_title')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
+                                        </div>
+                                    </div>
+                                    :
+                                    <div className="font-sans text-center p-3 font-bold ">
+                                        Select a lesson
+                                    </div>
+                                }
+                            </div>
+                            
                         </div>
 
                         <div className="w-40 static ">
