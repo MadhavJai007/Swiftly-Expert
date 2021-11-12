@@ -397,11 +397,19 @@ const Dashboard = () => {
                 <div className="text-2xl">
                     <p>Currently logged in as: <strong> {currentUser.email} </strong></p>
                 </div>
-                <div className="text-2xl font-extrabold">
-                    <button type="log out" onClick={handleLogout}>log out</button>
+                <div className="text-2xl font-extrabold pb-5">
+                    <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    Logout
+                    </button>
                 </div>
             </div>
+
+                
             </div>
+            
             
         </div>
 
