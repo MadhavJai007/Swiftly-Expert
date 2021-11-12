@@ -104,9 +104,14 @@ const Signup = () => {
                               border-gray-200 rounded mb-2" ref={lastNameRef} name="lastname" placeholder="Enter your last name" required />
                     <br/>
                     <label className="text-md text-white mb-4">Country</label>
-                    <input type="text" className="text-sm text-gray-base w-full 
-                              mr-3 py-5 px-4 h-2 border 
-                              border-gray-200 rounded mb-2" ref={countryRef} name="country" placeholder="Enter your country" required />
+                    <select id = "dropdown" className="text-sm text-gray-base w-full 
+                              mr-3 border 
+                              border-gray-200 rounded mb-2" ref={countryRef} name="country" placeholder="Enter your country" required>
+                        <option value="Canada">Canada</option>
+                        <option value="United States">United States</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Australia">Australia</option>
+                    </select>
                     <br/>
                     <label className="text-md text-white mb-4">Date of birth (DD/MM/YYYY)</label>
                     <input type="text" className="text-sm text-gray-base w-full 
