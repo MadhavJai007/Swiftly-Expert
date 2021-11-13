@@ -40,6 +40,7 @@ const Dashboard = () => {
     const [lessonContentRetrieved, setLessonContentRetrieved] = useState(false)
     const [selectedChapter, setSelectedChapter] = useState(chapterObj)
     const [selectedLesson, setSelectedLesson] = useState(null)
+    const [updatedLesson, setUpdatedLesson] = useState(null)
     const [openTab, setOpenTab] = useState(1);
     const {currentUser, logout} = useAuth()
     const history = useHistory()
@@ -215,20 +216,25 @@ const Dashboard = () => {
         </option>
     })
 
-    var selectedFile = null;
-    var updatedLesson = null;
+    // var selectedFile = null;
+    // var updatedLesson = null;
 
     // Grabs file from computer
-    const fileSelectedHandler = event => {
-        selectedFile = event.target.files[0]
-
+    const fileSelectedHandler = async (event, content_index) => {
+        event.preventDefault();
+        let selectedFile = event.target.files[0] 
+        let tempLesson = {...selectedLesson}
         if (selectedFile != null){
-            getBase64(selectedFile).then(
-                data => {
-                    selectedLesson.lesson_content[0] = data
-                    updatedLesson = selectedLesson
-                }
-            );
+            try{
+                var imageData = await getBase64(selectedFile);
+                tempLesson.lesson_content[content_index] = imageData;
+                // used a state variable called updatedLesson. used its associated function (setUpdatedLesson) to set the value of the updated lesson
+                setUpdatedLesson(tempLesson);
+                console.log(selectedLesson)
+            }
+            catch(err) {
+                console.log("error uploading data")
+            }
         }
 
     }
@@ -249,19 +255,21 @@ const Dashboard = () => {
         const array = [];
         console.log("lessonContent() called")
         for (var i = 1; i < selectedLesson.lesson_content.length; i++){
-            if(selectedLesson.lesson_content[i].startsWith("data:image/png;base64,")){
-
+            if(selectedLesson.lesson_content[i].startsWith("data:image/png;base64,") || selectedLesson.lesson_content[i].startsWith("data:image/gif;base64,")){
+                let content_index = i;
                 array.push(
                     <div key={`lesson_info_${i}`}>
                          <div className = "flex flex-col items-center justify-center">
                             <img src={selectedLesson.lesson_content[i]} alt="Red dot" />
-                            <input type="file" onChange={fileSelectedHandler}/>
+                            <input type="file" onChange={(e) => fileSelectedHandler(e, content_index)}/>
                             <button onClick={() => {
-
-                                // Calling setSelectedLesson with updatedLesson (same lesson, just updated content)
-                                setSelectedLesson(updatedLesson)
-
-                                }}>Upload</button>
+                                // if the updatedLesson is not null (only null by default)
+                                if(updatedLesson){
+                                    // console.log("ds???")
+                                    // Calling setSelectedLesson and setting selectedLesson state with data in updatedLesson state (same lesson, just updated content)
+                                    setSelectedLesson(updatedLesson)
+                                }
+                            }}>Upload</button>
                         </div>                   
                     </div>
                 )
