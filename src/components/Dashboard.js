@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
-import { collection, doc, getDocs, getDoc, listCollections } from 'firebase/firestore'
+import { collection, doc, setDoc, getDocs, getDoc, listCollections } from 'firebase/firestore'
 import {db} from '../firebase';
 // import Tabs from './widgets/Tabs';
 
@@ -14,6 +14,7 @@ const chapterObj = {
     chapter_number: 0,
     chapter_length: 1,
     subscription_code: "N/A",
+    chapter_author: "",
     lessons: [], // the lessons subcollection
     playground: [] // playgrounds subcollection
 }
@@ -71,7 +72,8 @@ const Dashboard = () => {
                 chapterDesc: doc.data()["chapter_desc"],
                 chapterDiff: doc.data()["chapter_difficulty"],
                 chapterLength: doc.data()["chapter_length"],
-                chapterSubCode: doc.data()["subscription_code"]
+                chapterSubCode: doc.data()["subscription_code"],
+                chapterAuth: doc.data()["author"]
             })
         })
         setChapterList(_chapterList)
@@ -123,10 +125,13 @@ const Dashboard = () => {
             _chapterObj.chapter_number = chapterDocSnap.data().chapter_number
             _chapterObj.chapter_length = chapterDocSnap.data().chapter_length
             _chapterObj.subscription_code = chapterDocSnap.data().subscription_code
+            _chapterObj.chapter_author = chapterDocSnap.data().author
+
+            console.log(chapterDocSnap.data().author)
 
             setSelectedChapter(_chapterObj)
             setSelectedLesson(null)
-
+            
         } else {
             // this shouldnt happen
             console.log("Requested document not found!!")
@@ -163,7 +168,7 @@ const Dashboard = () => {
                         {chapter["chapterTitle"]}
                     </p>
                     <p className="text-gray-400 dark:text-gray-300 text-sm font-medium mb-2">
-                       Created by: {"Insert author name"}
+                       Created by: {chapter.chapterAuth}
                     </p>
                     <p className="text-gray-400 dark:text-gray-300 text-xs font-medium mb-2">
                         Approx. length: {chapter["chapterLength"] + " mins"}
@@ -196,11 +201,18 @@ const Dashboard = () => {
             onClick={e => {
                 e.preventDefault();
                 setOpenTab(tab.number)
+
+                // If going to lessons tab and chapter is not nil, download lessons
                 if(tab.number === 2 && selectedChapter.chapter_id !== "") {
                     if(!lessonContentRetrieved) {
                         console.log("loading the lession content")
                         getChapterLessons()
                     }
+                }
+                
+                // If going to chapter tab, and selected chapter is not nil, clear lessons
+                else if (tab.number === 1 && selectedChapter.chapter_id !== "") {
+                    setSelectedChapter({...selectedChapter, lessons: []});
                 }
             }}
             >
@@ -216,8 +228,6 @@ const Dashboard = () => {
         </option>
     })
 
-    // var selectedFile = null;
-    // var updatedLesson = null;
 
     // Grabs file from computer
     const fileSelectedHandler = async (event, content_index) => {
@@ -236,7 +246,6 @@ const Dashboard = () => {
                 console.log("error uploading data")
             }
         }
-
     }
 
     // Function that converts file to base64
@@ -249,6 +258,78 @@ const Dashboard = () => {
         });
       }
 
+    // Function that updates the chapter
+    const updateChapter = async(chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
+
+        let returnCode;
+        let chaptersRefDoc = doc(db, "Chapters", chapterID);
+
+        let validInput = true
+        let chapterLength = parseInt(chapterLen)
+        let chapterDifficulty = parseInt(chapterDiff)
+
+        // Checking if chapter title and desc are not empty
+        if (chapterTitle.trim() == ""){
+            validInput = false
+        }
+
+        if (chapterDesc.trim() == ""){
+            validInput = false
+        }
+
+        // Only update doc if the data is valid
+        if (validInput == true){
+
+            // Only updating chapter stuff (if user selects chapter tab, chaptLessons = [], so length is 0)
+            if (chaptLessons.length == 0){
+
+                console.log("Updating: General Chapter")
+
+                await setDoc(chaptersRefDoc, {
+                    "chapter_desc": chapterDesc,
+                    "chapter_number": chapterNum,
+                    "chapter_difficulty": chapterDifficulty,
+                    "chapter_icon_name": "character.book.closed",
+                    "chapter_length": chapterLength,
+                    "chapter_title": chapterTitle,
+                    "subscription_code": subCode
+                })
+                .then(res => {
+                    // console.log(res);
+                    returnCode = res;
+                })
+                .catch(err => {
+                    // TODO: identify possible error code. None found so far
+                    console.log(err); 
+                    returnCode = {"code": "UNEXPECTED_SIGNUP_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"};
+                })
+            }
+
+            // Updating lesson stuff (not complete)
+            else if (chaptLessons.length != 0){
+
+                console.log("Updating: Chapter Lessons")
+
+                // Getting the chapter
+                let chapterRefDoc = doc(db, "Chapters", "chapter_006");
+
+                // Getting lessons collection
+                let lessonsRefCollection = collection(chapterRefDoc, "lessons")
+                
+            
+                // Looping over each lesson and writing it to the lessons collection
+                for (var i = 0; i < chaptLessons.length; i++){
+
+                    // Grabbing the specific lessonn
+                    let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
+        
+                    await setDoc(lessonsRefDoc, {
+                        "lesson_content": chaptLessons[i].lesson_content
+                    })
+                }    
+            }
+        }
+    }
 
 
     const lessonContent = () => {
@@ -262,14 +343,14 @@ const Dashboard = () => {
                          <div className = "flex flex-col items-center justify-center">
                             <img src={selectedLesson.lesson_content[i]} alt="Red dot" />
                             <input type="file" onChange={(e) => fileSelectedHandler(e, content_index)}/>
-                            <button onClick={() => {
+                            {/* <button onClick={() => {
                                 // if the updatedLesson is not null (only null by default)
                                 if(updatedLesson){
-                                    // console.log("ds???")
+                                    console.log("ds???")
                                     // Calling setSelectedLesson and setting selectedLesson state with data in updatedLesson state (same lesson, just updated content)
                                     setSelectedLesson(updatedLesson)
                                 }
-                            }}>Upload</button>
+                            }}>Upload</button> */}
                         </div>                   
                     </div>
                 )
@@ -277,7 +358,10 @@ const Dashboard = () => {
                 array.push(
                     <div key={`lesson_info_${i}`} className="w-96">
                        <textarea value={selectedLesson.lesson_content[i]}
-                        onChange={(e) => console.log("later")} 
+                       
+                        onChange={(e) => 
+                            console.log("later")} 
+
                         className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" 
                          placeholder="Enter something" 
                          rows="5" cols="40">
@@ -419,7 +503,21 @@ const Dashboard = () => {
                         </div>
 
                         <div className="w-40 static ">
-                            <button type="button" className=" py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                            <button type="button" onClick={() => {
+
+                                // If selected chapter is not null --> then user is updating a chapter
+                                if (selectedChapter.chapter_id != ""){
+
+                                    
+
+                                    updateChapter(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
+
+                                // Else, then user is creating a new chapter                                    
+                                }else{
+
+                                }
+
+                            }} className=" py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                 <svg width="20" height="20" fill="currentColor" className="mr-2" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M1344 1472q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28h-1472q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h427q21 56 70.5 92t110.5 36h256q61 0 110.5-36t70.5-92h427q40 0 68 28t28 68zm-325-648q-17 40-59 40h-256v448q0 26-19 45t-45 19h-256q-26 0-45-19t-19-45v-448h-256q-42 0-59-40-17-39 14-69l448-448q18-19 45-19t45 19l448 448q31 30 14 69z">
                                     </path>
