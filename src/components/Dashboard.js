@@ -356,9 +356,21 @@ const Dashboard = () => {
                             }}>Upload</button> */}
                         </div>   
                         <div className = "flex flex-col items-center justify-center">
-                            <button type="button">+Paragraph</button>
-                            <button type="button">+Image</button>
-                        </div>                
+                            <button type="button" onClick={() => {
+                                array.push(
+                                    <textarea>
+                                    New TextArea
+                                    </textarea>
+                                )
+                                }}>+Paragraph</button>
+                            <button type="button" onClick={() => {
+                                array.push(
+                                    <textarea>
+                                    New TextArea
+                                    </textarea>
+                                )
+                                }}>+Image</button>
+                        </div>              
                     </div>
                 )
             }else {
@@ -375,9 +387,21 @@ const Dashboard = () => {
                          rows="5" cols="40">
                         </textarea>
                         <div className = "flex flex-col items-center justify-center">
-                            <button type="button">+Paragraph</button>
-                            <button type="button">+Image</button>
-                        </div>
+                            <button type="button" onClick={() => {
+                                array.push(
+                                    <textarea>
+                                    New TextArea
+                                    </textarea>
+                                )
+                                }}>+Paragraph</button>
+                            <button type="button" onClick={() => {
+                                array.push(
+                                    <textarea>
+                                    New TextArea
+                                    </textarea>
+                                )
+                                }}>+Image</button>
+                        </div>   
                     </div>
                 )
             }
