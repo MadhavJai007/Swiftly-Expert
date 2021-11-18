@@ -339,7 +339,10 @@ const Dashboard = () => {
             if(selectedLesson.lesson_content[i].startsWith("data:image/png;base64,") || selectedLesson.lesson_content[i].startsWith("data:image/gif;base64,")){
                 let content_index = i;
                 array.push(
+                    
                     <div key={`lesson_info_${i}`}>
+
+                        
                          <div className = "flex flex-col items-center justify-center">
                             <img src={selectedLesson.lesson_content[i]} alt="Red dot" />
                             <input type="file" onChange={(e) => fileSelectedHandler(e, content_index)}/>
@@ -351,12 +354,17 @@ const Dashboard = () => {
                                     setSelectedLesson(updatedLesson)
                                 }
                             }}>Upload</button> */}
-                        </div>                   
+                        </div>   
+                        <div className = "flex flex-col items-center justify-center">
+                            <button type="button">+Paragraph</button>
+                            <button type="button">+Image</button>
+                        </div>                
                     </div>
                 )
             }else {
                 array.push(
                     <div key={`lesson_info_${i}`} className="w-96">
+
                        <textarea value={selectedLesson.lesson_content[i]}
                        
                         onChange={(e) => 
@@ -366,6 +374,10 @@ const Dashboard = () => {
                          placeholder="Enter something" 
                          rows="5" cols="40">
                         </textarea>
+                        <div className = "flex flex-col items-center justify-center">
+                            <button type="button">+Paragraph</button>
+                            <button type="button">+Image</button>
+                        </div>
                     </div>
                 )
             }
@@ -490,6 +502,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                         <div className="flex flex-col space-y-9">
+                                            
                                             {lessonContent()}
                                         </div>
                                     </div>
