@@ -42,6 +42,7 @@ const Dashboard = () => {
     const [selectedChapter, setSelectedChapter] = useState(chapterObj)
     const [selectedLesson, setSelectedLesson] = useState(null)
     const [updatedLesson, setUpdatedLesson] = useState(null)
+    const [lessonContentList, setLessonContentList] = useState(null)
     const [openTab, setOpenTab] = useState(1);
     const {currentUser, logout} = useAuth()
     const history = useHistory()
@@ -332,10 +333,9 @@ const Dashboard = () => {
     }
 
 
-    const lessonContent = () => {
+    const renderLessonContent = () => {
         const array = [];
         console.log("lessonContent() called")
-
 
         // Looping through lesson content
         for (var i = 1; i < selectedLesson.lesson_content.length; i++){
@@ -346,12 +346,14 @@ const Dashboard = () => {
                     <div key={i} className = "flex flex-row items-center justify-center">
                     {/* New Paragraph */}
                         <div className="pt-5 px-2">
-                            <button onClick={() => {
-                                array.push(
-                                    <textarea>
-                                    New TextArea
-                                    </textarea>
-                                )
+                            <button onClick={(e) => { 
+                                    // insertContent(e, "button", content_index)
+
+                                // array.push(
+                                //     <textarea>
+                                //     New TextArea
+                                //     </textarea>
+                                // )
                                 }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -499,7 +501,7 @@ const Dashboard = () => {
                 )
             }
         }
-        return array;
+        setLessonContentList(array)
     }
 
     useEffect(()=>{ 
@@ -517,6 +519,14 @@ const Dashboard = () => {
 
     useEffect(() => {
         console.log(selectedLesson)
+    }, [selectedLesson])
+
+    /* only render lesson content when lesson is selected, 
+     except when the selectedLesson state is set to null when the page is being rendered for the first tiem */
+    useEffect(() => {
+        if(selectedLesson){
+            renderLessonContent()
+        }
     }, [selectedLesson])
 
     return (
@@ -615,7 +625,9 @@ const Dashboard = () => {
                         <div className= {"flex flex-row " + (openTab === 2 ? "block" : "hidden")}>
                             <div className="shadow-lg mb-8 pl-3 w-1/4 h-5/6 rounded-l-md bg-green-500 overflow-auto"> 
                                 <div className=" text-2xl my-7 text-left ">Lessons</div>
-                                    <select id="lessons" onChange={(e)=>{onLessonSelect(e)}} className="block mb-8 w-52 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="lessons">
+                                    <select id="lessons" onChange={(e)=>{
+                                            onLessonSelect(e);
+                                        }} className="block mb-8 w-52 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="lessons">
                                         <option value="">
                                             Select a lesson
                                         </option>
@@ -642,7 +654,7 @@ const Dashboard = () => {
                                         </div>
                                         <div className="flex flex-col space-y-9">
                                             
-                                            {lessonContent()}
+                                            {lessonContentList}
                                         </div>
                                     </div>
                                     :
