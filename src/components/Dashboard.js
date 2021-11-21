@@ -195,8 +195,8 @@ const Dashboard = () => {
             className={
                 "text-xs font-bold px-5 py-3 shadow-lg rounded block leading-normal " +
                 (openTab === tab.number
-                ? "text-white bg-red-600"
-                : "text-red-600 bg-white")
+                ? "text-white bg-green-500"
+                : "text-green-600 bg-white")
             }
             onClick={e => {
                 e.preventDefault();
@@ -499,10 +499,23 @@ const Dashboard = () => {
 
     return (
       <>
-        <div className="">
-
-            <div className="flex flex-row space-x-4 m-3 h-screen">
-                <div className="w-3/4 h-5/6 rounded-l-md bg-purple-200 overflow-auto">
+        <div className="flex flex-col space-y-4 bg-darkCustom">
+            <div className="flex justify-between pt-16 mb-0 mx-3">
+                <div className="text-2xl">
+                    <p className="text-white">Currently logged in as: <strong> {currentUser.email} </strong></p>
+                </div>
+                
+                <div className="text-2xl font-extrabold pb-5">
+                    <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    Logout
+                    </button>
+                </div>
+            </div>
+            <div className="flex flex-row space-x-4 m-3 h-screen pt-16 ">
+                <div className="w-3/4 h-5/6 rounded-l-md  bg-gray-300 overflow-auto">
                     <div className="font-sans text-center p-3 font-bold ">
                         <div className="text-2xl my-7">Editing panel</div>
 
@@ -568,7 +581,7 @@ const Dashboard = () => {
 
 
                             <div className="text-2xl font-extrabold pb-5">
-                                <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center bg-blue-500 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
@@ -578,9 +591,9 @@ const Dashboard = () => {
                         </div>
                         
                         <div className= {"flex flex-row " + (openTab === 2 ? "block" : "hidden")}>
-                            <div className="pl-3 w-1/4 h-5/6 rounded-l-md bg-red-400 overflow-auto"> 
-                                <div className="text-2xl my-7 text-left ">Lessons</div>
-                                    <select id="lessons" onChange={(e)=>{onLessonSelect(e)}} className="block w-52 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="lessons">
+                            <div className="shadow-lg mb-8 pl-3 w-1/4 h-5/6 rounded-l-md bg-green-500 overflow-auto"> 
+                                <div className=" text-2xl my-7 text-left ">Lessons</div>
+                                    <select id="lessons" onChange={(e)=>{onLessonSelect(e)}} className="block mb-8 w-52 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="lessons">
                                         <option value="">
                                             Select a lesson
                                         </option>
@@ -588,7 +601,7 @@ const Dashboard = () => {
                                     </select>
                                 
                             </div>
-                            <div className=" w-3/4 h-full rounded-r-md bg-blue-400 overflow-auto">
+                            <div className=" w-3/4 h-full rounded-r-md bg-gray-300 overflow-auto">
                                 {selectedLesson ? 
                                     <div className="flex flex-col font-sans space-y-6 items-center p-3">
                                         <div className="flex flex-row space-x-6">
@@ -634,7 +647,7 @@ const Dashboard = () => {
 
                                 }
 
-                            }} className=" py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                            }} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-green-500 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                 <svg width="20" height="20" fill="currentColor" className="mr-2" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M1344 1472q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28h-1472q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h427q21 56 70.5 92t110.5 36h256q61 0 110.5-36t70.5-92h427q40 0 68 28t28 68zm-325-648q-17 40-59 40h-256v448q0 26-19 45t-45 19h-256q-26 0-45-19t-19-45v-448h-256q-42 0-59-40-17-39 14-69l448-448q18-19 45-19t45 19l448 448q31 30 14 69z">
                                     </path>
@@ -646,7 +659,7 @@ const Dashboard = () => {
 
                     
                 </div>
-                <div className="w-1/4 h-5/6 rounded-r-md bg-blue-400 overflow-auto">
+                <div className="w-1/4 h-5/6 rounded-r-md bg-gray-300 overflow-auto">
                     <div className="font-sans text-center p-3 font-bold text-2xl">
                         Your Chapters
                         <div className="flex flex-col justify-center items-stretch text-2xl font-bold space-y-4 pt-5 ">
@@ -656,21 +669,8 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className="">
-            <div className="flex justify-between mx-3">
-                <div className="text-2xl">
-                    <p>Currently logged in as: <strong> {currentUser.email} </strong></p>
-                </div>
+            
                 
-                <div className="text-2xl font-extrabold pb-5">
-                    <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    Logout
-                    </button>
-                </div>
-            </div>
-
                 
             </div>
             
