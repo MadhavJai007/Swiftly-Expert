@@ -339,11 +339,51 @@ const Dashboard = () => {
 
         // Looping through lesson content
         for (var i = 1; i < selectedLesson.lesson_content.length; i++){
+            let content_index = i;
+
+            // put the add new content butttons before the first element. only happens once
+            {i === 1 ? array.push(
+                    <div key={i} className = "flex flex-row items-center justify-center">
+                    {/* New Paragraph */}
+                        <div className="pt-5 px-2">
+                            <button onClick={() => {
+                                array.push(
+                                    <textarea>
+                                    New TextArea
+                                    </textarea>
+                                )
+                                }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                Paragraph
+                            </button>
+                        </div>
+
+                        {/* New Image */}
+                        <div className="pt-5 px-2">
+                            <button onClick={() => {
+                            array.push(
+                                <textarea>
+                                New TextArea
+                                </textarea>
+                            )
+                            }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                Image
+                            </button>
+                        </div>
+                    </div>
+                )  :
+                console.log("skipped")
+            }
 
             // If the content starts with data:... it is an image
             if(selectedLesson.lesson_content[i].startsWith("data:image/png;base64,") || selectedLesson.lesson_content[i].startsWith("data:image/gif;base64,")){
-                let content_index = i;
-
+                
+                
                 // Push new UI into array
                 array.push(
                     
@@ -370,35 +410,26 @@ const Dashboard = () => {
                         </div>   
 
                         {/* ADD NEW CONTENT AREA */}
-                        <div className = "flex flex-col items-center justify-center">
+                        <div key={i} className = "flex flex-row items-center justify-center">
                           
                           {/* New Paragraph */}
-                            <div className="pt-5">
-                                    <button onClick={() => {
-                                        array.push(
-                                            <textarea>
-                                            New TextArea
-                                            </textarea>
-                                        )
-                                        }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                        Paragraph
-                                    </button>
-                                </div>
-                    
-
-                            {/* <button type="button" onClick={() => {
-                                array.push(
-                                    <textarea>
-                                    New TextArea
-                                    </textarea>
-                                )
-                                }}>+Paragraph</button> */}
+                            <div className="pt-5 px-2">
+                                <button onClick={() => {
+                                    array.push(
+                                        <textarea>
+                                        New TextArea
+                                        </textarea>
+                                    )
+                                    }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    Paragraph
+                                </button>
+                            </div>
 
                             {/* New Image */}
-                            <div className="pt-5">
+                            <div className="pt-5 px-2">
                                 <button onClick={() => {
                                 array.push(
                                     <textarea>
@@ -430,17 +461,8 @@ const Dashboard = () => {
                         </textarea>
 
                         {/* ADD NEW CONTENT AREA */}
-                        <div className = "flex flex-col items-center justify-center">
-                            {/* <button type="button" onClick={() => {
-                                array.push(
-                                    <textarea>
-                                    New TextArea
-                                    </textarea>
-                                )
-                                }}>+Paragraph</button> */}
-
-                            {/* New Paragraph */}
-                            <div className="pt-5">
+                        <div key={i} className = "flex flex-row items-center justify-center">
+                            <div className="pt-5 px-2">
                                 <button onClick={() => {
                                     array.push(
                                         <textarea>
@@ -456,7 +478,7 @@ const Dashboard = () => {
                             </div>
 
                             {/* New Image */}
-                            <div className="pt-5">
+                            <div className="pt-5 px-2">
                                 <button onClick={() => {
                                 array.push(
                                     <textarea>
