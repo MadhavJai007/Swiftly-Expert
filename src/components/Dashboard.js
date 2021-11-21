@@ -332,6 +332,33 @@ const Dashboard = () => {
         }
     }
 
+    const insertContent = (e, type, index) => {
+        e.preventDefault()
+        let _lessonContentList;
+        console.log(index )
+        if(type === "para") {
+            _lessonContentList = lessonContentList
+
+            _lessonContentList.splice(index, 0, 
+                <div key={`inserted`} className="w-96">
+                    {/* Text Area with content from lesson */}
+                    <textarea value={"selectedLesson.lesson_content[i]"}
+                    onChange={(e) => 
+                        console.log("later")} 
+                        className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" 
+                        placeholder="Enter something" 
+                        rows="5" cols="40">
+                    </textarea>
+                </div>
+            )
+            console.log(_lessonContentList)
+            setLessonContentList(_lessonContentList)
+        }
+        else if (type === "img") {
+            _lessonContentList = lessonContentList
+        }
+    }
+
 
     const renderLessonContent = () => {
         const array = [];
@@ -342,12 +369,13 @@ const Dashboard = () => {
             let content_index = i;
 
             // put the add new content butttons before the first element. only happens once
-            {i === 1 ? array.push(
-                    <div key={i} className = "flex flex-row items-center justify-center">
+            if(i === 1) { 
+                array.push(
+                    <div key={"original"} className = "flex flex-row items-center justify-center">
                     {/* New Paragraph */}
                         <div className="pt-5 px-2">
                             <button onClick={(e) => { 
-                                    // insertContent(e, "button", content_index)
+                                    insertContent(e, "para", content_index)
 
                                 // array.push(
                                 //     <textarea>
@@ -364,12 +392,13 @@ const Dashboard = () => {
 
                         {/* New Image */}
                         <div className="pt-5 px-2">
-                            <button onClick={() => {
-                            array.push(
-                                <textarea>
-                                New TextArea
-                                </textarea>
-                            )
+                            <button onClick={(e) => {
+                                insertContent(e, "img", content_index)
+                            // array.push(
+                            //     <textarea>
+                            //     New TextArea
+                            //     </textarea>
+                            // )
                             }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -378,8 +407,7 @@ const Dashboard = () => {
                             </button>
                         </div>
                     </div>
-                )  :
-                console.log("skipped")
+                )
             }
 
             // If the content starts with data:... it is an image
@@ -416,12 +444,13 @@ const Dashboard = () => {
                           
                           {/* New Paragraph */}
                             <div className="pt-5 px-2">
-                                <button onClick={() => {
-                                    array.push(
-                                        <textarea>
-                                        New TextArea
-                                        </textarea>
-                                    )
+                                <button onClick={(e) => {
+                                        insertContent(e, "para", content_index)
+                                    // array.push(
+                                    //     <textarea>
+                                    //     New TextArea
+                                    //     </textarea>
+                                    // )
                                     }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -432,12 +461,13 @@ const Dashboard = () => {
 
                             {/* New Image */}
                             <div className="pt-5 px-2">
-                                <button onClick={() => {
-                                array.push(
-                                    <textarea>
-                                    New TextArea
-                                    </textarea>
-                                )
+                                <button onClick={(e) => {
+                                    insertContent(e, "img", content_index)
+                                // array.push(
+                                //     <textarea>
+                                //     New TextArea
+                                //     </textarea>
+                                // )
                                 }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -449,7 +479,7 @@ const Dashboard = () => {
                     </div>
                 )
                 
-            }else {
+            } else {
                 array.push(
                     <div key={`lesson_info_${i}`} className="w-96">
 
@@ -465,12 +495,13 @@ const Dashboard = () => {
                         {/* ADD NEW CONTENT AREA */}
                         <div key={i} className = "flex flex-row items-center justify-center">
                             <div className="pt-5 px-2">
-                                <button onClick={() => {
-                                    array.push(
-                                        <textarea>
-                                        New TextArea
-                                        </textarea>
-                                    )
+                                <button onClick={(e) => {
+                                        insertContent(e, "para", content_index)
+                                    // array.push(
+                                    //     <textarea>
+                                    //     New TextArea
+                                    //     </textarea>
+                                    // )
                                     }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -481,12 +512,8 @@ const Dashboard = () => {
 
                             {/* New Image */}
                             <div className="pt-5 px-2">
-                                <button onClick={() => {
-                                array.push(
-                                    <textarea>
-                                    New TextArea
-                                    </textarea>
-                                )
+                                <button onClick={(e) => {
+                                    insertContent(e, "img", content_index)
                                 }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
