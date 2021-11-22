@@ -41,6 +41,7 @@ const Dashboard = () => {
     const [lessonContentRetrieved, setLessonContentRetrieved] = useState(false)
     const [selectedChapter, setSelectedChapter] = useState(chapterObj)
     const [selectedLesson, setSelectedLesson] = useState(null)
+    const [originalLessonContent, setOriginalLessonContent] = useState(null)
     const [updatedLesson, setUpdatedLesson] = useState(null)
     const [lessonContentList, setLessonContentList] = useState(null)
     const [openTab, setOpenTab] = useState(1);
@@ -128,7 +129,7 @@ const Dashboard = () => {
             _chapterObj.subscription_code = chapterDocSnap.data().subscription_code
             _chapterObj.chapter_author = chapterDocSnap.data().author
 
-            console.log(chapterDocSnap.data().author)
+            // console.log(chapterDocSnap.data().author)
 
             setSelectedChapter(_chapterObj)
             setSelectedLesson(null)
@@ -158,6 +159,7 @@ const Dashboard = () => {
         if(lessonId !== ""){
             var chosenLesson = selectedChapter.lessons.find(lesson => lesson.lesson_id === lessonId)
             setSelectedLesson(chosenLesson)
+            setOriginalLessonContent(chosenLesson)
         }
     }
 
@@ -332,28 +334,27 @@ const Dashboard = () => {
         }
     }
 
-    const insertContent = (e, type, index) => {
+    // function used to insert new content into existing lessons.
+    const insertContent = (e, type, index, placement) => {
         e.preventDefault()
         let _lessonContentList;
-        console.log(index )
-        if(type === "para") {
-            _lessonContentList = lessonContentList
 
-            _lessonContentList.splice(index, 0, 
-                <div key={`inserted`} className="w-96">
-                    {/* Text Area with content from lesson */}
-                    <textarea value={"selectedLesson.lesson_content[i]"}
-                    onChange={(e) => 
-                        console.log("later")} 
-                        className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" 
-                        placeholder="Enter something" 
-                        rows="5" cols="40">
-                    </textarea>
-                </div>
-            )
-            console.log(_lessonContentList)
-            setLessonContentList(_lessonContentList)
+        // placement is always "after the specified index" except when inserting content before the first piece.
+        if(placement == "after"){
+            index += 1
+            console.log(index)
         }
+        // if the type of content being inserted is a paragraph
+        if(type === "para") {
+            _lessonContentList = selectedLesson.lesson_content;
+
+            _lessonContentList.splice(index, 0, "New textbox"
+            )
+            // console.log(originalLessonContent)
+            setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
+            // console.log(originalLessonContent)
+        }
+        // if the type of content being inserted is an image
         else if (type === "img") {
             _lessonContentList = lessonContentList
         }
@@ -362,7 +363,7 @@ const Dashboard = () => {
 
     const renderLessonContent = () => {
         const array = [];
-        console.log("lessonContent() called")
+        console.log("renderLessonContent() called")
 
         // Looping through lesson content
         for (var i = 1; i < selectedLesson.lesson_content.length; i++){
@@ -371,11 +372,11 @@ const Dashboard = () => {
             // put the add new content butttons before the first element. only happens once
             if(i === 1) { 
                 array.push(
-                    <div key={"original"} className = "flex flex-row items-center justify-center">
+                    <div key={"before_first"} className = "flex flex-row items-center justify-center">
                     {/* New Paragraph */}
                         <div className="pt-5 px-2">
                             <button onClick={(e) => { 
-                                    insertContent(e, "para", content_index)
+                                    insertContent(e, "para", content_index, "before")
 
                                 // array.push(
                                 //     <textarea>
@@ -393,7 +394,7 @@ const Dashboard = () => {
                         {/* New Image */}
                         <div className="pt-5 px-2">
                             <button onClick={(e) => {
-                                insertContent(e, "img", content_index)
+                                insertContent(e, "img", content_index, "before")
                             // array.push(
                             //     <textarea>
                             //     New TextArea
@@ -445,7 +446,7 @@ const Dashboard = () => {
                           {/* New Paragraph */}
                             <div className="pt-5 px-2">
                                 <button onClick={(e) => {
-                                        insertContent(e, "para", content_index)
+                                        insertContent(e, "para", content_index, "after")
                                     // array.push(
                                     //     <textarea>
                                     //     New TextArea
@@ -462,7 +463,7 @@ const Dashboard = () => {
                             {/* New Image */}
                             <div className="pt-5 px-2">
                                 <button onClick={(e) => {
-                                    insertContent(e, "img", content_index)
+                                    insertContent(e, "img", content_index, "after")
                                 // array.push(
                                 //     <textarea>
                                 //     New TextArea
@@ -496,7 +497,7 @@ const Dashboard = () => {
                         <div key={i} className = "flex flex-row items-center justify-center">
                             <div className="pt-5 px-2">
                                 <button onClick={(e) => {
-                                        insertContent(e, "para", content_index)
+                                        insertContent(e, "para", content_index, "after")
                                     // array.push(
                                     //     <textarea>
                                     //     New TextArea
@@ -513,7 +514,7 @@ const Dashboard = () => {
                             {/* New Image */}
                             <div className="pt-5 px-2">
                                 <button onClick={(e) => {
-                                    insertContent(e, "img", content_index)
+                                    insertContent(e, "img", content_index, "after")
                                 }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -531,6 +532,12 @@ const Dashboard = () => {
         setLessonContentList(array)
     }
 
+    const resetLesson = () => {
+        console.log("resetting changes")
+        console.log(originalLessonContent)
+        setSelectedLesson(originalLessonContent)
+    }
+
     useEffect(()=>{ 
         console.log(currentUser.email)
         // if a currentUser exists (logged in)
@@ -544,17 +551,19 @@ const Dashboard = () => {
         console.log(selectedChapter)
     }, [selectedChapter])
 
-    useEffect(() => {
-        console.log(selectedLesson)
-    }, [selectedLesson])
-
-    /* only render lesson content when lesson is selected, 
+    /* only render lesson content when lesson is selected or update, 
      except when the selectedLesson state is set to null when the page is being rendered for the first tiem */
     useEffect(() => {
         if(selectedLesson){
             renderLessonContent()
+            console.log("lesson content re-rendered")
+            console.log(selectedLesson)
         }
     }, [selectedLesson])
+
+    useEffect(() => {
+        console.log(originalLessonContent)
+    }, [originalLessonContent])
 
     return (
       <>
@@ -678,6 +687,14 @@ const Dashboard = () => {
                                                 </label>
                                                 <input type="text" id="chapter-title" value={selectedLesson.lesson_title}  onChange={(e) => onInputChange(e, 'lesson','lesson_title')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
                                             </div>
+                                            <div className="pt-7">
+                                                <button onClick={() => {resetLesson()}} 
+                                                    className="py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                                                >
+                                                    Reset
+                                                </button>
+                                            </div>
+                            
                                         </div>
                                         <div className="flex flex-col space-y-9">
                                             
