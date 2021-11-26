@@ -149,9 +149,14 @@ const Dashboard = () => {
         }
         else if(type === "lesson") {
             let _lessonObj = {...selectedLesson}
+            // only updating lesson title property and first element in lesson content (which is also lesson title)
             if(input==='lesson_title') {
                 _lessonObj[`${input}`] = e.target.value
                 _lessonObj['lesson_content'][0] = e.target.value
+            }
+            // updating specified index in lesson content array inside the selectedLesson
+            else if (input==='lesson_content'){
+                _lessonObj[`${input}`][index] = e.target.value
             }
             setSelectedLesson(_lessonObj)
         }
@@ -403,7 +408,7 @@ const Dashboard = () => {
                 )
             }
 
-            // If the content starts with data:... it is an image
+            // If the content starts with data:image/ it is an image
             if(selectedLesson.lesson_content[i].startsWith("data:image/")){
                 
                 
@@ -462,14 +467,18 @@ const Dashboard = () => {
                     </div>
                 )
                 
-            } else {
+            } 
+            // else push a text area with the array element's text.
+            else {
                 array.push(
                     <div key={`lesson_info_${i}`} className="w-96">
 
                         {/* Text Area with content from lesson */}
                        <textarea value={selectedLesson.lesson_content[i]}
-                        onChange={(e) => 
-                            console.log("later")} 
+                            onChange={(e) => 
+                                // console.log("later")
+                                onInputChange(e,'lesson','lesson_content',content_index)
+                            } 
                             className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" 
                             placeholder="Enter something" 
                             rows="5" cols="40">
