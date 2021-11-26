@@ -140,7 +140,7 @@ const Dashboard = () => {
         }
     }
 
-    const onInputChange = (e, type, input) => {
+    const onInputChange = (e, type, input, index) => {
         e.preventDefault();
         if(type === "chapter" ){
             let _chapterObj = {...selectedChapter}
@@ -149,7 +149,10 @@ const Dashboard = () => {
         }
         else if(type === "lesson") {
             let _lessonObj = {...selectedLesson}
-            _lessonObj[`${input}`] = e.target.value
+            if(input==='lesson_title') {
+                _lessonObj[`${input}`] = e.target.value
+                _lessonObj['lesson_content'][0] = e.target.value
+            }
             setSelectedLesson(_lessonObj)
         }
     }
@@ -360,7 +363,7 @@ const Dashboard = () => {
         }
     }
 
-
+    // function to render lesson content in html form
     const renderLessonContent = () => {
         const array = [];
         console.log("renderLessonContent() called")
@@ -377,12 +380,6 @@ const Dashboard = () => {
                         <div className="pt-5 px-2">
                             <button onClick={(e) => { 
                                     insertContent(e, "para", content_index, "before")
-
-                                // array.push(
-                                //     <textarea>
-                                //     New TextArea
-                                //     </textarea>
-                                // )
                                 }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -395,11 +392,6 @@ const Dashboard = () => {
                         <div className="pt-5 px-2">
                             <button onClick={(e) => {
                                 insertContent(e, "img", content_index, "before")
-                            // array.push(
-                            //     <textarea>
-                            //     New TextArea
-                            //     </textarea>
-                            // )
                             }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -412,7 +404,7 @@ const Dashboard = () => {
             }
 
             // If the content starts with data:... it is an image
-            if(selectedLesson.lesson_content[i].startsWith("data:image/png;base64,") || selectedLesson.lesson_content[i].startsWith("data:image/gif;base64,")){
+            if(selectedLesson.lesson_content[i].startsWith("data:image/")){
                 
                 
                 // Push new UI into array
@@ -447,11 +439,6 @@ const Dashboard = () => {
                             <div className="pt-5 px-2">
                                 <button onClick={(e) => {
                                         insertContent(e, "para", content_index, "after")
-                                    // array.push(
-                                    //     <textarea>
-                                    //     New TextArea
-                                    //     </textarea>
-                                    // )
                                     }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -464,11 +451,6 @@ const Dashboard = () => {
                             <div className="pt-5 px-2">
                                 <button onClick={(e) => {
                                     insertContent(e, "img", content_index, "after")
-                                // array.push(
-                                //     <textarea>
-                                //     New TextArea
-                                //     </textarea>
-                                // )
                                 }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -498,11 +480,6 @@ const Dashboard = () => {
                             <div className="pt-5 px-2">
                                 <button onClick={(e) => {
                                         insertContent(e, "para", content_index, "after")
-                                    // array.push(
-                                    //     <textarea>
-                                    //     New TextArea
-                                    //     </textarea>
-                                    // )
                                     }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -610,14 +587,14 @@ const Dashboard = () => {
                                     <label  className="text-gray-700">
                                         Chapter title
                                     </label>
-                                    <input type="text" id="chapter-title" value={selectedChapter.chapter_title}  onChange={(e) => onInputChange(e, 'chapter', 'chapter_title')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
+                                    <input type="text" id="chapter-title" value={selectedChapter.chapter_title}  onChange={(e) => onInputChange(e, 'chapter', 'chapter_title', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
                                 </div>
                                 
                                 <div className="relative w-40">
                                     <label className="text-gray-700">
                                         Subscription code
                                     </label>
-                                    <input type="text" id="sub-code" value={selectedChapter.subscription_code}  onChange={(e) => onInputChange(e, 'chapter','subscription_code')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="sub_code" placeholder="Enter a code"/>
+                                    <input type="text" id="sub-code" value={selectedChapter.subscription_code}  onChange={(e) => onInputChange(e, 'chapter','subscription_code', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="sub_code" placeholder="Enter a code"/>
                                 </div>
                             </div>
                             
@@ -625,7 +602,7 @@ const Dashboard = () => {
                                 <label className="text-gray-700"  >
                                 Chapter Description
                                 </label>
-                                <textarea value={selectedChapter.chapter_desc} onChange={(e) => onInputChange(e, 'chapter','chapter_desc')} className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter-desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
+                                <textarea value={selectedChapter.chapter_desc} onChange={(e) => onInputChange(e, 'chapter','chapter_desc', 0)} className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter-desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
                                 </textarea>
                             </div>
 
@@ -635,7 +612,7 @@ const Dashboard = () => {
                                 </label>
                                 <br/>
                                 {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
-                                <input id="chapter-length" type="range" min="1" max="120" step="1" value={selectedChapter.chapter_length} onChange={(e) => onInputChange(e, 'chapter', 'chapter_length')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
+                                <input id="chapter-length" type="range" min="1" max="120" step="1" value={selectedChapter.chapter_length} onChange={(e) => onInputChange(e, 'chapter', 'chapter_length', 0)} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
                             </div>
 
                             <div>
@@ -644,7 +621,7 @@ const Dashboard = () => {
                                 </label>
                                 <br/>
                                 {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
-                                <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty')} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
+                                <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty', 0)} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
                             </div>
 
 
@@ -685,7 +662,7 @@ const Dashboard = () => {
                                                 <label  className="text-gray-700">
                                                     Lesson title
                                                 </label>
-                                                <input type="text" id="chapter-title" value={selectedLesson.lesson_title}  onChange={(e) => onInputChange(e, 'lesson','lesson_title')} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
+                                                <input type="text" id="chapter-title" value={selectedLesson.lesson_title}  onChange={(e) => onInputChange(e, 'lesson','lesson_title', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
                                             </div>
                                             <div className="pt-7">
                                                 <button onClick={() => {resetLesson()}} 
@@ -713,7 +690,7 @@ const Dashboard = () => {
                         <div className="w-40 static ">
                             <button type="button" onClick={() => {
 
-                                // If selected chapter is not null --> then user is updating a chapter
+                                // If selected chapter is not an empty string --> then user is updating a chapter
                                 if (selectedChapter.chapter_id != ""){
 
                                     
