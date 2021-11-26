@@ -45,6 +45,7 @@ const Dashboard = () => {
     const [updatedLesson, setUpdatedLesson] = useState(null)
     const [lessonContentList, setLessonContentList] = useState(null)
     const [openTab, setOpenTab] = useState(1);
+    const [sampleImg, setSampleImg] = useState(null)
     const {currentUser, logout} = useAuth()
     const history = useHistory()
 
@@ -269,6 +270,19 @@ const Dashboard = () => {
         });
       }
 
+    const getBase64FromUrl = async (url) => {
+        const data = await fetch(url);
+        const blob = await data.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(blob); 
+          reader.onloadend = () => {
+            const base64data = reader.result;   
+            resolve(base64data);
+          }
+        });
+    }
+
     // Function that updates the chapter
     const updateChapter = async(chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
 
@@ -355,16 +369,19 @@ const Dashboard = () => {
         // if the type of content being inserted is a paragraph
         if(type === "para") {
             _lessonContentList = selectedLesson.lesson_content;
-
-            _lessonContentList.splice(index, 0, "New textbox"
-            )
+            // insert new string that will act as the textbox's text (here its placeholder text)
+            _lessonContentList.splice(index, 0, "New textbox")
             // console.log(originalLessonContent)
             setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
             // console.log(originalLessonContent)
         }
         // if the type of content being inserted is an image
         else if (type === "img") {
-            _lessonContentList = lessonContentList
+            _lessonContentList = selectedLesson.lesson_content;
+            // insert string of that will represent a dummy immage
+            _lessonContentList.splice(index, 0, sampleImg)
+            // console.log(_lessonContentList)
+            setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
         }
     }
 
@@ -531,6 +548,13 @@ const Dashboard = () => {
         if(currentUser && chapterList.length === 0){
             getAuthorsChapters(false)
         }
+
+        getBase64FromUrl('https://pbs.twimg.com/profile_images/1026981625291190272/35O2KIRX_400x400.jpg')
+        .then(res => {
+            console.log(res)
+            setSampleImg(res)
+        })
+        
     },[])
 
     useEffect(() => {
