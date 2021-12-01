@@ -295,7 +295,8 @@ const Dashboard = () => {
     // Function that updates the chapter
     const updateChapter = async(chapter) => { //, chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
         //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
-        let returnCode;
+        console.log(chapter)
+        // let returnCode;
         let chaptersRefDoc = doc(db, "Chapters", chapter.chapter_id);
         let lessonsRefCollection = collection(chaptersRefDoc, "lessons")
 
@@ -315,42 +316,50 @@ const Dashboard = () => {
         // Only update doc if the data is valid
         if (validInput == true){
             var _chapter = chapter;
-            _chapter.lessons = selectedLesson;
+            // _chapter.lessons = selectedLesson;
+
+            // console.log(_chapter);
 
             // TODO: check if user wants to upload just general info from metadata page, just lessons from lessons page or everything
 
             // for now upload everything
 
-            // await setDoc(chaptersRefDoc, {
-            //         "chapter_desc": chapter.chapter_desc,
-            //         "chapter_number": chapter.chapter_number,
-            //         "chapter_difficulty": chapterDifficulty,
-            //         "chapter_icon_name": "character.book.closed",
-            //         "chapter_length": chapterLength,
-            //         "chapter_title": chapter.chapter_title,
-            //         "subscription_code": chapter.subscription_code
-            //     })
-            //     .then(res => {
-            //         console.log(res);
-            //     })
-            //     .catch(err => {
-            //         // TODO: identify possible error code. None found so far
-            //         console.log(err); 
-            //         console.log({"code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"})
-            //     })
+            await setDoc(chaptersRefDoc, {
+                    "chapter_desc": chapter.chapter_desc,
+                    "chapter_number": chapter.chapter_number,
+                    "chapter_difficulty": chapterDifficulty,
+                    "chapter_icon_name": "character.book.closed",
+                    "chapter_length": chapterLength,
+                    "chapter_title": chapter.chapter_title,
+                    "subscription_code": chapter.subscription_code
+                })
+                .then(res => {
+                    console.log(res);
+                })
+                .catch(err => {
+                    // TODO: identify possible error code. None found so far
+                    console.log(err); 
+                    console.log({"code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"})
+                })
 
 
-            // let chaptLessons = _chapter.lessons
-            // // Looping over each lesson and writing it to the lessons collection
-            // for (var i = 0; i < chaptLessons.length; i++){
+            let chaptLessons = _chapter.lessons
+            // Looping over each lesson and writing it to the lessons collection
+            for (var i = 0; i < chaptLessons.length; i++){
 
-            //     // Grabbing the specific lessonn
-            //     let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
-    
-            //     await setDoc(lessonsRefDoc, {
-            //         "lesson_content": chaptLessons[i].lesson_content
-            //     })
-            // }    
+                // Grabbing the specific lessonn
+                let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
+                
+                try {
+                    let updateLessonsOperation = await setDoc(lessonsRefDoc, {
+                        "lesson_content": chaptLessons[i].lesson_content
+                    })
+                    console.log(updateLessonsOperation)
+                }
+                catch(err) {
+                    console.log("updating lessons failed")
+                }
+            }    
 
 
 
