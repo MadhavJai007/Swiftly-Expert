@@ -100,6 +100,7 @@ const Dashboard = () => {
 
     const getChapter = async (docId) => {
         setLessonContentRetrieved(false)
+        setSelectedChapter(chapterObj)
         setOpenTab(1)
         const chapterDocRef = doc(db, "Chapters", docId);
         const chapterDocSnap = await getDoc(chapterDocRef);
@@ -214,6 +215,10 @@ const Dashboard = () => {
                 e.preventDefault();
                 setOpenTab(tab.number)
 
+                console.log(selectedChapter)
+                console.log(selectedLesson)
+                // console.log(lessonOptions)
+
                 // If going to lessons tab and chapter is not nil, download lessons
                 if(tab.number === 2 && selectedChapter.chapter_id !== "") {
                     if(!lessonContentRetrieved) {
@@ -222,10 +227,14 @@ const Dashboard = () => {
                     }
                 }
                 
+                // TODO: SCRAP THIS
                 // If going to chapter tab, and selected chapter is not nil, clear lessons
-                else if (tab.number === 1 && selectedChapter.chapter_id !== "") {
-                    setSelectedChapter({...selectedChapter, lessons: []});
-                }
+                // else if (tab.number === 1 && selectedChapter.chapter_id !== "") {
+                //     if(lessonContentRetrieved){
+
+                //     } 
+                //     setSelectedChapter({...selectedChapter, lessons: []});
+                // }
             }}
             >
                 {tab.tabTitle}
@@ -284,75 +293,117 @@ const Dashboard = () => {
     }
 
     // Function that updates the chapter
-    const updateChapter = async(chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
-
+    const updateChapter = async(chapter) => { //, chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
+        //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
         let returnCode;
-        let chaptersRefDoc = doc(db, "Chapters", chapterID);
+        let chaptersRefDoc = doc(db, "Chapters", chapter.chapter_id);
+        let lessonsRefCollection = collection(chaptersRefDoc, "lessons")
 
         let validInput = true
-        let chapterLength = parseInt(chapterLen)
-        let chapterDifficulty = parseInt(chapterDiff)
+        let chapterLength = parseInt(chapter.chapter_length)
+        let chapterDifficulty = parseInt(chapter.chapter_difficulty)
 
         // Checking if chapter title and desc are not empty
-        if (chapterTitle.trim() == ""){
+        if (chapter.chapter_title.trim() == ""){
             validInput = false
         }
 
-        if (chapterDesc.trim() == ""){
+        if (chapter.chapter_desc.trim() == ""){
             validInput = false
         }
 
         // Only update doc if the data is valid
         if (validInput == true){
+            var _chapter = chapter;
+            _chapter.lessons = selectedLesson;
 
-            // Only updating chapter stuff (if user selects chapter tab, chaptLessons = [], so length is 0)
-            if (chaptLessons.length == 0){
+            // TODO: check if user wants to upload just general info from metadata page, just lessons from lessons page or everything
 
-                console.log("Updating: General Chapter")
+            // for now upload everything
 
-                await setDoc(chaptersRefDoc, {
-                    "chapter_desc": chapterDesc,
-                    "chapter_number": chapterNum,
-                    "chapter_difficulty": chapterDifficulty,
-                    "chapter_icon_name": "character.book.closed",
-                    "chapter_length": chapterLength,
-                    "chapter_title": chapterTitle,
-                    "subscription_code": subCode
-                })
-                .then(res => {
-                    // console.log(res);
-                    returnCode = res;
-                })
-                .catch(err => {
-                    // TODO: identify possible error code. None found so far
-                    console.log(err); 
-                    returnCode = {"code": "UNEXPECTED_SIGNUP_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"};
-                })
-            }
+            // await setDoc(chaptersRefDoc, {
+            //         "chapter_desc": chapter.chapter_desc,
+            //         "chapter_number": chapter.chapter_number,
+            //         "chapter_difficulty": chapterDifficulty,
+            //         "chapter_icon_name": "character.book.closed",
+            //         "chapter_length": chapterLength,
+            //         "chapter_title": chapter.chapter_title,
+            //         "subscription_code": chapter.subscription_code
+            //     })
+            //     .then(res => {
+            //         console.log(res);
+            //     })
+            //     .catch(err => {
+            //         // TODO: identify possible error code. None found so far
+            //         console.log(err); 
+            //         console.log({"code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"})
+            //     })
 
-            // Updating lesson stuff (not complete)
-            else if (chaptLessons.length != 0){
 
-                console.log("Updating: Chapter Lessons")
+            // let chaptLessons = _chapter.lessons
+            // // Looping over each lesson and writing it to the lessons collection
+            // for (var i = 0; i < chaptLessons.length; i++){
 
-                // Getting the chapter
-                let chapterRefDoc = doc(db, "Chapters", "chapter_006");
+            //     // Grabbing the specific lessonn
+            //     let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
+    
+            //     await setDoc(lessonsRefDoc, {
+            //         "lesson_content": chaptLessons[i].lesson_content
+            //     })
+            // }    
 
-                // Getting lessons collection
-                let lessonsRefCollection = collection(chapterRefDoc, "lessons")
+
+
+            // console.log(_selectedChapter)
+            // console.log(_selectedChapter.lessons)
+            // // Only updating chapter stuff (if user selects chapter tab, chaptLessons = [], so length is 0)
+            // if (chaptLessons.length == 0){
+
+            //     console.log("Updating: General Chapter")
+
+            //     await setDoc(chaptersRefDoc, {
+            //         "chapter_desc": chapterDesc,
+            //         "chapter_number": chapterNum,
+            //         "chapter_difficulty": chapterDifficulty,
+            //         "chapter_icon_name": "character.book.closed",
+            //         "chapter_length": chapterLength,
+            //         "chapter_title": chapterTitle,
+            //         "subscription_code": subCode
+            //     })
+            //     .then(res => {
+            //         // console.log(res);
+            //         returnCode = res;
+            //     })
+            //     .catch(err => {
+            //         // TODO: identify possible error code. None found so far
+            //         console.log(err); 
+            //         returnCode = {"code": "UNEXPECTED_SIGNUP_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"};
+            //     })
+            // }
+
+            // // Updating lesson stuff (not complete)
+            // else if (chaptLessons.length != 0){
+
+            //     console.log("Updating: Chapter Lessons")
+
+            //     // Getting the chapter
+            //     let chapterRefDoc = doc(db, "Chapters", "chapter_006");
+
+            //     // Getting lessons collection
+            //     let lessonsRefCollection = collection(chapterRefDoc, "lessons")
                 
             
-                // Looping over each lesson and writing it to the lessons collection
-                for (var i = 0; i < chaptLessons.length; i++){
+                // // Looping over each lesson and writing it to the lessons collection
+                // for (var i = 0; i < chaptLessons.length; i++){
 
-                    // Grabbing the specific lessonn
-                    let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
+                //     // Grabbing the specific lessonn
+                //     let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
         
-                    await setDoc(lessonsRefDoc, {
-                        "lesson_content": chaptLessons[i].lesson_content
-                    })
-                }    
-            }
+                //     await setDoc(lessonsRefDoc, {
+                //         "lesson_content": chaptLessons[i].lesson_content
+                //     })
+                // }    
+            // }
         }
     }
 
@@ -725,11 +776,7 @@ const Dashboard = () => {
 
                                 // If selected chapter is not an empty string --> then user is updating a chapter
                                 if (selectedChapter.chapter_id != ""){
-
-                                    
-
-                                    updateChapter(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
-
+                                    updateChapter(selectedChapter) //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
                                 // Else, then user is creating a new chapter                                    
                                 }else{
 
