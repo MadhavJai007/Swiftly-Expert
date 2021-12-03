@@ -716,16 +716,6 @@ const Dashboard = () => {
                                 {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
                                 <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty', 0)} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
                             </div>
-
-
-                            <div className="text-2xl font-extrabold pb-5">
-                                <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center bg-blue-500 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Create New Chapter
-                                </button>
-                            </div>
                         </div>
                         
                         <div className= {"flex flex-row " + (openTab === 2 ? "block" : "hidden")}>
@@ -781,6 +771,15 @@ const Dashboard = () => {
                         </div>
 
                         <div className="w-40 static ">
+
+                            <div className="text-2xl font-extrabold pb-5">
+                                <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center bg-blue-500 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Create Chapter
+                                </button>
+                            </div>
                             <button type="button" onClick={() => {
 
                                 // If selected chapter is not an empty string --> then user is updating a chapter
