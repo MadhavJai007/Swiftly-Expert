@@ -49,6 +49,7 @@ const Dashboard = () => {
     const {currentUser, logout} = useAuth()
     const history = useHistory()
 
+    // logout handler
     const handleLogout = async () => {
         setError('')
 
@@ -61,6 +62,7 @@ const Dashboard = () => {
         }
     }    
 
+    // function that gets the chapters associated to the currently logged in user
     const getAuthorsChapters = async (isRefreshing) => {
         // if(isRefreshing) {
         //     setChaptersRetrieved(false)
@@ -83,6 +85,7 @@ const Dashboard = () => {
         setChaptersRetrieved(true)
     }
 
+    // function that gets the lessons associated to the currently chosen chapter (chosen chapter specified in selectedChapter state)
     const getChapterLessons = async () => {
         let chapterDocRef = doc(db, "Chapters", selectedChapter.chapter_id)
         const querySnapshot = await getDocs(collection(chapterDocRef, "lessons"))
@@ -98,6 +101,10 @@ const Dashboard = () => {
         setLessonContentRetrieved(true)
     }
 
+    /* 
+    function that is triggered when a chapter tile on the right panel is clicked. 
+    Retrieves metadata of the chapter and stores it in selectedChapter state variable
+    */
     const getChapter = async (docId) => {
         setLessonContentRetrieved(false)
         setSelectedChapter(chapterObj)
@@ -105,19 +112,6 @@ const Dashboard = () => {
         const chapterDocRef = doc(db, "Chapters", docId);
         const chapterDocSnap = await getDoc(chapterDocRef);
         if(chapterDocSnap.exists()) {
-            // console.log("Document data:", chapterDocSnap.data());
-            // let chapterNum = chapterList.length + 1;
-            // let chapterId;
-            // if(chapterNum >= 100){
-            //     chapterId = `chapter_${chapterNum}`;
-            // }
-            // else if(chapterNum >= 10) {
-            //     chapterId = `chapter_0${chapterNum}`;
-            // }
-            // else {
-            //     chapterId = `chapter_00${chapterNum}`;
-            // }
-
             // creating temp copy of the empty chapter object
             console.log(docId)
             let _chapterObj = {...chapterObj};
@@ -142,6 +136,7 @@ const Dashboard = () => {
         }
     }
 
+    // general purpose text input handler that updates different text state variables appropriately
     const onInputChange = (e, type, input, index) => {
         e.preventDefault();
         if(type === "chapter" ){
@@ -164,6 +159,7 @@ const Dashboard = () => {
         }
     }
 
+    // handler that triggers when a lesson is selected from the dropdown in the second tab of the editor panel
     const onLessonSelect = (e) => {
         let lessonId = e.target.value;
         if(lessonId !== ""){
@@ -173,6 +169,7 @@ const Dashboard = () => {
         }
     }
 
+    // rendering a list of chapter cards to display them on right panel of website
     const chapterCards = chapterList.map(chapter => {
         return <button  key={chapter.chapterId} onClick={() => { getChapter(chapter.chapterId) }}>
             <div className="shadow-lg rounded-xl max-w-xs p-4 bg-white dark:bg-gray-800 relative overflow-hidden"> 
@@ -202,6 +199,7 @@ const Dashboard = () => {
         </button>
     })
 
+    // render tabs for the editor panel and store them in constant
     const tabs = tabSections.map(tab => {
         return <li className="mx-2 flex-auto text-center" key={tab.number}>
             <a
@@ -242,7 +240,7 @@ const Dashboard = () => {
         </li>
     })
 
-
+    // renders the options for the lesson selector dropdown
     const lessonOptions = selectedChapter.lessons.map(lesson => {
         return <option key={lesson.lesson_id} value={lesson.lesson_id}>
             {lesson.lesson_title}
@@ -279,6 +277,7 @@ const Dashboard = () => {
         });
       }
 
+    // convert image url (from online) to base64 format
     const getBase64FromUrl = async (url) => {
         const data = await fetch(url);
         const blob = await data.blob();
@@ -292,12 +291,41 @@ const Dashboard = () => {
         });
     }
 
-    // Function that updates the chapter
-    const updateChapter = async(chapter) => { //, chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
+    // mini function that just clears states that are related to chapter editor panel
+    const resetChapterStates = () => {
+        setSelectedChapter(chapterObj);
+        setSelectedLesson(null);
+        setLessonContentRetrieved(false);
+        setOriginalLessonContent(null);
+        setLessonContentList(null);
+        setOpenTab(1);
+    }
+
+    // Function that publishes the chapter
+    const updateChapter = async(chapter, mode) => { //, chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
         //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
         console.log(chapter)
+        let chapterId = chapter.chapter_id;
+        console.log(chapterId);
+
+        // if adding chapter, generate a chapter id
+        if(mode == "add") {
+            let chapterNum = chapterList.length + 1;
+            if(chapterNum >= 100){
+                chapterId = `chapter_${chapterNum}`;
+            }
+            else if(chapterNum >= 10) {
+                chapterId = `chapter_0${chapterNum}`;
+            }
+            else {
+                chapterId = `chapter_00${chapterNum}`;
+            }
+        }
+
+        console.log(chapterId);
+
         // let returnCode;
-        let chaptersRefDoc = doc(db, "Chapters", chapter.chapter_id);
+        let chaptersRefDoc = doc(db, "Chapters", chapterId);
         let lessonsRefCollection = collection(chaptersRefDoc, "lessons")
 
         let validInput = true
@@ -307,10 +335,12 @@ const Dashboard = () => {
         // Checking if chapter title and desc are not empty
         if (chapter.chapter_title.trim() == ""){
             validInput = false
+            console.log("chapter title is empty")
         }
 
         if (chapter.chapter_desc.trim() == ""){
             validInput = false
+            console.log("chapter description is empty")
         }
 
         // Only update doc if the data is valid
@@ -342,24 +372,33 @@ const Dashboard = () => {
                     console.log({"code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"})
                 })
 
-
+            
             let chaptLessons = _chapter.lessons
-            // Looping over each lesson and writing it to the lessons collection
-            for (var i = 0; i < chaptLessons.length; i++){
+            if(mode == "update") {
+                // Looping over each lesson and writing it to the lessons collection
+                for (var i = 0; i < chaptLessons.length; i++){
 
-                // Grabbing the specific lessonn
-                let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
-                
-                try {
-                    let updateLessonsOperation = await setDoc(lessonsRefDoc, {
-                        "lesson_content": chaptLessons[i].lesson_content
-                    })
-                    console.log(updateLessonsOperation)
-                }
-                catch(err) {
-                    console.log("updating lessons failed")
+                    // Grabbing the specific lessonn
+                    let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
+                    
+                    try {
+                        let updateLessonsOperation = await setDoc(lessonsRefDoc, {
+                            "lesson_content": chaptLessons[i].lesson_content
+                        })
+                        console.log(updateLessonsOperation)
+                    }
+                    catch(err) {
+                        console.log("updating lessons failed")
+                    }
                 }
             }    
+            else if(mode == "add") {
+                console.log("add new lessons here")
+                // reset chapter editor related states 
+                resetChapterStates()
+                // refresh list of chapters in right panel
+                getAuthorsChapters()
+            }
 
 
 
@@ -595,11 +634,17 @@ const Dashboard = () => {
         setLessonContentList(array)
     }
 
+
     const resetLesson = () => {
         console.log("resetting changes")
         console.log(originalLessonContent)
         setSelectedLesson(originalLessonContent)
     }
+
+
+    /*
+        USE EFFECT HOOKS
+    */
 
     useEffect(()=>{ 
         console.log(currentUser.email)
@@ -773,7 +818,11 @@ const Dashboard = () => {
                         <div className="w-40 static ">
 
                             <div className="text-2xl font-extrabold pb-5">
-                                <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center bg-blue-500 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                <button onClick={() => {
+                                        // mini function that just clears states that are related to chapter editor panel
+                                        resetChapterStates()
+                                    }
+                                } className=" py-2 px-4 flex justify-center items-center bg-blue-500 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
@@ -784,10 +833,12 @@ const Dashboard = () => {
 
                                 // If selected chapter is not an empty string --> then user is updating a chapter
                                 if (selectedChapter.chapter_id != ""){
-                                    updateChapter(selectedChapter) //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
+                                    updateChapter(selectedChapter, "update") //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
                                 // Else, then user is creating a new chapter                                    
                                 }else{
-
+                                    console.log("chapter id is empty")
+                                    console.log("adding new chapter to firebase")
+                                    updateChapter(selectedChapter, "add")
                                 }
 
                             }} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-green-500 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
