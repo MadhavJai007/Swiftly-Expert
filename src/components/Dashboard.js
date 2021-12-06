@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
-import { collection, doc, setDoc, getDocs, getDoc, listCollections } from 'firebase/firestore'
+import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections } from 'firebase/firestore'
 import {db} from '../firebase';
 // import Tabs from './widgets/Tabs';
 
@@ -34,6 +34,12 @@ const tabSections = [
     }
 ]
 
+const templateLesson = {
+    lesson_id: '',
+    lesson_title: '',
+    lesson_content: []
+}
+
 const Dashboard = () => {
     const [error, setError] = useState("")
     const [chapterList, setChapterList] = useState([]);
@@ -44,6 +50,7 @@ const Dashboard = () => {
     const [originalLessonContent, setOriginalLessonContent] = useState(null)
     const [updatedLesson, setUpdatedLesson] = useState(null)
     const [lessonContentList, setLessonContentList] = useState(null)
+    const [isCreatingChapter, setIsCreatingChapter] = useState(true)
     const [openTab, setOpenTab] = useState(1);
     const [sampleImg, setSampleImg] = useState(null)
     const {currentUser, logout} = useAuth()
@@ -87,18 +94,22 @@ const Dashboard = () => {
 
     // function that gets the lessons associated to the currently chosen chapter (chosen chapter specified in selectedChapter state)
     const getChapterLessons = async () => {
-        let chapterDocRef = doc(db, "Chapters", selectedChapter.chapter_id)
-        const querySnapshot = await getDocs(collection(chapterDocRef, "lessons"))
-        let lessons = []
-        querySnapshot.forEach(doc => {
-            lessons.push({
-                "lesson_id": doc.id,
-                "lesson_title":  doc.data().lesson_content[0],
-                "lesson_content": doc.data().lesson_content
-            })
-        })
-        setSelectedChapter({...selectedChapter, lessons: lessons});
-        setLessonContentRetrieved(true)
+        // only do this if the user isnt making a brand new chapter
+        // if(!isCreatingChapter) {
+            console.log("retrieving chapter's lessons...")
+           let chapterDocRef = doc(db, "Chapters", selectedChapter.chapter_id)
+           const querySnapshot = await getDocs(collection(chapterDocRef, "lessons"))
+           let lessons = []
+           querySnapshot.forEach(doc => {
+               lessons.push({
+                   "lesson_id": doc.id,
+                   "lesson_title":  doc.data().lesson_content[0],
+                   "lesson_content": doc.data().lesson_content
+               })
+           })
+           setSelectedChapter({...selectedChapter, lessons: lessons});
+           setLessonContentRetrieved(true) 
+        // }
     }
 
     /* 
@@ -129,7 +140,8 @@ const Dashboard = () => {
 
             setSelectedChapter(_chapterObj)
             setSelectedLesson(null)
-            
+            // disabling the creatingMode flag (only when creating a new chapter)
+            setIsCreatingChapter(false)
         } else {
             // this shouldnt happen
             console.log("Requested document not found!!")
@@ -293,12 +305,106 @@ const Dashboard = () => {
 
     // mini function that just clears states that are related to chapter editor panel
     const resetChapterStates = () => {
-        setSelectedChapter(chapterObj);
+        setSelectedChapter({...chapterObj, lessons: []});
         setSelectedLesson(null);
         setLessonContentRetrieved(false);
         setOriginalLessonContent(null);
         setLessonContentList(null);
+        setIsCreatingChapter(true)
         setOpenTab(1);
+    }
+
+    // creates a blank lesson and adds it to the chapter's lesson list
+    const createBlankLesson = async () => {
+        let newLesson;
+        // if user is adding a chapter
+        if(isCreatingChapter){
+            let clonedChapter = chapterObj;
+            // console.log(clonedChapter);
+            // if this the first lesson being added to the brand new lesson
+            if(clonedChapter.lessons.length === 0) {
+                newLesson = templateLesson;
+                newLesson.lesson_id = "lesson_001";
+                newLesson.lesson_title = "Untitled lesson";
+                newLesson.lesson_content[0] = "Untitled lesson";
+                newLesson.lesson_content[1] = "New textbox";
+                clonedChapter.lessons.push(newLesson)
+                // console.log(newLesson);
+                // console.log(chapterObj)
+                setSelectedLesson(newLesson)
+                setSelectedChapter(clonedChapter)
+            }
+            else {
+                // console.log("calculate lesson id first");
+                let clonedChapterLessons = clonedChapter.lessons;
+                console.log(clonedChapterLessons);
+                let newLessonId; 
+                
+                let isValidLessonId = false
+
+                let lessonNum = clonedChapterLessons.length + 1;
+                if(lessonNum >= 100){
+                    newLessonId = `lesson_${lessonNum}`;
+                }
+                else if(lessonNum >= 10) {
+                    newLessonId = `lesson_0${lessonNum}`;
+                }
+                else {
+                    newLessonId = `lesson_00${lessonNum}`;
+                }
+
+                // TODO: SERIOUS BUG ISSUE HERE
+                newLesson = templateLesson;
+                newLesson.lesson_id = newLessonId;
+                newLesson.lesson_title = "Untitled lesson";
+                newLesson.lesson_content[0] = "Untitled lesson";
+                newLesson.lesson_content[1] = "New textbox";
+                clonedChapterLessons.push(newLesson)
+                console.log(clonedChapterLessons)
+                // setSelectedLesson(newLesson)
+                // setSelectedChapter({...clonedChapter, lessons: clonedChapterLessons})
+
+                // while (!isValidLessonId) {  
+                //     // keep doing until finding an available lesson id
+                //     let lessonNum = clonedChapterLessons.length + 1;
+                //     if(lessonNum >= 100){
+                //         newLessonId = `lesson_${lessonNum}`;
+                //     }
+                //     else if(lessonNum >= 10) {
+                //         newLessonId = `lesson_0${lessonNum}`;
+                //     }
+                //     else {
+                //         newLessonId = `lesson_00${lessonNum}`;
+                //     }
+
+                //     const lessonFound = clonedChapterLessons.find(lesson => lesson["lesson_id"] == newLessonId);
+
+                //     // if undefined, lesson id is available
+                //     if(!lessonFound){
+                //         console.log(newLessonId + " is available")
+                //         newLesson = templateLesson;
+                //         newLesson.lesson_id = newLessonId;
+                //         newLesson.lesson_title = "Untitled lesson";
+                //         newLesson.lesson_content[0] = "Untitled lesson";
+                //         newLesson.lesson_content[1] = "New textbox";
+                //         clonedChapter.lessons.push(newLesson)
+                //         setSelectedLesson(newLesson)
+                //         setSelectedChapter(clonedChapter)
+                //         isValidLessonId = true
+                //     } else {
+                //         console.log(newLessonId + " not available")
+                //     }
+                // }
+
+
+
+            }
+        }
+        // if user is currently modifying an existing chapter in the database
+        else {
+            console.log("adding blank lesson to the existing chapter list")
+        }
+        
     }
 
     // Function that publishes the chapter
@@ -369,7 +475,7 @@ const Dashboard = () => {
                 .catch(err => {
                     // TODO: identify possible error code. None found so far
                     console.log(err); 
-                    console.log({"code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"})
+                    console.log({"code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror"})
                 })
 
             
@@ -394,6 +500,25 @@ const Dashboard = () => {
             }    
             else if(mode == "add") {
                 console.log("add new lessons here")
+                // adding a brand new chapter
+                if(isCreatingChapter) {
+                    // Looping over each lesson and writing it to the lessons collection
+                    for (var i = 0; i < chaptLessons.length; i++){
+                        
+                        // Grabbing the specific lessonn
+                        let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
+                        
+                        try {
+                            let updateLessonsOperation = await setDoc(lessonsRefDoc, {
+                                "lesson_content": chaptLessons[i].lesson_content
+                            })
+                            console.log(updateLessonsOperation)
+                        }
+                        catch(err) {
+                            console.log("updating lessons failed")
+                        }
+                    }
+                }
                 // reset chapter editor related states 
                 resetChapterStates()
                 // refresh list of chapters in right panel
@@ -677,6 +802,10 @@ const Dashboard = () => {
     }, [selectedLesson])
 
     useEffect(() => {
+        console.log(isCreatingChapter)
+    }, [isCreatingChapter])
+
+    useEffect(() => {
         console.log(originalLessonContent)
     }, [originalLessonContent])
 
@@ -793,7 +922,11 @@ const Dashboard = () => {
                                                 <input type="text" id="chapter-title" value={selectedLesson.lesson_title}  onChange={(e) => onInputChange(e, 'lesson','lesson_title', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
                                             </div>
                                             <div className="pt-7">
-                                                <button onClick={() => {resetLesson()}} 
+                                                <button onClick={() => {
+                                                        console.log(selectedChapter)
+                                                        console.log(selectedLesson)
+                                                    }
+                                                } 
                                                     className="py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
                                                 >
                                                     Reset
@@ -808,7 +941,7 @@ const Dashboard = () => {
                                     </div>
                                     :
                                     <div className="font-sans text-center p-3 font-bold text-xl">
-                                        Select a lesson
+                                        {"Select a lesson"}
                                     </div>
                                 }
                             </div>
@@ -816,6 +949,23 @@ const Dashboard = () => {
                         </div>
 
                         <div className="w-40 static ">
+
+                            {openTab == 2 ? 
+                            <div className="text-2xl font-extrabold pb-5">
+                                <button onClick={() => {
+                                            // create a template lesson object and set it as selectedLesson
+                                            createBlankLesson()
+                                        }
+                                    } className=" py-2 px-4 flex justify-center items-center bg-purple-500 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Create lesson
+                                </button>
+                            </div>
+                            :
+                            <br/>
+                            }
 
                             <div className="text-2xl font-extrabold pb-5">
                                 <button onClick={() => {
