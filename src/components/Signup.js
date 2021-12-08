@@ -28,8 +28,7 @@ const Signup = () => {
                 switch(statusCode.code) {
                     case "EMAIL_AVAILABLE":
                         let res = await addUserToExperts(
-                                emailRef.current.value.trim(), 
-                                passwordConfirmRef.current.value.trim(), 
+                                emailRef.current.value.trim(),
                                 usernameRef.current.value.trim(), 
                                 firstNameRef.current.value.trim(), 
                                 lastNameRef.current.value.trim(), 

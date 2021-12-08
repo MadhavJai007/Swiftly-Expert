@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    const addUserToExperts = async (email, password, username, firstname, lastname, country, dob) => {
+    const addUserToExperts = async (email, username, firstname, lastname, country, dob) => {
         let returnCode;
         let expertsDocRef = doc(db, "Experts", username);
         console.log("Username is free. adding user")
@@ -45,7 +45,6 @@ export const AuthProvider = ({ children }) => {
             "email": email,
             "firstname": firstname,
             "lastName": lastname,
-            "password": password,
             "username": username
         })
         .then(res => {
