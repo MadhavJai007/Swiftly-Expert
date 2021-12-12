@@ -316,89 +316,33 @@ const Dashboard = () => {
 
     // creates a blank lesson and adds it to the chapter's lesson list
     const createBlankLesson = async () => {
-        let newLesson;
+        let newLesson = null;
+        let clonedChapter = null;
         // if user is adding a chapter
         if(isCreatingChapter){
-            let clonedChapter = chapterObj;
-            // console.log(clonedChapter);
-            // if this the first lesson being added to the brand new lesson
-            if(clonedChapter.lessons.length === 0) {
-                newLesson = templateLesson;
-                newLesson.lesson_id = "lesson_001";
-                newLesson.lesson_title = "Untitled lesson";
-                newLesson.lesson_content[0] = "Untitled lesson";
-                newLesson.lesson_content[1] = "New textbox";
-                clonedChapter.lessons.push(newLesson)
-                // console.log(newLesson);
-                // console.log(chapterObj)
-                setSelectedLesson(newLesson)
-                setSelectedChapter(clonedChapter)
+            clonedChapter = selectedChapter;
+
+            let newLessonId; 
+            let lessonNum = clonedChapter.lessons.length + 1;
+            if(lessonNum >= 100){
+                newLessonId = `lesson_${lessonNum}`;
+            }
+            else if(lessonNum >= 10) {
+                newLessonId = `lesson_0${lessonNum}`;
             }
             else {
-                // console.log("calculate lesson id first");
-                let clonedChapterLessons = clonedChapter.lessons;
-                console.log(clonedChapterLessons);
-                let newLessonId; 
-                
-                let isValidLessonId = false
-
-                let lessonNum = clonedChapterLessons.length + 1;
-                if(lessonNum >= 100){
-                    newLessonId = `lesson_${lessonNum}`;
-                }
-                else if(lessonNum >= 10) {
-                    newLessonId = `lesson_0${lessonNum}`;
-                }
-                else {
-                    newLessonId = `lesson_00${lessonNum}`;
-                }
-
-                // TODO: SERIOUS BUG ISSUE HERE
-                newLesson = templateLesson;
-                newLesson.lesson_id = newLessonId;
-                newLesson.lesson_title = "Untitled lesson";
-                newLesson.lesson_content[0] = "Untitled lesson";
-                newLesson.lesson_content[1] = "New textbox";
-                clonedChapterLessons.push(newLesson)
-                console.log(clonedChapterLessons)
-                // setSelectedLesson(newLesson)
-                // setSelectedChapter({...clonedChapter, lessons: clonedChapterLessons})
-
-                // while (!isValidLessonId) {  
-                //     // keep doing until finding an available lesson id
-                //     let lessonNum = clonedChapterLessons.length + 1;
-                //     if(lessonNum >= 100){
-                //         newLessonId = `lesson_${lessonNum}`;
-                //     }
-                //     else if(lessonNum >= 10) {
-                //         newLessonId = `lesson_0${lessonNum}`;
-                //     }
-                //     else {
-                //         newLessonId = `lesson_00${lessonNum}`;
-                //     }
-
-                //     const lessonFound = clonedChapterLessons.find(lesson => lesson["lesson_id"] == newLessonId);
-
-                //     // if undefined, lesson id is available
-                //     if(!lessonFound){
-                //         console.log(newLessonId + " is available")
-                //         newLesson = templateLesson;
-                //         newLesson.lesson_id = newLessonId;
-                //         newLesson.lesson_title = "Untitled lesson";
-                //         newLesson.lesson_content[0] = "Untitled lesson";
-                //         newLesson.lesson_content[1] = "New textbox";
-                //         clonedChapter.lessons.push(newLesson)
-                //         setSelectedLesson(newLesson)
-                //         setSelectedChapter(clonedChapter)
-                //         isValidLessonId = true
-                //     } else {
-                //         console.log(newLessonId + " not available")
-                //     }
-                // }
-
-
-
+                newLessonId = `lesson_00${lessonNum}`;
             }
+
+            newLesson = templateLesson;
+            newLesson.lesson_id = newLessonId;
+            newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
+            newLesson.lesson_content[0] = "Untitled lesson";
+            newLesson.lesson_content[1] = "New textbox";
+            var lessonArr = clonedChapter.lessons;
+            lessonArr.push(JSON.parse(JSON.stringify(newLesson)))
+            setSelectedChapter({...clonedChapter, lessons: lessonArr})
+            setSelectedLesson(selectedChapter.lessons[lessonNum - 1])
         }
         // if user is currently modifying an existing chapter in the database
         else {
@@ -522,7 +466,7 @@ const Dashboard = () => {
                 // reset chapter editor related states 
                 resetChapterStates()
                 // refresh list of chapters in right panel
-                getAuthorsChapters()
+                getAuthorsChapters(false)
             }
 
 
