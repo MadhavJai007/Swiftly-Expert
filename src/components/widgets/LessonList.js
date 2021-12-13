@@ -49,24 +49,21 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
 
                     <div key={`lesson_info_${i}`}>
 
-                        {/* IMAGE STUFF */}
-                        <div className="flex flex-col items-center justify-center">
+                        <div className="flex flex-row justify-center space-x-4">
+                            {/* IMAGE STUFF */}
+                            <div className="flex flex-col items-center justify-center w-96 ">
 
-                            {/* This is the image */}
-                            <img src={selectedLesson.lesson_content[i]} alt="Red dot" />
+                                {/* This is the image */}
+                                <img src={selectedLesson.lesson_content[i]} alt="Red dot" />
 
-                            {/* This is the image picker */}
-                            <div className="pt-2.5">
-                                <input type="file" onChange={(e) => fileSelectedHandler(e, content_index)} />
-                                {/* <button onClick={() => {
-                        // if the updatedLesson is not null (only null by default)
-                        if(updatedLesson){
-                            console.log("ds???")
-                            // Calling setSelectedLesson and setting selectedLesson state with data in updatedLesson state (same lesson, just updated content)
-                            setSelectedLesson(updatedLesson)
-                        }
-                    }}>Upload</button> */}
+                                {/* This is the image picker */}
+                                <div className="pt-2.5">
+                                    <input type="file" onChange={(e) => fileSelectedHandler(e, content_index)} />
+                                </div>
                             </div>
+                            <button onClick={() => console.log(`Deleting content block ${content_index}`)}>
+                                <div className="flex rounded-full text-5xl bg-red-500 w-8 h-8 justify-center items-center pb-4 text-white">-</div>
+                            </button>
                         </div>
 
                         {/* ADD NEW CONTENT AREA */}
@@ -104,18 +101,24 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
             // else push a text area with the array element's text.
             else {
                 array.push(
-                    <div key={`lesson_info_${i}`} className="w-96">
+                    <div key={`lesson_info_${i}`} >
 
                         {/* Text Area with content from lesson */}
-                        <textarea value={selectedLesson.lesson_content[i]}
-                            onChange={(e) =>
-                                // console.log("later")
-                                onInputChange(e, 'lesson', 'lesson_content', content_index)}
-                            className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-                            placeholder="Enter something"
-                            rows="5" cols="40">
-                        </textarea>
-
+                        <div className="flex flex-row justify-center space-x-4 ">
+                            <div className="flex flex-col items-center justify-center w-96 ">
+                                <textarea value={selectedLesson.lesson_content[i]}
+                                    onChange={(e) =>
+                                        // console.log("later")
+                                        onInputChange(e, 'lesson', 'lesson_content', content_index)}
+                                    className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                                    placeholder="Enter something"
+                                    rows="5" cols="40">
+                                </textarea>
+                            </div>
+                            <button onClick={() => console.log(`Deleting content block ${content_index}`)}>
+                                <div className="flex rounded-full text-5xl bg-red-500 w-8 h-8 justify-center items-center pb-4 text-white">-</div>
+                            </button>
+                        </div>
                         {/* ADD NEW CONTENT AREA */}
                         <div key={i} className="flex flex-row items-center justify-center">
                             <div className="pt-5 px-2">

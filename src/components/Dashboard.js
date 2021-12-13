@@ -618,8 +618,8 @@ const Dashboard = () => {
                             </div>
                             <div className=" w-3/4 h-full rounded-r-md bg-gray-300 overflow-auto">
                                 {selectedLesson ? 
-                                    <div className="flex flex-col font-sans space-y-6 items-center p-3">
-                                        <div className="flex flex-row space-x-6">
+                                    <div className="font-sans space-y-6 items-center p-3">
+                                        <div className="flex flex-row justify-center space-x-6">
                                             <div className="w-40 text-xl" >
                                                 <label  className="text-gray-700">
                                                     Lesson ID
@@ -645,7 +645,7 @@ const Dashboard = () => {
                                             </div>
                             
                                         </div>
-                                        <div className="flex flex-col space-y-9">
+                                        <div className="space-y-9">
                                             
                                             {lessonContentList}
                                         </div>
