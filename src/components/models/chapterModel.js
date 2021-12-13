@@ -15,21 +15,6 @@ export const chapterObj = {
     playground: [] // playgrounds subcollection
 }
 
-export const tabs = [
-    {
-        "number": 1,
-        "tabTitle": "metadata"
-    },
-    {
-        "number": 2,
-        "tabTitle": "lessons"
-    },
-    {
-        "number": 3,
-        "tabTitle": "playground"
-    }
-]
-
 export const templateLesson = {
     lesson_id: '',
     lesson_title: '',

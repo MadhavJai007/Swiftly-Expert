@@ -4,11 +4,14 @@ import { Link, useHistory } from 'react-router-dom'
 import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections } from 'firebase/firestore'
 import {db} from '../firebase';
 
-import { chapterObj, tabs, templateLesson} from './models/chapterModel';
+import { chapterObj, templateLesson} from './models/chapterModel';
 import { renderingLessonList } from './widgets/LessonList';
+import { renderTabs } from './widgets/Tabs';
+import { renderChapterCards } from './widgets/ChapterCards';
+import * as dashboardViewModel from './viewmodels/DashboardViewModel';
 // import Tabs from './widgets/Tabs';
 
-const tabSections = tabs;
+// const tabSections = tabs;
 
 const Dashboard = () => {
     const [error, setError] = useState("")
@@ -26,120 +29,35 @@ const Dashboard = () => {
     const {currentUser, logout} = useAuth()
     const history = useHistory()
 
-    // logout handler
-    const handleLogout = async () => {
-        setError('')
-
-        try {
-            await logout()
-            history.push('/login')
-        }
-        catch {
-            setError('Failed to log out')
-        }
-    }    
+    // calls logout handler
+    const handleLogout = dashboardViewModel.logoutHandler(setError, logout, history)    
 
     // function that gets the chapters associated to the currently logged in user
-    const getAuthorsChapters = async (isRefreshing) => {
-        // if(isRefreshing) {
-        //     setChaptersRetrieved(false)
-        // }
-        const querySnapshot = await getDocs(collection(db, "Chapters"));
-        let _chapterList = []
-        querySnapshot.forEach(doc => {
-            _chapterList.push({
-                chapterId: doc.id,
-                chapterNumber: doc.data()["chapter_number"],
-                chapterTitle: doc.data()["chapter_title"],
-                chapterDesc: doc.data()["chapter_desc"],
-                chapterDiff: doc.data()["chapter_difficulty"],
-                chapterLength: doc.data()["chapter_length"],
-                chapterSubCode: doc.data()["subscription_code"],
-                chapterAuth: doc.data()["author"]
-            })
-        })
-        setChapterList(_chapterList)
-        setChaptersRetrieved(true)
-    }
+    const getAuthorsChapters = dashboardViewModel.retrieveChapters(setChapterList, setChaptersRetrieved)
 
     // function that gets the lessons associated to the currently chosen chapter (chosen chapter specified in selectedChapter state)
-    const getChapterLessons = async () => {
-        // only do this if the user isnt making a brand new chapter
-        // if(!isCreatingChapter) {
-            console.log("retrieving chapter's lessons...")
-           let chapterDocRef = doc(db, "Chapters", selectedChapter.chapter_id)
-           const querySnapshot = await getDocs(collection(chapterDocRef, "lessons"))
-           let lessons = []
-           querySnapshot.forEach(doc => {
-               lessons.push({
-                   "lesson_id": doc.id,
-                   "lesson_title":  doc.data().lesson_content[0],
-                   "lesson_content": doc.data().lesson_content
-               })
-           })
-           setSelectedChapter({...selectedChapter, lessons: lessons});
-           setLessonContentRetrieved(true) 
-        // }
-    }
+    const getChapterLessons = dashboardViewModel.getCurrChapterLessons(selectedChapter, setSelectedChapter, setLessonContentRetrieved)
 
     /* 
     function that is triggered when a chapter tile on the right panel is clicked. 
     Retrieves metadata of the chapter and stores it in selectedChapter state variable
     */
-    const getChapter = async (docId) => {
-        setLessonContentRetrieved(false)
-        setSelectedChapter(chapterObj)
-        setOpenTab(1)
-        const chapterDocRef = doc(db, "Chapters", docId);
-        const chapterDocSnap = await getDoc(chapterDocRef);
-        if(chapterDocSnap.exists()) {
-            // creating temp copy of the empty chapter object
-            console.log(docId)
-            let _chapterObj = {...chapterObj};
-            _chapterObj.chapter_id = docId
-            _chapterObj.chapter_title = chapterDocSnap.data().chapter_title
-            _chapterObj.chapter_desc = chapterDocSnap.data().chapter_desc
-            _chapterObj.chapter_difficulty = chapterDocSnap.data().chapter_difficulty
-            _chapterObj.chapter_icon_name = chapterDocSnap.data().chapter_icon_name
-            _chapterObj.chapter_number = chapterDocSnap.data().chapter_number
-            _chapterObj.chapter_length = chapterDocSnap.data().chapter_length
-            _chapterObj.subscription_code = chapterDocSnap.data().subscription_code
-            _chapterObj.chapter_author = chapterDocSnap.data().author
-
-            // console.log(chapterDocSnap.data().author)
-
-            setSelectedChapter(_chapterObj)
-            setSelectedLesson(null)
-            // disabling the creatingMode flag (only when creating a new chapter)
-            setIsCreatingChapter(false)
-        } else {
-            // this shouldnt happen
-            console.log("Requested document not found!!")
-        }
-    }
+    const getChapter = dashboardViewModel.getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter)
 
     // general purpose text input handler that updates different text state variables appropriately
-    const onInputChange = (e, type, input, index) => {
-        e.preventDefault();
-        if(type === "chapter" ){
-            let _chapterObj = {...selectedChapter}
-            _chapterObj[`${input}`] = e.target.value
-            setSelectedChapter(_chapterObj)
-        }
-        else if(type === "lesson") {
-            let _lessonObj = {...selectedLesson}
-            // only updating lesson title property and first element in lesson content (which is also lesson title)
-            if(input==='lesson_title') {
-                _lessonObj[`${input}`] = e.target.value
-                _lessonObj['lesson_content'][0] = e.target.value
-            }
-            // updating specified index in lesson content array inside the selectedLesson
-            else if (input==='lesson_content'){
-                _lessonObj[`${input}`][index] = e.target.value
-            }
-            setSelectedLesson(_lessonObj)
-        }
-    }
+    const onInputChange = dashboardViewModel.dashboardTextInputHandler(selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson)
+
+    // mini function that just clears states that are related to chapter editor panel
+    const resetChapterStates = dashboardViewModel.resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, setLessonContentRetrieved, setOriginalLessonContent, setLessonContentList, setIsCreatingChapter, setOpenTab)
+
+    // creates a blank lesson and adds it to the chapter's lesson list
+    const createBlankLesson = dashboardViewModel.generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson)
+
+    // Function that publishes the chapter
+    const publishChapter = dashboardViewModel.generateAndPublishChapter(chapterList, resetChapterStates, getAuthorsChapters, isCreatingChapter)
+
+    // function used to insert new content into existing lessons.
+    const insertContent = dashboardViewModel.insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleImg)
 
     // handler that triggers when a lesson is selected from the dropdown in the second tab of the editor panel
     const onLessonSelect = (e) => {
@@ -152,67 +70,10 @@ const Dashboard = () => {
     }
 
     // rendering a list of chapter cards to display them on right panel of website
-    const chapterCards = chapterList.map(chapter => {
-        return <button  key={chapter.chapterId} onClick={() => { getChapter(chapter.chapterId) }}>
-            <div className="shadow-lg rounded-xl max-w-xs p-4 bg-white dark:bg-gray-800 relative overflow-hidden"> 
-                <div className="w-full h-full block">
-                    <p className="text-gray-800 dark:text-white text-xl font-bold mb-2">
-                        {chapter["chapterTitle"]}
-                    </p>
-                    <p className="text-gray-400 dark:text-gray-300 text-sm font-medium mb-2">
-                       Created by: {chapter.chapterAuth}
-                    </p>
-                    <p className="text-gray-400 dark:text-gray-300 text-xs font-medium mb-2">
-                        Approx. length: {chapter["chapterLength"] + " mins"}
-                    </p>
-                    <div className="flex dark:text-gray-200 items-center justify-between">
-                        <p className="font-semibold">
-                            Difficulty:
-                        </p>
-                        <p className="font-bold">
-                            {chapter.chapterDiff}
-                        </p>
-                    </div>
-                    <div className="w-full h-2 bg-gray-400 rounded-full mt-3 mb-6">
-                        <div className={`w-${chapter.chapterDiff}/3 h-full text-center text-xs text-white ${chapter.chapterDiff > 1 ? (chapter.chapterDiff > 2 ? `bg-red-400` : `bg-yellow-400` ) : `bg-green-400`} rounded-full`}/>
-                    </div>
-                </div>
-            </div>
-        </button>
-    })
+    const chapterCards = renderChapterCards(chapterList, getChapter)
 
     // render tabs for the editor panel and store them in constant
-    const tabs = tabSections.map(tab => {
-        return <li className="mx-2 flex-auto text-center" key={tab.number}>
-            <a
-            className={
-                "text-xs font-bold px-5 py-3 shadow-lg rounded block leading-normal " +
-                (openTab === tab.number
-                ? "text-white bg-green-500"
-                : "text-green-600 bg-white")
-            }
-            onClick={e => {
-                e.preventDefault();
-                setOpenTab(tab.number)
-
-                console.log(selectedChapter)
-                console.log(selectedLesson)
-                // console.log(lessonOptions)
-
-                // If going to lessons tab and chapter is not nil, download lessons
-                if(tab.number === 2 && selectedChapter.chapter_id !== "") {
-                    if(!lessonContentRetrieved) {
-                        console.log("loading the lession content")
-                        getChapterLessons()
-                    }
-                }
-
-            }}
-            >
-                {tab.tabTitle}
-            </a>
-        </li>
-    })
+    const tabs = renderTabs(openTab, setOpenTab, selectedChapter, selectedLesson, lessonContentRetrieved, getChapterLessons)
 
     // renders the options for the lesson selector dropdown
     const lessonOptions = selectedChapter.lessons.map(lesson => {
@@ -265,240 +126,8 @@ const Dashboard = () => {
         });
     }
 
-    // mini function that just clears states that are related to chapter editor panel
-    const resetChapterStates = () => {
-        setSelectedChapter({...chapterObj, lessons: []});
-        setSelectedLesson(null);
-        setLessonContentRetrieved(false);
-        setOriginalLessonContent(null);
-        setLessonContentList(null);
-        setIsCreatingChapter(true)
-        setOpenTab(1);
-    }
-
-    // creates a blank lesson and adds it to the chapter's lesson list
-    const createBlankLesson = async () => {
-        let newLesson = null;
-        let clonedChapter = null;
-        // if user is adding a chapter
-        if(isCreatingChapter){
-            clonedChapter = selectedChapter;
-
-            let newLessonId; 
-            let lessonNum = clonedChapter.lessons.length + 1;
-            if(lessonNum >= 100){
-                newLessonId = `lesson_${lessonNum}`;
-            }
-            else if(lessonNum >= 10) {
-                newLessonId = `lesson_0${lessonNum}`;
-            }
-            else {
-                newLessonId = `lesson_00${lessonNum}`;
-            }
-
-            newLesson = templateLesson;
-            newLesson.lesson_id = newLessonId;
-            newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
-            newLesson.lesson_content[0] = "Untitled lesson";
-            newLesson.lesson_content[1] = "New textbox";
-            var lessonArr = clonedChapter.lessons;
-            lessonArr.push(JSON.parse(JSON.stringify(newLesson)))
-            setSelectedChapter({...clonedChapter, lessons: lessonArr})
-            setSelectedLesson(selectedChapter.lessons[lessonNum - 1])
-        }
-        // if user is currently modifying an existing chapter in the database
-        else {
-            console.log("adding blank lesson to the existing chapter list")
-            clonedChapter = selectedChapter;
-            
-            let newLessonId; 
-            let lessonNum = clonedChapter.lessons.length + 1;
-            if(lessonNum >= 100){
-                newLessonId = `lesson_${lessonNum}`;
-            }
-            else if(lessonNum >= 10) {
-                newLessonId = `lesson_0${lessonNum}`;
-            }
-            else {
-                newLessonId = `lesson_00${lessonNum}`;
-            }
-
-            newLesson = templateLesson;
-            newLesson.lesson_id = newLessonId;
-            newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
-            newLesson.lesson_content[0] = "Untitled lesson";
-            newLesson.lesson_content[1] = "New textbox";
-            var lessonArr = clonedChapter.lessons;
-            lessonArr.push(JSON.parse(JSON.stringify(newLesson)))
-            setSelectedChapter({...clonedChapter, lessons: lessonArr})
-            setSelectedLesson(selectedChapter.lessons[lessonNum - 1])
-        }
-        
-    }
-
-    // Function that publishes the chapter
-    const publishChapter = async(chapter, mode) => { //, chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
-        //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
-        console.log(chapter)
-        let chapterId = chapter.chapter_id;
-        console.log(chapterId);
-
-        // if adding chapter, generate a chapter id
-        if(mode == "add") {
-            let chapterNum = chapterList.length + 1;
-            if(chapterNum >= 100){
-                chapterId = `chapter_${chapterNum}`;
-            }
-            else if(chapterNum >= 10) {
-                chapterId = `chapter_0${chapterNum}`;
-            }
-            else {
-                chapterId = `chapter_00${chapterNum}`;
-            }
-        }
-
-        console.log(chapterId);
-
-        // let returnCode;
-        let chaptersRefDoc = doc(db, "Chapters", chapterId);
-        let lessonsRefCollection = collection(chaptersRefDoc, "lessons")
-
-        let validInput = true
-        let chapterLength = parseInt(chapter.chapter_length)
-        let chapterDifficulty = parseInt(chapter.chapter_difficulty)
-
-        // Checking if chapter title and desc are not empty
-        if (chapter.chapter_title.trim() == ""){
-            validInput = false
-            console.log("chapter title is empty")
-        }
-
-        if (chapter.chapter_desc.trim() == ""){
-            validInput = false
-            console.log("chapter description is empty")
-        }
-
-        // Only update doc if the data is valid
-        if (validInput == true){
-            var _chapter = chapter;
-            // _chapter.lessons = selectedLesson;
-
-            // console.log(_chapter);
-
-            // TODO: check if user wants to upload just general info from metadata page, just lessons from lessons page or everything
-
-            // for now upload everything
-
-            await setDoc(chaptersRefDoc, {
-                    "chapter_desc": chapter.chapter_desc,
-                    "chapter_number": chapter.chapter_number,
-                    "chapter_difficulty": chapterDifficulty,
-                    "chapter_icon_name": "character.book.closed",
-                    "chapter_length": chapterLength,
-                    "chapter_title": chapter.chapter_title,
-                    "subscription_code": chapter.subscription_code
-                })
-                .then(res => {
-                    console.log(res);
-                })
-                .catch(err => {
-                    // TODO: identify possible error code. None found so far
-                    console.log(err); 
-                    console.log({"code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror"})
-                })
-
-            
-            let chaptLessons = _chapter.lessons
-            if(mode == "update") {
-                // Looping over each lesson and writing it to the lessons collection
-                for (var i = 0; i < chaptLessons.length; i++){
-
-                    // Grabbing the specific lessonn
-                    let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
-                    
-                    try {
-                        let updateLessonsOperation = await setDoc(lessonsRefDoc, {
-                            "lesson_content": chaptLessons[i].lesson_content
-                        })
-                        console.log(updateLessonsOperation)
-                    }
-                    catch(err) {
-                        console.log("updating lessons failed")
-                    }
-                }
-                // reset chapter editor related states 
-                resetChapterStates()
-                // refresh list of chapters in right panel
-                getAuthorsChapters(false)
-            }    
-            else if(mode == "add") {
-                console.log("add new lessons here")
-                // adding a brand new chapter
-                if(isCreatingChapter) {
-                    // Looping over each lesson and writing it to the lessons collection
-                    for (var i = 0; i < chaptLessons.length; i++){
-                        
-                        // Grabbing the specific lessonn
-                        let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
-                        
-                        try {
-                            let updateLessonsOperation = await setDoc(lessonsRefDoc, {
-                                "lesson_content": chaptLessons[i].lesson_content
-                            })
-                            console.log(updateLessonsOperation)
-                        }
-                        catch(err) {
-                            console.log("updating lessons failed")
-                        }
-                    }
-                }
-                // reset chapter editor related states 
-                resetChapterStates()
-                // refresh list of chapters in right panel
-                getAuthorsChapters(false)
-            }
-
-        }
-    }
-
-    // function used to insert new content into existing lessons.
-    const insertContent = (e, type, index, placement) => {
-        e.preventDefault()
-        let _lessonContentList;
-
-        // placement is always "after the specified index" except when inserting content before the first piece.
-        if(placement == "after"){
-            index += 1
-            console.log(index)
-        }
-        // if the type of content being inserted is a paragraph
-        if(type === "para") {
-            _lessonContentList = selectedLesson.lesson_content;
-            // insert new string that will act as the textbox's text (here its placeholder text)
-            _lessonContentList.splice(index, 0, "New textbox")
-            // console.log(originalLessonContent)
-            setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
-            // console.log(originalLessonContent)
-        }
-        // if the type of content being inserted is an image
-        else if (type === "img") {
-            _lessonContentList = selectedLesson.lesson_content;
-            // insert string of that will represent a dummy immage
-            _lessonContentList.splice(index, 0, sampleImg)
-            // console.log(_lessonContentList)
-            setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
-        }
-        // if a block is to be deleted
-        if(type === "delete"){
-            _lessonContentList = selectedLesson.lesson_content;
-            _lessonContentList.splice(index, 1);
-            setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
-        }
-    }
-
     // function to render lesson content in html form
     const renderLessonContent = renderingLessonList(selectedLesson, insertContent, fileSelectedHandler, onInputChange, setLessonContentList)
-
 
     const resetLesson = () => {
         console.log("resetting changes")
@@ -509,8 +138,10 @@ const Dashboard = () => {
 
     /*
         USE EFFECT HOOKS
+        used to trigger something when a change to a state variable occurs
     */
 
+    // acts as a component onMount method. triggers when the website and all its state variables initialize for the first time
     useEffect(()=>{ 
         console.log(currentUser.email)
         // if a currentUser exists (logged in)
@@ -527,6 +158,7 @@ const Dashboard = () => {
         
     },[])
 
+    // triggers following code when selectedChapter state variable changes in value at any point
     useEffect(() => {
         console.log(selectedChapter)
     }, [selectedChapter])
@@ -541,14 +173,17 @@ const Dashboard = () => {
         }
     }, [selectedLesson])
 
+    // triggers following code when isCreatingChapter state variable changes in value at any point
     useEffect(() => {
         console.log(isCreatingChapter)
     }, [isCreatingChapter])
 
+    // triggers following code when originalLessonContent state variable changes in value at any point
     useEffect(() => {
         console.log(originalLessonContent)
     }, [originalLessonContent])
 
+    // this returns the JSX/HTML code that is responsible for rendering the website
     return (
       <>
         <div className="flex flex-col space-y-4 bg-darkCustom">
@@ -747,6 +382,7 @@ const Dashboard = () => {
                     <div className="font-sans text-center p-3 font-bold text-2xl">
                         Your Chapters
                         <div className="flex flex-col justify-center items-stretch text-2xl font-bold space-y-4 pt-5 ">
+                            {/* Renders the chapter cards only whern chapters have been retrieved from firestore. otherwise show "loading" */}
                             {chapterCards.length > 0 ? chapterCards : "Loading chapters..."}
                         </div>
                     </div>

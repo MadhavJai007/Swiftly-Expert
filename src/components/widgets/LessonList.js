@@ -1,5 +1,5 @@
 
-
+// used to render the lesson list full of content blocks within  the dashboard's lesson tab
 export const renderingLessonList = (selectedLesson, insertContent, fileSelectedHandler, onInputChange, setLessonContentList) => {
     return () => {
         const array = [];
