@@ -465,7 +465,15 @@ const Dashboard = () => {
             // console.log(_lessonContentList)
             setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
         }
+        // if a block is to be deleted
+        if(type === "delete"){
+            _lessonContentList = selectedLesson.lesson_content;
+            _lessonContentList.splice(index, 1);
+            setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
+        }
     }
+
+    // function used to
 
     // function to render lesson content in html form
     const renderLessonContent = renderingLessonList(selectedLesson, insertContent, fileSelectedHandler, onInputChange, setLessonContentList)

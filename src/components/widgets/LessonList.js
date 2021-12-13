@@ -61,7 +61,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                                     <input type="file" onChange={(e) => fileSelectedHandler(e, content_index)} />
                                 </div>
                             </div>
-                            <button onClick={() => console.log(`Deleting content block ${content_index}`)}>
+                            <button onClick={(e) => insertContent(e, "delete", content_index, "before") }>
                                 <div className="flex rounded-full text-5xl bg-red-500 w-8 h-8 justify-center items-center pb-4 text-white">-</div>
                             </button>
                         </div>
@@ -115,7 +115,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                                     rows="5" cols="40">
                                 </textarea>
                             </div>
-                            <button onClick={() => console.log(`Deleting content block ${content_index}`)}>
+                            <button onClick={(e) => insertContent(e, "delete", content_index, "before") }>
                                 <div className="flex rounded-full text-5xl bg-red-500 w-8 h-8 justify-center items-center pb-4 text-white">-</div>
                             </button>
                         </div>
