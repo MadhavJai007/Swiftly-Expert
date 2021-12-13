@@ -3,42 +3,12 @@ import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
 import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections } from 'firebase/firestore'
 import {db} from '../firebase';
+
+import { chapterObj, tabs, templateLesson} from './models/chapterModel';
+import { renderingLessonList } from './widgets/LessonList';
 // import Tabs from './widgets/Tabs';
 
-const chapterObj = {
-    chapter_id: "",
-    chapter_title: "",
-    chapter_desc: "",
-    chapter_difficulty: 1,
-    chapter_icon_name: "folder.circle",
-    chapter_number: 0,
-    chapter_length: 1,
-    subscription_code: "N/A",
-    chapter_author: "",
-    lessons: [], // the lessons subcollection
-    playground: [] // playgrounds subcollection
-}
-
-const tabSections = [
-    {
-        "number": 1,
-        "tabTitle": "metadata"
-    },
-    {
-        "number": 2,
-        "tabTitle": "lessons"
-    },
-    {
-        "number": 3,
-        "tabTitle": "playground"
-    }
-]
-
-const templateLesson = {
-    lesson_id: '',
-    lesson_title: '',
-    lesson_content: []
-}
+const tabSections = tabs;
 
 const Dashboard = () => {
     const [error, setError] = useState("")
@@ -236,15 +206,7 @@ const Dashboard = () => {
                         getChapterLessons()
                     }
                 }
-                
-                // TODO: SCRAP THIS
-                // If going to chapter tab, and selected chapter is not nil, clear lessons
-                // else if (tab.number === 1 && selectedChapter.chapter_id !== "") {
-                //     if(lessonContentRetrieved){
 
-                //     } 
-                //     setSelectedChapter({...selectedChapter, lessons: []});
-                // }
             }}
             >
                 {tab.tabTitle}
@@ -352,7 +314,7 @@ const Dashboard = () => {
     }
 
     // Function that publishes the chapter
-    const updateChapter = async(chapter, mode) => { //, chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
+    const publishChapter = async(chapter, mode) => { //, chapterID, chapterNum ,chapterTitle, subCode, chapterDesc, chapterLen, chapterDiff, chaptLessons) => {
         //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
         console.log(chapter)
         let chapterId = chapter.chapter_id;
@@ -441,6 +403,10 @@ const Dashboard = () => {
                         console.log("updating lessons failed")
                     }
                 }
+                // reset chapter editor related states 
+                resetChapterStates()
+                // refresh list of chapters in right panel
+                getAuthorsChapters(false)
             }    
             else if(mode == "add") {
                 console.log("add new lessons here")
@@ -469,58 +435,6 @@ const Dashboard = () => {
                 getAuthorsChapters(false)
             }
 
-
-
-            // console.log(_selectedChapter)
-            // console.log(_selectedChapter.lessons)
-            // // Only updating chapter stuff (if user selects chapter tab, chaptLessons = [], so length is 0)
-            // if (chaptLessons.length == 0){
-
-            //     console.log("Updating: General Chapter")
-
-            //     await setDoc(chaptersRefDoc, {
-            //         "chapter_desc": chapterDesc,
-            //         "chapter_number": chapterNum,
-            //         "chapter_difficulty": chapterDifficulty,
-            //         "chapter_icon_name": "character.book.closed",
-            //         "chapter_length": chapterLength,
-            //         "chapter_title": chapterTitle,
-            //         "subscription_code": subCode
-            //     })
-            //     .then(res => {
-            //         // console.log(res);
-            //         returnCode = res;
-            //     })
-            //     .catch(err => {
-            //         // TODO: identify possible error code. None found so far
-            //         console.log(err); 
-            //         returnCode = {"code": "UNEXPECTED_SIGNUP_ERR", "details": "unexpected sign up error. contact an administrator. check console for more details"};
-            //     })
-            // }
-
-            // // Updating lesson stuff (not complete)
-            // else if (chaptLessons.length != 0){
-
-            //     console.log("Updating: Chapter Lessons")
-
-            //     // Getting the chapter
-            //     let chapterRefDoc = doc(db, "Chapters", "chapter_006");
-
-            //     // Getting lessons collection
-            //     let lessonsRefCollection = collection(chapterRefDoc, "lessons")
-                
-            
-                // // Looping over each lesson and writing it to the lessons collection
-                // for (var i = 0; i < chaptLessons.length; i++){
-
-                //     // Grabbing the specific lessonn
-                //     let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id)
-        
-                //     await setDoc(lessonsRefDoc, {
-                //         "lesson_content": chaptLessons[i].lesson_content
-                //     })
-                // }    
-            // }
         }
     }
 
@@ -554,154 +468,7 @@ const Dashboard = () => {
     }
 
     // function to render lesson content in html form
-    const renderLessonContent = () => {
-        const array = [];
-        console.log("renderLessonContent() called")
-
-        // Looping through lesson content
-        for (var i = 1; i < selectedLesson.lesson_content.length; i++){
-            let content_index = i;
-
-            // put the add new content butttons before the first element. only happens once
-            if(i === 1) { 
-                array.push(
-                    <div key={"before_first"} className = "flex flex-row items-center justify-center">
-                    {/* New Paragraph */}
-                        <div className="pt-5 px-2">
-                            <button onClick={(e) => { 
-                                    insertContent(e, "para", content_index, "before")
-                                }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                Paragraph
-                            </button>
-                        </div>
-
-                        {/* New Image */}
-                        <div className="pt-5 px-2">
-                            <button onClick={(e) => {
-                                insertContent(e, "img", content_index, "before")
-                            }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                Image
-                            </button>
-                        </div>
-                    </div>
-                )
-            }
-
-            // If the content starts with data:image/ it is an image
-            if(selectedLesson.lesson_content[i].startsWith("data:image/")){
-                
-                
-                // Push new UI into array
-                array.push(
-                    
-                    <div key={`lesson_info_${i}`}>
-
-                        {/* IMAGE STUFF */}
-                         <div className = "flex flex-col items-center justify-center">
-
-                            {/* This is the image */}
-                            <img src={selectedLesson.lesson_content[i]} alt="Red dot" />
-
-                            {/* This is the image picker */}
-                            <div className="pt-2.5">
-                                <input type="file" onChange={(e) => fileSelectedHandler(e, content_index)}/>
-                                {/* <button onClick={() => {
-                                    // if the updatedLesson is not null (only null by default)
-                                    if(updatedLesson){
-                                        console.log("ds???")
-                                        // Calling setSelectedLesson and setting selectedLesson state with data in updatedLesson state (same lesson, just updated content)
-                                        setSelectedLesson(updatedLesson)
-                                    }
-                                }}>Upload</button> */}
-                            </div>
-                        </div>   
-
-                        {/* ADD NEW CONTENT AREA */}
-                        <div key={i} className = "flex flex-row items-center justify-center">
-                          
-                          {/* New Paragraph */}
-                            <div className="pt-5 px-2">
-                                <button onClick={(e) => {
-                                        insertContent(e, "para", content_index, "after")
-                                    }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
-                                    Paragraph
-                                </button>
-                            </div>
-
-                            {/* New Image */}
-                            <div className="pt-5 px-2">
-                                <button onClick={(e) => {
-                                    insertContent(e, "img", content_index, "after")
-                                }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
-                                    Image
-                                </button>
-                            </div>
-                        </div>              
-                    </div>
-                )
-                
-            } 
-            // else push a text area with the array element's text.
-            else {
-                array.push(
-                    <div key={`lesson_info_${i}`} className="w-96">
-
-                        {/* Text Area with content from lesson */}
-                       <textarea value={selectedLesson.lesson_content[i]}
-                            onChange={(e) => 
-                                // console.log("later")
-                                onInputChange(e,'lesson','lesson_content',content_index)
-                            } 
-                            className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" 
-                            placeholder="Enter something" 
-                            rows="5" cols="40">
-                        </textarea>
-
-                        {/* ADD NEW CONTENT AREA */}
-                        <div key={i} className = "flex flex-row items-center justify-center">
-                            <div className="pt-5 px-2">
-                                <button onClick={(e) => {
-                                        insertContent(e, "para", content_index, "after")
-                                    }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
-                                    Paragraph
-                                </button>
-                            </div>
-
-                            {/* New Image */}
-                            <div className="pt-5 px-2">
-                                <button onClick={(e) => {
-                                    insertContent(e, "img", content_index, "after")
-                                }} className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
-                                    Image
-                                </button>
-                            </div>
-
-                          
-                        </div>   
-                    </div>
-                )
-            }
-        }
-        setLessonContentList(array)
-    }
+    const renderLessonContent = renderingLessonList(selectedLesson, insertContent, fileSelectedHandler, onInputChange, setLessonContentList)
 
 
     const resetLesson = () => {
@@ -927,12 +694,12 @@ const Dashboard = () => {
 
                                 // If selected chapter is not an empty string --> then user is updating a chapter
                                 if (selectedChapter.chapter_id != ""){
-                                    updateChapter(selectedChapter, "update") //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
+                                    publishChapter(selectedChapter, "update") //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
                                 // Else, then user is creating a new chapter                                    
                                 }else{
                                     console.log("chapter id is empty")
                                     console.log("adding new chapter to firebase")
-                                    updateChapter(selectedChapter, "add")
+                                    publishChapter(selectedChapter, "add")
                                 }
 
                             }} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-green-500 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
