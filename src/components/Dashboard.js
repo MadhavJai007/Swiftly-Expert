@@ -309,6 +309,29 @@ const Dashboard = () => {
         // if user is currently modifying an existing chapter in the database
         else {
             console.log("adding blank lesson to the existing chapter list")
+            clonedChapter = selectedChapter;
+            
+            let newLessonId; 
+            let lessonNum = clonedChapter.lessons.length + 1;
+            if(lessonNum >= 100){
+                newLessonId = `lesson_${lessonNum}`;
+            }
+            else if(lessonNum >= 10) {
+                newLessonId = `lesson_0${lessonNum}`;
+            }
+            else {
+                newLessonId = `lesson_00${lessonNum}`;
+            }
+
+            newLesson = templateLesson;
+            newLesson.lesson_id = newLessonId;
+            newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
+            newLesson.lesson_content[0] = "Untitled lesson";
+            newLesson.lesson_content[1] = "New textbox";
+            var lessonArr = clonedChapter.lessons;
+            lessonArr.push(JSON.parse(JSON.stringify(newLesson)))
+            setSelectedChapter({...clonedChapter, lessons: lessonArr})
+            setSelectedLesson(selectedChapter.lessons[lessonNum - 1])
         }
         
     }
@@ -472,8 +495,6 @@ const Dashboard = () => {
             setSelectedLesson({...selectedLesson, lesson_content: _lessonContentList})
         }
     }
-
-    // function used to
 
     // function to render lesson content in html form
     const renderLessonContent = renderingLessonList(selectedLesson, insertContent, fileSelectedHandler, onInputChange, setLessonContentList)
