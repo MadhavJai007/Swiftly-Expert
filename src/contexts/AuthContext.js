@@ -132,6 +132,9 @@ export const AuthProvider = ({ children }) => {
                     // setErrorMsg("Incorrect password")
                     returnCode = {"code": "WRONG_PASSWORD"}
                     break;
+                case "auth/too-many-requests":
+                    returnCode = {"code": "TOO_MANY_ATTEMPTS"}
+                    break;
                 default:
                     // setErrorMsg("Unexpected error occured")
                     console.log(JSON.stringify(err));
