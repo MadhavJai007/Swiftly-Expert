@@ -1,11 +1,12 @@
-import React, {useRef, useState, useEffect} from 'react'
+import React, {useRef, useState, useEffect, useMemo} from 'react'
 import {useAuth} from '../contexts/AuthContext'
 import {Link, useHistory} from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {LockOutlined, VisibilityOff, Visibility} from '@mui/icons-material';
 import { Container, CssBaseline, Box, Avatar, Typography, TextField, FormControlLabel,
       FormControl, InputLabel, OutlinedInput,
-      InputAdornment, Button, Grid, Checkbox, Link as MaterialLink, IconButton } from '@mui/material';
+      InputAdornment, Button, Grid, Checkbox, Link as MaterialLink, IconButton, useMediaQuery } from '@mui/material';
+
 
 
 
@@ -16,13 +17,23 @@ const Login = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag which represents whether user's browser or OS preference for dark mode.
 
     const history = useHistory();
-    const theme = createTheme();
+    const theme = useMemo(() => 
+        createTheme(
+            {
+                palette: {
+                    mode: prefersDarkMode ? 'dark' : 'light',
+                },
+            }
+        ),
+        [prefersDarkMode],
+    );
+    
     // useEffect(() => {
     //     console.log()
     // }, [errorMsg])
-    // test commit Arjun Suthaharan
 
     async function handleSubmit(e) {
         console.log(emailRef.current.value)
@@ -65,8 +76,8 @@ const Login = () => {
                     setErrorMsg("Unexpected error occured")
             }            
         }
-        catch {
-            // console.log(JSON.stringify(err))
+        catch(err) {
+            console.log(JSON.stringify(err))
             setErrorMsg('Failed to log in')
         }
         setLoading(false)
@@ -88,8 +99,14 @@ const Login = () => {
                 <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
             <LockOutlined />
                 </Avatar>
-                <Typography component="h1" variant="h5">
+                <Typography component="h1" variant="h5" gutterBottom>
                     Login to Swiftly
+
+                     {/* ignore these Box elements */}
+                    <Box sx={{ color: 'error.main' }}>error.main</Box>
+                    <Box sx={{ color: 'warning.main' }}>warning.main</Box>
+                    <Box sx={{ color: 'info.main' }}>info.main</Box>
+                    <Box sx={{ color: 'success.main' }}>success.main</Box>
                 </Typography>
 
                 <br/>

@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }) => {
         const q = query(expertsRef, where("email", "==", email))
         const querySnapshot = await getDocs(q);
         
+        console.log(querySnapshot.docs);
         // TODO: save querySnapshot.docs[0].data() to an object
         // TODO: save querySnapshot.docs[0]["id"] with setCurrentUsername
 
