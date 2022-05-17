@@ -2,7 +2,7 @@ import React, {useRef, useState} from 'react'
 import {useAuth} from '../contexts/AuthContext'
 import {Link, useHistory} from 'react-router-dom'
 
-const Signup = () => {
+const Signup = (props) => {
     //reference variables
     const emailRef = useRef();
     const passwordRef = useRef();

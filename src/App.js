@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import React, {Component, useState, useEffect, useRef} from 'react';
+import React, {Component, useState, useEffect, useRef, useMemo} from 'react';
 import Splash from './components/Splash';
 import LoginPage from './components/LoginPage';
 import Login from './components/Login';
@@ -9,24 +9,40 @@ import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Switch, Route} from 'react-router-dom'
+import { createTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 
 
 const App = () => {
   const isMounted = useRef(false);
   const [isDoneLoading, setIsDoneLoading] = useState(false);
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
   
+  const theme = useMemo(() => 
+    createTheme(
+        {
+            palette: {
+                mode: prefersDarkMode ? 'dark' : 'light',
+            },
+        }
+    ),
+    [prefersDarkMode],
+  );
+
   // mimics component.onMount
   useEffect(() => {
     isMounted.current = true;
     document.title = "Swiftly";
     // startSplashTimer(1000);
   }, []);
+  
 
   const startSplashTimer = (time) => {
     setTimeout(() => {
       setIsDoneLoading(true);
     }, time);
   }
+  
   //when timer is not done loading, it will show splash screen
   // if(!isDoneLoading){
   //   return (
@@ -45,9 +61,15 @@ const App = () => {
         <Router>
             <AuthProvider>
               <Switch>
-                <PrivateRoute exact path="/" component={Dashboard} />
-                <Route path="/signup" component={Signup} />
-                <Route path="/login" component={Login} />
+                <PrivateRoute exact path="/">
+                  <Dashboard theme={theme}/>
+                </PrivateRoute>
+                <Route path="/signup">
+                  <Signup theme={theme}/>
+                </Route>
+                <Route path="/login">
+                  <Login theme={theme}/>
+                </Route>
               </Switch>
             </AuthProvider>
         </Router>  

@@ -10,26 +10,16 @@ import { Container, CssBaseline, Box, Avatar, Typography, TextField, FormControl
 
 
 
-const Login = () => {
+const Login = (props) => {
     const emailRef = useRef();
     const passwordRef = useRef();
     const {login, getUserEmail, currentUser} = useAuth();
     const [errorMsg, setErrorMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag which represents whether user's browser or OS preference for dark mode.
 
     const history = useHistory();
-    const theme = useMemo(() => 
-        createTheme(
-            {
-                palette: {
-                    mode: prefersDarkMode ? 'dark' : 'light',
-                },
-            }
-        ),
-        [prefersDarkMode],
-    );
+
     
     // useEffect(() => {
     //     console.log()
@@ -85,7 +75,7 @@ const Login = () => {
 
     return (
         <>
-        <ThemeProvider theme={theme} >
+        <ThemeProvider theme={props.theme} >
         <Container component={"main"} maxWidth="xs" >
             <CssBaseline />
             <Box
