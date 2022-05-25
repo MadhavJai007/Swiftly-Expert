@@ -7,10 +7,12 @@ import {db} from '../firebase';
 import { chapterObj, templateLesson} from './models/chapterModel';
 import { renderingLessonList } from './widgets/LessonList';
 import { renderTabs } from './widgets/Tabs';
+import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline } from '@mui/material';
+import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography } from '@mui/material';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
+import { Menu as MenuIcon } from '@mui/icons-material'; 
 // import Tabs from './widgets/Tabs';
 
 // const tabSections = tabs;
@@ -186,6 +188,9 @@ const Dashboard = (props) => {
         console.log(originalLessonContent)
     }, [originalLessonContent])
 
+    
+    
+
     const Panel = styled(Paper)(({theme}) => ({
         backgroundColor: prefersDarkMode ? '#262b32' : '#e6e6e6',
         ...theme.typography.body2,
@@ -199,238 +204,274 @@ const Dashboard = (props) => {
     return (
       <>
         <ThemeProvider theme={props.theme} >
-        <Container maxWidth={false} fixed={false}>
-            <Box sx={{display: 'flex'}}>
-                <CssBaseline />
-                <Box sx={{ flexGrow: 1, marginTop: 4 }}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={9}>
-                            <Panel>xs=9</Panel>
+            <Container maxWidth={false} fixed={false}>
+                <Box >
+                    <CssBaseline />
+                    <SwiftlyAppBar/>
+                    {/* <AppBar position='sticky'>
+                        <Container maxWidth={false} fixed={false}>
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                component="a"
+                                href="/"
+                                sx={{
+                                mr: 2,
+                                display: { xs: 'none', md: 'flex' },
+                                fontFamily: 'monospace',
+                                fontWeight: 700,
+                                letterSpacing: '.3rem',
+                                color: 'inherit',
+                                textDecoration: 'none',
+                                }}
+                            >
+                                SWIFTLY
+                            </Typography>
+                        </Container>
+                    </AppBar> */}
+                    <Box
+                    component="main"
+                    sx={{
+                        backgroundColor: (theme) => 
+                        theme.palette.mode === 'dark'
+                            ? theme.palette.grey[100]
+                            : theme.palette.grey[900],
+                        flexGrow: 1,
+                        height: '90vh',
+                        width: '50vw',
+                        overflow: 'auto',
+                        marginTop: 4
+                    }}
+                    ></Box>
+                    {/* <Box sx={{ flexGrow: 1, marginTop: 4 }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={9}>
+                                <Panel>xs=9</Panel>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Panel>xs=3</Panel>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <Panel>xs=4</Panel>
+                            </Grid>
+                            <Grid item xs={8}>
+                                <Panel>xs=8</Panel>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={3}>
-                            <Panel>xs=3</Panel>
-                        </Grid>
-                        {/* <Grid item xs={4}>
-                            <Panel>xs=4</Panel>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <Panel>xs=8</Panel>
-                        </Grid> */}
-                    </Grid>
+                    </Box> */}
                 </Box>
-            </Box>
-            
-            <div className="flex flex-col space-y-4 bg-darkCustom">
-                <div className="flex justify-between pt-16 mb-0 mx-3">
-                    <div className="text-2xl">
-                        <p className="text-white">Currently logged in as: <strong> {currentUser.email} </strong></p>
+                
+                <div className="flex flex-col space-y-4 bg-darkCustom">
+                    <div className="flex justify-between pt-16 mb-0 mx-3">
+                        <div className="text-2xl">
+                            <p className="text-white">Currently logged in as: <strong> {JSON.stringify(currentUser.displayName)} </strong></p>
+                        </div>
+                        
+                        <div className="text-2xl font-extrabold pb-5">
+                            <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            Logout
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div className="text-2xl font-extrabold pb-5">
-                        <button type="log out" onClick={handleLogout} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                        Logout
-                        </button>
-                    </div>
-                </div>
-                <div className="flex flex-row space-x-4 m-3 h-screen pt-16 ">
-                    <div className="w-3/4 h-5/6 rounded-l-md  bg-gray-300 overflow-auto">
-                        <div className="font-sans text-center p-3 font-bold ">
-                            <div className="text-2xl my-7">Editing panel</div>
+                    <div className="flex flex-row space-x-4 m-3 h-screen pt-16 ">
+                        <div className="w-3/4 h-5/6 rounded-l-md  bg-gray-300 overflow-auto">
+                            <div className="font-sans text-center p-3 font-bold ">
+                                <div className="text-2xl my-7">Editing panel</div>
 
-                            {/* <Tabs color="red" /> */}
+                                {/* <Tabs color="red" /> */}
 
-                            <div className="flex flex-wrap">
-                                <div className="w-full">
-                                    <ul className="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">
-                                        {tabs}
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <div className={"flex flex-col items-center justify-center font-bold space-y-6 pt-5 " + (openTab === 1 ? "block" : "hidden")}>
-                                <div className="flex flex-row space-x-6">
-                                    <div className="relative w-40">
-                                        <label  className="text-gray-700">
-                                            Chapter number
-                                        </label>
-                                        <input type="text" id="chapter-num" disabled={true} value={selectedChapter.chapter_number} name="chapter_num" placeholder="Not needed" className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" />
+                                <div className="flex flex-wrap">
+                                    <div className="w-full">
+                                        <ul className="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">
+                                            {tabs}
+                                        </ul>
                                     </div>
+                                </div>
 
-                                    <div className="relative ">
-                                        <label  className="text-gray-700">
-                                            Chapter title
-                                        </label>
-                                        <input type="text" id="chapter-title" value={selectedChapter.chapter_title}  onChange={(e) => onInputChange(e, 'chapter', 'chapter_title', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
+                                <div className={"flex flex-col items-center justify-center font-bold space-y-6 pt-5 " + (openTab === 1 ? "block" : "hidden")}>
+                                    <div className="flex flex-row space-x-6">
+                                        <div className="relative w-40">
+                                            <label  className="text-gray-700">
+                                                Chapter number
+                                            </label>
+                                            <input type="text" id="chapter-num" disabled={true} value={selectedChapter.chapter_number} name="chapter_num" placeholder="Not needed" className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-gray-200 text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" />
+                                        </div>
+
+                                        <div className="relative ">
+                                            <label  className="text-gray-700">
+                                                Chapter title
+                                            </label>
+                                            <input type="text" id="chapter-title" value={selectedChapter.chapter_title}  onChange={(e) => onInputChange(e, 'chapter', 'chapter_title', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="chapter_title" placeholder="Enter a title"/>
+                                        </div>
+                                        
+                                        <div className="relative w-40">
+                                            <label className="text-gray-700">
+                                                Subscription code
+                                            </label>
+                                            <input type="text" id="sub-code" value={selectedChapter.subscription_code}  onChange={(e) => onInputChange(e, 'chapter','subscription_code', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="sub_code" placeholder="Enter a code"/>
+                                        </div>
                                     </div>
                                     
-                                    <div className="relative w-40">
-                                        <label className="text-gray-700">
-                                            Subscription code
+                                    <div>
+                                        <label className="text-gray-700"  >
+                                        Chapter Description
                                         </label>
-                                        <input type="text" id="sub-code" value={selectedChapter.subscription_code}  onChange={(e) => onInputChange(e, 'chapter','subscription_code', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="sub_code" placeholder="Enter a code"/>
+                                        <textarea value={selectedChapter.chapter_desc} onChange={(e) => onInputChange(e, 'chapter','chapter_desc', 0)} className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter-desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
+                                        </textarea>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-gray-700" >
+                                            Chapter length: {`~ ${selectedChapter.chapter_length} minutes`}
+                                        </label>
+                                        <br/>
+                                        {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
+                                        <input id="chapter-length" type="range" min="1" max="120" step="1" value={selectedChapter.chapter_length} onChange={(e) => onInputChange(e, 'chapter', 'chapter_length', 0)} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-gray-700" >
+                                            Chapter Difficulty: {selectedChapter.chapter_difficulty < 3 ? (selectedChapter.chapter_difficulty < 2 ? "Easy" : "Medium") : "Hard"}
+                                        </label>
+                                        <br/>
+                                        {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
+                                        <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty', 0)} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
                                     </div>
                                 </div>
                                 
-                                <div>
-                                    <label className="text-gray-700"  >
-                                    Chapter Description
-                                    </label>
-                                    <textarea value={selectedChapter.chapter_desc} onChange={(e) => onInputChange(e, 'chapter','chapter_desc', 0)} className="flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" id="chapter-desc" placeholder="Enter chapter description" name="chapter_desc" rows="5" cols="40">
-                                    </textarea>
-                                </div>
-
-                                <div>
-                                    <label className="text-gray-700" >
-                                        Chapter length: {`~ ${selectedChapter.chapter_length} minutes`}
-                                    </label>
-                                    <br/>
-                                    {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
-                                    <input id="chapter-length" type="range" min="1" max="120" step="1" value={selectedChapter.chapter_length} onChange={(e) => onInputChange(e, 'chapter', 'chapter_length', 0)} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
-                                </div>
-
-                                <div>
-                                    <label className="text-gray-700" >
-                                        Chapter Difficulty: {selectedChapter.chapter_difficulty < 3 ? (selectedChapter.chapter_difficulty < 2 ? "Easy" : "Medium") : "Hard"}
-                                    </label>
-                                    <br/>
-                                    {/* <input type="range" min="1" max="120" value="50" className="slider" id="chapter-length" /> */}
-                                    <input id="chapter-diff" type="range" min="1" max="3" step="1" value={selectedChapter.chapter_difficulty} onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty', 0)} className="rounded-lg overflow-hidden appearance-none py-2 my-4 bg-gray-400 h-3 w-96"/>
-                                </div>
-                            </div>
-                            
-                            <div className= {"flex flex-row " + (openTab === 2 ? "block" : "hidden")}>
-                                <div className="shadow-lg mb-8 pl-3 w-1/4 h-5/6 rounded-l-md bg-green-500 overflow-auto"> 
-                                    <div className=" text-2xl my-7 text-left ">Lessons</div>
-                                        <select id="lessons" onChange={(e)=>{
-                                                onLessonSelect(e);
-                                            }} className="block mb-8 w-52 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="lessons">
-                                            <option value="">
-                                                Select a lesson
-                                            </option>
-                                            {lessonOptions}
-                                        </select>
+                                <div className= {"flex flex-row " + (openTab === 2 ? "block" : "hidden")}>
+                                    <div className="shadow-lg mb-8 pl-3 w-1/4 h-5/6 rounded-l-md bg-green-500 overflow-auto"> 
+                                        <div className=" text-2xl my-7 text-left ">Lessons</div>
+                                            <select id="lessons" onChange={(e)=>{
+                                                    onLessonSelect(e);
+                                                }} className="block mb-8 w-52 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" name="lessons">
+                                                <option value="">
+                                                    Select a lesson
+                                                </option>
+                                                {lessonOptions}
+                                            </select>
+                                        
+                                    </div>
+                                    <div className=" w-3/4 h-full rounded-r-md bg-gray-300 overflow-auto">
+                                        {selectedLesson ? 
+                                            <div className="font-sans space-y-6 items-center p-3">
+                                                <div className="flex flex-row justify-center space-x-6">
+                                                    <div className="w-40 text-xl" >
+                                                        <label  className="text-gray-700">
+                                                            Lesson ID
+                                                        </label>
+                                                        <input type="text" id="chapter-title" value={selectedLesson.lesson_id}  disabled={true} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
+                                                    </div>
+                                                    <div className="w-72 text-xl" >
+                                                        <label  className="text-gray-700">
+                                                            Lesson title
+                                                        </label>
+                                                        <input type="text" id="chapter-title" value={selectedLesson.lesson_title}  onChange={(e) => onInputChange(e, 'lesson','lesson_title', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
+                                                    </div>
+                                                    <div className="pt-7">
+                                                        <button onClick={() => {
+                                                                console.log(selectedChapter)
+                                                                console.log(selectedLesson)
+                                                            }
+                                                        } 
+                                                            className="py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
+                                                        >
+                                                            Reset
+                                                        </button>
+                                                    </div>
+                                    
+                                                </div>
+                                                <div className="space-y-9">
+                                                    
+                                                    {lessonContentList}
+                                                </div>
+                                            </div>
+                                            :
+                                            <div className="font-sans text-center p-3 font-bold text-xl">
+                                                {"Select a lesson"}
+                                            </div>
+                                        }
+                                    </div>
                                     
                                 </div>
-                                <div className=" w-3/4 h-full rounded-r-md bg-gray-300 overflow-auto">
-                                    {selectedLesson ? 
-                                        <div className="font-sans space-y-6 items-center p-3">
-                                            <div className="flex flex-row justify-center space-x-6">
-                                                <div className="w-40 text-xl" >
-                                                    <label  className="text-gray-700">
-                                                        Lesson ID
-                                                    </label>
-                                                    <input type="text" id="chapter-title" value={selectedLesson.lesson_id}  disabled={true} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
-                                                </div>
-                                                <div className="w-72 text-xl" >
-                                                    <label  className="text-gray-700">
-                                                        Lesson title
-                                                    </label>
-                                                    <input type="text" id="chapter-title" value={selectedLesson.lesson_title}  onChange={(e) => onInputChange(e, 'lesson','lesson_title', 0)} className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent" name="lesson_title" placeholder="Enter a title"/>
-                                                </div>
-                                                <div className="pt-7">
-                                                    <button onClick={() => {
-                                                            console.log(selectedChapter)
-                                                            console.log(selectedLesson)
-                                                        }
-                                                    } 
-                                                        className="py-2 px-4 flex justify-center items-center bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg "
-                                                    >
-                                                        Reset
-                                                    </button>
-                                                </div>
-                                
-                                            </div>
-                                            <div className="space-y-9">
-                                                
-                                                {lessonContentList}
-                                            </div>
-                                        </div>
-                                        :
-                                        <div className="font-sans text-center p-3 font-bold text-xl">
-                                            {"Select a lesson"}
-                                        </div>
+
+                                <div className="w-40 static ">
+
+                                    {openTab == 2 ? 
+                                    <div className="text-2xl font-extrabold pb-5">
+                                        <button onClick={() => {
+                                                    // create a template lesson object and set it as selectedLesson
+                                                    createBlankLesson()
+                                                }
+                                            } className=" py-2 px-4 flex justify-center items-center bg-purple-500 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                            Create lesson
+                                        </button>
+                                    </div>
+                                    :
+                                    <br/>
                                     }
-                                </div>
-                                
-                            </div>
 
-                            <div className="w-40 static ">
-
-                                {openTab == 2 ? 
-                                <div className="text-2xl font-extrabold pb-5">
-                                    <button onClick={() => {
-                                                // create a template lesson object and set it as selectedLesson
-                                                createBlankLesson()
+                                    <div className="text-2xl font-extrabold pb-5">
+                                        <button onClick={() => {
+                                                // mini function that just clears states that are related to chapter editor panel
+                                                resetChapterStates()
                                             }
-                                        } className=" py-2 px-4 flex justify-center items-center bg-purple-500 hover:bg-purple-700 focus:ring-purple-500 focus:ring-offset-purple-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                        } className=" py-2 px-4 flex justify-center items-center bg-blue-500 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                         </svg>
-                                        Create lesson
-                                    </button>
-                                </div>
-                                :
-                                <br/>
-                                }
+                                        Create Chapter
+                                        </button>
+                                    </div>
+                                    <button type="button" onClick={() => {
 
-                                <div className="text-2xl font-extrabold pb-5">
-                                    <button onClick={() => {
-                                            // mini function that just clears states that are related to chapter editor panel
-                                            resetChapterStates()
+                                        // If selected chapter is not an empty string --> then user is updating a chapter
+                                        if (selectedChapter.chapter_id != ""){
+                                            publishChapter(selectedChapter, "update") //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
+                                        // Else, then user is creating a new chapter                                    
+                                        }else{
+                                            console.log("chapter id is empty")
+                                            console.log("adding new chapter to firebase")
+                                            publishChapter(selectedChapter, "add")
                                         }
-                                    } className=" py-2 px-4 flex justify-center items-center bg-blue-500 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                    Create Chapter
+
+                                    }} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-green-500 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                                        <svg width="20" height="20" fill="currentColor" className="mr-2" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1344 1472q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28h-1472q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h427q21 56 70.5 92t110.5 36h256q61 0 110.5-36t70.5-92h427q40 0 68 28t28 68zm-325-648q-17 40-59 40h-256v448q0 26-19 45t-45 19h-256q-26 0-45-19t-19-45v-448h-256q-42 0-59-40-17-39 14-69l448-448q18-19 45-19t45 19l448 448q31 30 14 69z">
+                                            </path>
+                                        </svg>
+                                        Upload
                                     </button>
                                 </div>
-                                <button type="button" onClick={() => {
-
-                                    // If selected chapter is not an empty string --> then user is updating a chapter
-                                    if (selectedChapter.chapter_id != ""){
-                                        publishChapter(selectedChapter, "update") //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
-                                    // Else, then user is creating a new chapter                                    
-                                    }else{
-                                        console.log("chapter id is empty")
-                                        console.log("adding new chapter to firebase")
-                                        publishChapter(selectedChapter, "add")
-                                    }
-
-                                }} className=" py-2 px-4 flex justify-center items-center shadow-lg bg-green-500 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
-                                    <svg width="20" height="20" fill="currentColor" className="mr-2" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M1344 1472q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28h-1472q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h427q21 56 70.5 92t110.5 36h256q61 0 110.5-36t70.5-92h427q40 0 68 28t28 68zm-325-648q-17 40-59 40h-256v448q0 26-19 45t-45 19h-256q-26 0-45-19t-19-45v-448h-256q-42 0-59-40-17-39 14-69l448-448q18-19 45-19t45 19l448 448q31 30 14 69z">
-                                        </path>
-                                    </svg>
-                                    Upload
-                                </button>
                             </div>
-                        </div>
 
-                        
-                    </div>
-                    <div className="w-1/4 h-5/6 rounded-r-md bg-gray-300 overflow-auto">
-                        <div className="font-sans text-center p-3 font-bold text-2xl">
-                            Your Chapters
-                            <div className="flex flex-col justify-center items-stretch text-2xl font-bold space-y-4 pt-5 ">
-                                {/* Renders the chapter cards only whern chapters have been retrieved from firestore. otherwise show "loading" */}
-                                {chapterCards.length > 0 ? chapterCards : "Loading chapters..."}
+                            
+                        </div>
+                        <div className="w-1/4 h-5/6 rounded-r-md bg-gray-300 overflow-auto">
+                            <div className="font-sans text-center p-3 font-bold text-2xl">
+                                Your Chapters
+                                <div className="flex flex-col justify-center items-stretch text-2xl font-bold space-y-4 pt-5 ">
+                                    {/* Renders the chapter cards only whern chapters have been retrieved from firestore. otherwise show "loading" */}
+                                    {chapterCards.length > 0 ? chapterCards : "Loading chapters..."}
+                                </div>
                             </div>
                         </div>
                     </div>
+                <div className="">
+                
+                    
+                    
                 </div>
-            <div className="">
-            
                 
                 
-            </div>
-            
-            
-            </div>
-        </Container>
+                </div>
+            </Container>
         </ThemeProvider>
 
       </>
