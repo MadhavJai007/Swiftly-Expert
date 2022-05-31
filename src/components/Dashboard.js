@@ -10,9 +10,11 @@ import { renderTabs } from './widgets/Tabs';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography } from '@mui/material';
+import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, Divider, Drawer } from '@mui/material';
+import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
-import { Menu as MenuIcon } from '@mui/icons-material'; 
+import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
+import { width } from '@mui/system';
 // import Tabs from './widgets/Tabs';
 
 // const tabSections = tabs;
@@ -31,6 +33,7 @@ const Dashboard = (props) => {
     const [openTab, setOpenTab] = useState(1);
     const [sampleImg, setSampleImg] = useState(null)
     const {currentUser, logout} = useAuth()
+    const [drawerOpen, setDrawerOpen] = useState(false)
     const history = useHistory()
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
 
@@ -189,7 +192,24 @@ const Dashboard = (props) => {
     }, [originalLessonContent])
 
     
+    /* TEMP STUFF */
+
+    // chapter drawer
     
+
+    const handleDrawerOpen = () => {
+        setDrawerOpen(true);
+    };
+
+    const handleDrawerClose = () => {
+        setDrawerOpen(false);
+    };
+
+    // speed dial options
+    const actions = [
+        { icon: <ChapterIcon />, name: 'Add Chapter' },
+        { icon: <LessonIcon />, name: 'Add Lesson' },
+    ];
 
     const Panel = styled(Paper)(({theme}) => ({
         backgroundColor: prefersDarkMode ? '#262b32' : '#e6e6e6',
@@ -208,28 +228,42 @@ const Dashboard = (props) => {
                 <Box >
                     <CssBaseline />
                     <SwiftlyAppBar/>
-                    {/* <AppBar position='sticky'>
-                        <Container maxWidth={false} fixed={false}>
-                            <Typography
-                                variant="h6"
-                                noWrap
-                                component="a"
-                                href="/"
-                                sx={{
-                                mr: 2,
-                                display: { xs: 'none', md: 'flex' },
-                                fontFamily: 'monospace',
-                                fontWeight: 700,
-                                letterSpacing: '.3rem',
-                                color: 'inherit',
-                                textDecoration: 'none',
-                                }}
-                            >
-                                SWIFTLY
-                            </Typography>
-                        </Container>
-                    </AppBar> */}
-                    <Box
+
+                    {/* Chapter drawer */}
+                    <Drawer open={drawerOpen} anchor={'right'}>
+                        
+                        <Box sx={{display: 'flex', width: 480 } }>
+                            {/* Close drawer and refresh button button */}
+                            <Box sx={{ backgroundColor: '#0eb67b', display: 'flex', flexDirection: 'row', width: '100%', justifyContent: "space-between", mx: 'auto', alignItems: 'center'}}>
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="close drawer"
+                                    
+                                    onClick={handleDrawerClose}
+                                    sx={{ ...(!drawerOpen && { display: 'none' }), width: 40, p: 2.5 }}
+                                >
+                                    <CrossIcon/>
+                                </IconButton>
+                                <Typography variant='h5' component={'h4'}>
+                                    Your chapters
+                                </Typography>
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="refresh drawer"
+                                    
+                                    onClick={handleDrawerClose}
+                                    sx={{ ...(!drawerOpen && { display: 'none' }), width: 40, p: 2.5}}
+                                >
+                                    <Refresh/>
+                                </IconButton>
+                            </Box>
+                            
+                            <Box>
+
+                            </Box>
+                        </Box>
+                    </Drawer>
+                    {/* <Box
                     component="main"
                     sx={{
                         backgroundColor: (theme) => 
@@ -242,23 +276,38 @@ const Dashboard = (props) => {
                         overflow: 'auto',
                         marginTop: 4
                     }}
-                    ></Box>
-                    {/* <Box sx={{ flexGrow: 1, marginTop: 4 }}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={9}>
-                                <Panel>xs=9</Panel>
-                            </Grid>
-                            <Grid item xs={3}>
-                                <Panel>xs=3</Panel>
-                            </Grid>
-                            <Grid item xs={4}>
-                                <Panel>xs=4</Panel>
-                            </Grid>
-                            <Grid item xs={8}>
-                                <Panel>xs=8</Panel>
-                            </Grid>
-                        </Grid>
-                    </Box> */}
+                    ></Box> */}
+
+                    {/* open button for chapter drawer */}
+                    <IconButton
+                        color="inherit"
+                        aria-label="open drawer"
+                        edge="end"
+                        onClick={handleDrawerOpen}
+                        sx={{ ...(drawerOpen && { display: 'none' }) }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+
+
+                    {/* TODO: Extract speed dial as seperate component. */}
+                    <Box sx={{ position: 'relative', mt: 3, height: 320}}>
+                        <SpeedDial
+                            ariaLabel="Create speedDial"
+                            sx={{ position: 'absolute', bottom: 16, left: 16 }}
+                            icon={<SpeedDialIcon openIcon={<CrossIcon/>} />}
+                            direction={'up'}
+                        >
+                            {actions.map((action) => (
+                                <SpeedDialAction
+                                key={action.name}
+                                icon={action.icon}
+                                tooltipTitle={"action.name"}
+                                />
+                            ))}
+                        </SpeedDial>
+                    </Box>
+
                 </Box>
                 
                 <div className="flex flex-col space-y-4 bg-darkCustom">

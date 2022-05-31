@@ -128,7 +128,7 @@ const SwiftlyAppBar = (props) => {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar >MJ</Avatar>
+                <Avatar >{!props.username ? "USA" : "00"}</Avatar>
               </IconButton>
             </Tooltip>
             <Menu
