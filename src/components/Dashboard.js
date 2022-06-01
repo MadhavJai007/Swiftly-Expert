@@ -232,7 +232,7 @@ const Dashboard = (props) => {
                     {/* Chapter drawer */}
                     <Drawer open={drawerOpen} anchor={'right'}>
                         
-                        <Box sx={{display: 'flex', width: 480 } }>
+                        <Box sx={{display: 'block',  width: 480 } }>
                             {/* Close drawer and refresh button button */}
                             <Box sx={{ backgroundColor: '#0eb67b', display: 'flex', flexDirection: 'row', width: '100%', justifyContent: "space-between", mx: 'auto', alignItems: 'center'}}>
                                 <IconButton
@@ -258,8 +258,9 @@ const Dashboard = (props) => {
                                 </IconButton>
                             </Box>
                             
+                            {/* List of chapter cards */}
                             <Box>
-
+                                {chapterCards.length > 0 ?  chapterCards : "No Chapters found..."}
                             </Box>
                         </Box>
                     </Drawer>
