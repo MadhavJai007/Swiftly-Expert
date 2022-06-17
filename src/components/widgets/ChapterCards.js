@@ -1,4 +1,4 @@
-import { Box, Card, CardActions, CardContent, Typography, Button, LinearProgress } from "@mui/material";
+import { Box, Card, CardActions, CardContent, Typography, Button, LinearProgress, Paper } from "@mui/material";
 import { green, yellow, red } from '@mui/material/colors';
 import JustifyContent from "autoprefixer/lib/hacks/justify-content";
 
@@ -35,6 +35,7 @@ export function renderChapterCards(chapterList, getChapter) {
                 </CardActions>
                 
             </Card>
+        
         </Box>
 
         return <button key={chapter.chapterId} onClick={() => { getChapter(chapter.chapterId); } }>
