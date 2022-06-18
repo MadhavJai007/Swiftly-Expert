@@ -1,5 +1,7 @@
+import {Box, Typography} from '@mui/material'
+
 // function that will create the tabs widgets in the dashboard
-export function renderTabs(openTab, setOpenTab, selectedChapter, selectedLesson, lessonContentRetrieved, getChapterLessons) {
+function renderTabs(openTab, setOpenTab, selectedChapter, selectedLesson, lessonContentRetrieved, getChapterLessons) {
 
     // object containing the tabs that will be rendered in the dasboard's editor panel
     const tabs = [
@@ -49,3 +51,26 @@ export function renderTabs(openTab, setOpenTab, selectedChapter, selectedLesson,
         </li>;
     });
 }
+
+// The panel for each tab
+const TabPanel = (props) => {
+    const { children, tabValue, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={tabValue !== index}
+            id={`vertical-tabpanel-${index}`}
+            aria-labelledby={`vertical-tab-${index}`}
+            {...other}
+        >
+        {tabValue === index && (
+            <Box sx={{ p: 3 }}>
+                <Typography>{children}</Typography>
+            </Box>
+        )}
+        </div>
+    );
+}
+
+export default TabPanel;

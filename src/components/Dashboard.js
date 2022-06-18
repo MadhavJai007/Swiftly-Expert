@@ -6,7 +6,7 @@ import {db} from '../firebase';
 
 import { chapterObj, templateLesson} from './models/chapterModel';
 import { renderingLessonList } from './widgets/LessonList';
-import { renderTabs } from './widgets/Tabs';
+import TabPanel from './widgets/Tabs';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
@@ -14,7 +14,7 @@ import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconBu
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
-import { height, width } from '@mui/system';
+import PropTypes from 'prop-types';
 
 // const tabSections = tabs;
 
@@ -80,7 +80,7 @@ const Dashboard = (props) => {
     const chapterCards = renderChapterCards(chapterList, getChapter)
 
     // render tabs for the editor panel and store them in constant
-    const tabs = renderTabs(openTab, setOpenTab, selectedChapter, selectedLesson, lessonContentRetrieved, getChapterLessons)
+    // const tabs = renderTabs(openTab, setOpenTab, selectedChapter, selectedLesson, lessonContentRetrieved, getChapterLessons)
 
     // renders the options for the lesson selector dropdown
     const lessonOptions = selectedChapter.lessons.map(lesson => {
@@ -204,7 +204,7 @@ const Dashboard = (props) => {
         setDrawerOpen(false);
     };
 
-    // speed dial options
+    /* speed dial options */
     const actions = [
         { icon: <ChapterIcon />, name: 'Add Chapter' },
         { icon: <LessonIcon />, name: 'Add Lesson' },
@@ -219,7 +219,7 @@ const Dashboard = (props) => {
         color: theme.palette.text.secondary,
     }))
 
-    // tabs handler
+    /* tabbed editor */
     const handleTabChange = (event, newValue) => {
         /* newValue = 1/2/3 */
         setOpenTab(newValue)
@@ -299,9 +299,29 @@ const Dashboard = (props) => {
 
                     {/* TODO: Extract speed dial as seperate component. */}
                     {/* <Box sx={{ position: 'relative', mt: 3, height: 320}}>
+                    </Box> */}
+                    
+                    <Typography sx={{mt: 2, mb: 3, textAlign: 'center'}} variant={'h5'}>Editing panel</Typography>
+
+                    {/* Editor panel box */}
+                    <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '75vh', bgcolor: '#1c1e26',  p: 1, m: 1}}>
+                        <Tabs orientation='vertical' variant='scrollable' value={openTab} onChange={handleTabChange} aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider'}}>
+                            <Tab label="Summary"></Tab>
+                            <Tab label="Lessons"></Tab>
+                            <Tab label="Playground"></Tab>
+                        </Tabs>
+                        <TabPanel tabValue={openTab} index={0}>
+                            Edit the summary and other metadata for this chapter
+                        </TabPanel>
+                        <TabPanel tabValue={openTab} index={1}>
+                            Update your lesson list for this chapter in this section
+                        </TabPanel>
+                        <TabPanel tabValue={openTab} index={2}>
+                            Playground editor coming Soon ™
+                        </TabPanel>
                         <SpeedDial
                             ariaLabel="Create speedDial"
-                            sx={{ position: 'absolute', bottom: 16, left: 16 }}
+                            sx={{ position: 'absolute', bottom: '5vh', left: '70px' }}
                             icon={<SpeedDialIcon openIcon={<CrossIcon/>} />}
                             direction={'up'}
                         >
@@ -309,38 +329,11 @@ const Dashboard = (props) => {
                                 <SpeedDialAction
                                 key={action.name}
                                 icon={action.icon}
-                                tooltipTitle={"action.name"}
+                                tooltipTitle={action.name}
                                 />
                             ))}
                         </SpeedDial>
-                    </Box> */}
                     
-                    <Typography sx={{mt: 2, mb: 3, textAlign: 'center'}} variant={'h5'}>Editing panel</Typography>
-
-                    {/* Editor panel box */}
-                    <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '75vh', bgcolor: '#1c1e26',  p: 1, m: 1}}>
-                        <Box>
-                            <Tabs orientation='vertical' variant='scrollable' value={openTab} onChange={handleTabChange} aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider'}}>
-                                <Tab label="Summary"></Tab>
-                                <Tab label="Lessons"></Tab>
-                                <Tab label="Playground"></Tab>
-                            </Tabs>
-                            <SpeedDial
-                                ariaLabel="Create speedDial"
-                                sx={{ position: 'absolute', bottom: '5vh', left: '50px' }}
-                                icon={<SpeedDialIcon openIcon={<CrossIcon/>} />}
-                                direction={'up'}
-                            >
-                                {actions.map((action) => (
-                                    <SpeedDialAction
-                                    key={action.name}
-                                    icon={action.icon}
-                                    tooltipTitle={action.name}
-                                    />
-                                ))}
-                            </SpeedDial>
-                        </Box>
-
                     </Box>
                     
                 </Box>
