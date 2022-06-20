@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
@@ -6,11 +7,12 @@ import {db} from '../firebase';
 
 import { chapterObj, templateLesson} from './models/chapterModel';
 import { renderingLessonList } from './widgets/LessonList';
+import ChapterSummaryForm from './widgets/ChapterSummaryForm';
 import TabPanel from './widgets/Tabs';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, Divider, Drawer, Tab, Tabs } from '@mui/material';
+import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, Divider, Drawer, Tab, Tabs, TextField, Slider, Input, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
@@ -35,6 +37,11 @@ const Dashboard = (props) => {
     const [drawerOpen, setDrawerOpen] = useState(false)
     const history = useHistory()
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
+
+
+    // temp state variables
+    const [chapLen, setChapLen] = useState(1)
+    const [chapDiff, setChapDiff] = useState('')
 
     // calls logout handler
     const handleLogout = dashboardViewModel.logoutHandler(setError, logout, history)    
@@ -300,17 +307,34 @@ const Dashboard = (props) => {
                     {/* TODO: Extract speed dial as seperate component. */}
                     {/* <Box sx={{ position: 'relative', mt: 3, height: 320}}>
                     </Box> */}
-                    
                     <Typography sx={{mt: 2, mb: 3, textAlign: 'center'}} variant={'h5'}>Editing panel</Typography>
 
                     {/* Editor panel box */}
-                    <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '75vh', bgcolor: '#1c1e26',  p: 1, m: 1}}>
+                    <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '75vh', justifyContent: 'center', bgcolor: '#1c1e26',  p: 1, m: 1}}>
+
+                        {/* Tab pickers */}
                         <Tabs orientation='vertical' variant='scrollable' value={openTab} onChange={handleTabChange} aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider'}}>
                             <Tab label="Summary"></Tab>
                             <Tab label="Lessons"></Tab>
                             <Tab label="Playground"></Tab>
                         </Tabs>
-                        <TabPanel tabValue={openTab} index={0}>
+                        
+                        {/* summary tab form  */}
+                        {openTab === 0 && (
+                            <ChapterSummaryForm  chapLen={chapLen} setChapLen={setChapLen} chapDiff={chapDiff} setChapDiff={setChapDiff}  />
+                        )}
+                        {openTab === 1 && (
+                            <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
+                                <Typography>Update the lessons of the chapter</Typography>    
+                                
+                            </Box>
+                        )}
+                        {openTab === 2 && (
+                            <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
+                                <Typography>Playground editor coming Soon ™</Typography>    
+                            </Box>
+                        )}
+                        {/* <TabPanel tabValue={openTab} index={0}>
                             Edit the summary and other metadata for this chapter
                         </TabPanel>
                         <TabPanel tabValue={openTab} index={1}>
@@ -318,7 +342,7 @@ const Dashboard = (props) => {
                         </TabPanel>
                         <TabPanel tabValue={openTab} index={2}>
                             Playground editor coming Soon ™
-                        </TabPanel>
+                        </TabPanel> */}
                         <SpeedDial
                             ariaLabel="Create speedDial"
                             sx={{ position: 'absolute', bottom: '5vh', left: '70px' }}
