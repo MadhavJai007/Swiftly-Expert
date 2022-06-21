@@ -239,7 +239,7 @@ const Dashboard = (props) => {
             <Container maxWidth={false} fixed={false}>
                 <Box >
                     <CssBaseline />
-                    <SwiftlyAppBar/>
+                    <SwiftlyAppBar handleLogout={handleLogout} />
 
                     {/* Chapter drawer */}
                     {/* TODO: extract as separate component */}

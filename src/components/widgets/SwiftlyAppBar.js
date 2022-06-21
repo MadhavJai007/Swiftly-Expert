@@ -152,6 +152,9 @@ const SwiftlyAppBar = (props) => {
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
               ))}
+              <MenuItem key={'real_logout'} onClick={props.handleLogout}>
+                  <Typography textAlign="center">Real logout</Typography>
+                </MenuItem>
             </Menu>
           </Box>
           </Grid>
