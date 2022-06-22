@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
@@ -8,6 +9,7 @@ import {db} from '../firebase';
 import { chapterObj, templateLesson} from './models/chapterModel';
 import { renderingLessonList } from './widgets/LessonList';
 import ChapterSummaryForm from './widgets/ChapterSummaryForm';
+import ChapterDrawer from './widgets/ChapterDrawer';
 import TabPanel from './widgets/Tabs';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
@@ -242,41 +244,7 @@ const Dashboard = (props) => {
                     <SwiftlyAppBar handleLogout={handleLogout} />
 
                     {/* Chapter drawer */}
-                    {/* TODO: extract as separate component */}
-                    <Drawer open={drawerOpen} anchor={'right'}>
-                        
-                        <Box sx={{display: 'block',  width: 480 } }>
-                            {/* Close drawer and refresh button button */}
-                            <Box sx={{ backgroundColor: '#0eb67b', display: 'flex', flexDirection: 'row', width: '100%', justifyContent: "space-between", mx: 'auto', alignItems: 'center'}}>
-                                <IconButton
-                                    color="inherit"
-                                    aria-label="close drawer"
-                                    
-                                    onClick={handleDrawerClose}
-                                    sx={{ ...(!drawerOpen && { display: 'none' }), width: 40, p: 2.5 }}
-                                >
-                                    <CrossIcon/>
-                                </IconButton>
-                                <Typography variant='h5' component={'h4'}>
-                                    Your chapters
-                                </Typography>
-                                <IconButton
-                                    color="inherit"
-                                    aria-label="refresh drawer"
-                                    
-                                    onClick={handleDrawerClose}
-                                    sx={{ ...(!drawerOpen && { display: 'none' }), width: 40, p: 2.5}}
-                                >
-                                    <Refresh/>
-                                </IconButton>
-                            </Box>
-                            
-                            {/* List of chapter cards */}
-                            <Box>
-                                {chapterCards.length > 0 ?  chapterCards : "No Chapters found..."}
-                            </Box>
-                        </Box>
-                    </Drawer>
+                    <ChapterDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} chapterCards={chapterCards}  />
                     {/* <Box
                     component="main"
                     sx={{
@@ -297,7 +265,7 @@ const Dashboard = (props) => {
                         color="inherit"
                         aria-label="open drawer"
                         edge="end"
-                        onClick={handleDrawerOpen}
+                        onClick={() => setDrawerOpen(true)}
                         sx={{ ...(drawerOpen && { display: 'none' }) }}
                     >
                         <MenuIcon />
