@@ -79,9 +79,9 @@ const ChapterDrawer = ({ drawerOpen, setDrawerOpen, chapterCards }) => {
         </Box>
 
         {/* List of chapter cards */}
-        <Box>
+        {/* <Box> */}
           {chapterCards.length > 0 ? chapterCards : "No Chapters found..."}
-        </Box>
+        {/* </Box> */}
       </Box>
     </Drawer>
   );

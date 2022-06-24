@@ -272,7 +272,13 @@ export function dashboardTextInputHandler(selectedChapter, setSelectedChapter, s
         e.preventDefault();
         if (type === "chapter") {
             let _chapterObj = { ...selectedChapter };
-            _chapterObj[`${input}`] = e.target.value;
+            // {input} can be chapter title, sub code, description, lenght and difficulty
+            if(input == 'chapter_length'){
+                _chapterObj[`${input}`] = parseInt(e.target.value);
+            }
+            else {
+                _chapterObj[`${input}`] = e.target.value;
+            } 
             setSelectedChapter(_chapterObj);
         }
         else if (type === "lesson") {
@@ -297,7 +303,7 @@ export function getSelectedChapterDetails(setLessonContentRetrieved, setSelected
     return async (docId) => {
         setLessonContentRetrieved(false);
         setSelectedChapter(chapterObj);
-        setOpenTab(1);
+        setOpenTab(0);
         const chapterDocRef = doc(db, "Chapters", docId);
         const chapterDocSnap = await getDoc(chapterDocRef);
         if (chapterDocSnap.exists()) {

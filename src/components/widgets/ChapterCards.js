@@ -6,7 +6,7 @@ import JustifyContent from "autoprefixer/lib/hacks/justify-content";
 export function renderChapterCards(chapterList, getChapter) {
     return chapterList.map(chapter => {
 
-        return <Box sx={{m: 2} }>
+        return <Box key={chapter.chapterId} sx={{m: 2} }>
             <Card>
                 <CardContent>
                     <Typography variant="h5" component="div">
@@ -31,7 +31,9 @@ export function renderChapterCards(chapterList, getChapter) {
                 </CardContent>
 
                 <CardActions>
-                    <Button size="small">Edit</Button>
+                    <Button size="small" onClick={() => {
+                            getChapter(chapter.chapterId);
+                        }} >Edit</Button>
                 </CardActions>
                 
             </Card>

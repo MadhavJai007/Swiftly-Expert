@@ -10,7 +10,6 @@ import { chapterObj, templateLesson} from './models/chapterModel';
 import { renderingLessonList } from './widgets/LessonList';
 import ChapterSummaryForm from './widgets/ChapterSummaryForm';
 import ChapterDrawer from './widgets/ChapterDrawer';
-import TabPanel from './widgets/Tabs';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
@@ -202,17 +201,6 @@ const Dashboard = (props) => {
     
     /* TEMP STUFF */
 
-    // chapter drawer
-    
-
-    const handleDrawerOpen = () => {
-        setDrawerOpen(true);
-    };
-
-    const handleDrawerClose = () => {
-        setDrawerOpen(false);
-    };
-
     /* speed dial options */
     const actions = [
         { icon: <ChapterIcon />, name: 'Add Chapter' },
@@ -289,7 +277,7 @@ const Dashboard = (props) => {
                         
                         {/* summary tab form  */}
                         {openTab === 0 && (
-                            <ChapterSummaryForm  chapLen={chapLen} setChapLen={setChapLen} chapDiff={chapDiff} setChapDiff={setChapDiff}  />
+                            <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
                             <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>

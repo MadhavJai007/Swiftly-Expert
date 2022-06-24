@@ -21,31 +21,30 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  Button,
 } from "@mui/material";
 
 
 const ChapterSummaryForm = ({
-  chapLen,
-  setChapLen,
-  chapDiff,
-  setChapDiff,
+    onInputChange,
+    selectedChapter,
+    setSelectedChapter,
 }) => {
 
     /* chapter length slider */
-    const handleLengthSliderChange = (event) => {
-        setChapLen(event.target.value)
-    }
-
-    const handleLengthInputChange = (event) => {
-        setChapLen(event.target.value === '' ? 1 : parseInt(event.target.value));
-    }
 
     const handleChapLenInputBlur = () => {
-        if(chapLen < 1 ){
-            setChapLen(1)
+        if(selectedChapter['chapter_length'] < 1 ){
+            // setChapLen(1)
+            let _chapterObj = { ...selectedChapter };
+            _chapterObj['chapter_length'] = 1;
+            setSelectedChapter(_chapterObj);
         }
-        else if(chapLen > 121) {
-            setChapLen(121)
+        else if(selectedChapter['chapter_length'] > 121) {
+            // setChapLen(121)
+            let _chapterObj = { ...selectedChapter };
+            _chapterObj['chapter_length'] = 121;
+            setSelectedChapter(_chapterObj);
         }
     }
 
@@ -79,17 +78,19 @@ const ChapterSummaryForm = ({
           disabled
           id="chapter-num-txt"
           label="Chapter number"
-          defaultValue="0"
+          value={selectedChapter.chapter_number}
         />
         <TextField
           id="chapter-name-txt"
           label="Chapter title"
-          defaultValue="Hello World"
+          value={selectedChapter.chapter_title}
+          onChange={(e) => onInputChange(e, 'chapter', 'chapter_title', 0)}
         />
         <TextField
           id="sub-code-txt"
           label="Subscription code"
-          defaultValue="N/A"
+          value={selectedChapter.subscription_code}
+          onChange={(e) => onInputChange(e, 'chapter','subscription_code', 0)}
         />
       </Box>
 
@@ -107,10 +108,8 @@ const ChapterSummaryForm = ({
           multiline
           rows={5}
           fullWidth
-          value={"Give your chapter a description"}
-          onChange={() => {
-            console.log("deez nuts");
-          }}
+          value={selectedChapter.chapter_desc}
+          onChange={(e) => onInputChange(e, 'chapter','chapter_desc', 0)}
         />
       </Box>
 
@@ -148,9 +147,9 @@ const ChapterSummaryForm = ({
               Chapter length (mins):{" "}
             </Typography>
             <Input
-              value={chapLen}
+              value={selectedChapter.chapter_length}
               size="small"
-              onChange={handleLengthInputChange}
+              onChange={(e) => onInputChange(e, 'chapter', 'chapter_length', 0)}
               onBlur={handleChapLenInputBlur}
               inputProps={{
                 step: 10,
@@ -165,8 +164,8 @@ const ChapterSummaryForm = ({
               my: 2,
             }}
             aria-label="chapter-len-slider"
-            value={typeof chapLen === "number" ? chapLen : 1}
-            onChange={(e) => handleLengthSliderChange(e)}
+            value={selectedChapter.chapter_length}
+            onChange={(e) => onInputChange(e, 'chapter', 'chapter_length', 0)}
             valueLabelDisplay="auto"
             min={0}
             max={121}
@@ -190,11 +189,9 @@ const ChapterSummaryForm = ({
             }}
             labelId="chap-diff-select-label"
             id="chap-diff-select"
-            value={chapDiff}
+            value={selectedChapter.chapter_difficulty}
             label="Difficulty"
-            onChange={(e) => {
-              setChapDiff(e.target.value);
-            }}
+            onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty', 0)}
           >
             <MenuItem value={1}>Easy</MenuItem>
             <MenuItem value={2}>Medium</MenuItem>
