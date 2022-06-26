@@ -299,8 +299,9 @@ export function dashboardTextInputHandler(selectedChapter, setSelectedChapter, s
 }
 
 // gets the details of the specified chapter
-export function getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter) {
+export function getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen) {
     return async (docId) => {
+        setShowLoadingOverlay(true)
         setLessonContentRetrieved(false);
         setSelectedChapter(chapterObj);
         setOpenTab(0);
@@ -325,6 +326,8 @@ export function getSelectedChapterDetails(setLessonContentRetrieved, setSelected
             setSelectedLesson(null);
             // disabling the creatingMode flag (only when creating a new chapter)
             setIsCreatingChapter(false);
+            setShowLoadingOverlay(false);
+            setDrawerOpen(false)
         } else {
             // this shouldnt happen
             console.log("Requested document not found!!");

@@ -13,7 +13,7 @@ import ChapterDrawer from './widgets/ChapterDrawer';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, Divider, Drawer, Tab, Tabs, TextField, Slider, Input, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
+import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, Button, Tab, Tabs, Backdrop, CircularProgress } from '@mui/material';
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
@@ -41,8 +41,7 @@ const Dashboard = (props) => {
 
 
     // temp state variables
-    const [chapLen, setChapLen] = useState(1)
-    const [chapDiff, setChapDiff] = useState('')
+    const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
 
     // calls logout handler
     const handleLogout = dashboardViewModel.logoutHandler(setError, logout, history)    
@@ -55,9 +54,9 @@ const Dashboard = (props) => {
 
     /* 
     function that is triggered when a chapter tile on the right panel is clicked. 
-    Retrieves metadata of the chapter and stores it in selectedChapter state variable
+    Retrieves chapter into and is set in selectedChapter state variable
     */
-    const getChapter = dashboardViewModel.getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter)
+    const getChapter = dashboardViewModel.getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen)
 
     // general purpose text input handler that updates different text state variables appropriately
     const onInputChange = dashboardViewModel.dashboardTextInputHandler(selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson)
@@ -229,6 +228,12 @@ const Dashboard = (props) => {
             <Container maxWidth={false} fixed={false}>
                 <Box >
                     <CssBaseline />
+                    <Backdrop
+                        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                        open={showLoadingOverlay}
+                    >
+                        <CircularProgress color="inherit" />
+                    </Backdrop>
                     <SwiftlyAppBar handleLogout={handleLogout} />
 
                     {/* Chapter drawer */}
