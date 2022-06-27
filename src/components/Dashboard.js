@@ -310,13 +310,22 @@ const Dashboard = (props) => {
                             icon={<SpeedDialIcon openIcon={<CrossIcon/>} />}
                             direction={'up'}
                         >
-                            {actions.map((action) => (
+                            <SpeedDialAction
+                                icon={<ChapterIcon/>}
+                                tooltipTitle={'Create new chapter'}
+                                onClick={resetChapterStates}
+                            />
+                            <SpeedDialAction
+                                icon={<LessonIcon/>}
+                                tooltipTitle={'Create mew lesson'}
+                            />
+                            {/* {actions.map((action) => (
                                 <SpeedDialAction
                                 key={action.name}
                                 icon={action.icon}
                                 tooltipTitle={action.name}
                                 />
-                            ))}
+                            ))} */}
                         </SpeedDial>
                     
                     </Box>

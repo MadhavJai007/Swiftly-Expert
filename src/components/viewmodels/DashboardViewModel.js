@@ -37,7 +37,7 @@ export function resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, s
         setOriginalLessonContent(null);
         setLessonContentList(null);
         setIsCreatingChapter(true);
-        setOpenTab(1);
+        setOpenTab(0);
     };
 }
 
