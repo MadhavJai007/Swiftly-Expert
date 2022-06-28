@@ -13,7 +13,7 @@ import ChapterDrawer from './widgets/ChapterDrawer';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, Button, Tab, Tabs, Backdrop, CircularProgress } from '@mui/material';
+import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress } from '@mui/material';
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
@@ -199,13 +199,6 @@ const Dashboard = (props) => {
 
     
     /* TEMP STUFF */
-
-    /* speed dial options */
-    const actions = [
-        { icon: <ChapterIcon />, name: 'Add Chapter' },
-        { icon: <LessonIcon />, name: 'Add Lesson' },
-    ];
-
     const Panel = styled(Paper)(({theme}) => ({
         backgroundColor: prefersDarkMode ? '#262b32' : '#e6e6e6',
         ...theme.typography.body2,
@@ -215,29 +208,35 @@ const Dashboard = (props) => {
         color: theme.palette.text.secondary,
     }))
 
-    /* tabbed editor */
-    const handleTabChange = (event, newValue) => {
-        /* newValue = 1/2/3 */
-        setOpenTab(newValue)
-    }
 
-    // this returns the JSX/HTML code that is responsible for rendering the websitealignItems
+    // this returns the JSX/HTML code that is responsible for rendering the main editor interface
     return (
       <>
         <ThemeProvider theme={props.theme} >
-            <Container maxWidth={false} fixed={false}>
+            <CssBaseline />
+            
+            {/* This container is only displayed if window size is less than large */}
+            <Container maxWidth={false} fixed={false} sx={{...(useMediaQuery(props.theme.breakpoints.up('lg')) && { display: 'none' } ), minHeight: '100vh'}} >
+                <Typography sx={{mt: 2, mb: 3, pl: '5%', textAlign: 'center', position: 'absolute', top: '30%'}} variant={'h5'}>Please increase your window size or use a desktop browser</Typography>
+            </Container>
+
+            {/* The editor is only displayed if the window size is large or greater */}
+            <Container maxWidth={false} fixed={false} sx={{...(!useMediaQuery(props.theme.breakpoints.up('lg')) && { display: 'none' })}} >
                 <Box >
-                    <CssBaseline />
+                    {/* Loading screen overlay visible only when certain things are loading */}
                     <Backdrop
                         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                         open={showLoadingOverlay}
                     >
                         <CircularProgress color="inherit" />
                     </Backdrop>
+
+                    {/* nav bar on the top */}
                     <SwiftlyAppBar handleLogout={handleLogout} />
 
                     {/* Chapter drawer */}
                     <ChapterDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} chapterCards={chapterCards}  />
+
                     {/* <Box
                     component="main"
                     sx={{
@@ -253,28 +252,45 @@ const Dashboard = (props) => {
                     }}
                     ></Box> */}
 
-                    {/* open button for chapter drawer */}
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        edge="end"
-                        onClick={() => setDrawerOpen(true)}
-                        sx={{ ...(drawerOpen && { display: 'none' }) }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-
-
                     {/* TODO: Extract speed dial as seperate component. */}
                     {/* <Box sx={{ position: 'relative', mt: 3, height: 320}}>
                     </Box> */}
-                    <Typography sx={{mt: 2, mb: 3, textAlign: 'center'}} variant={'h5'}>Editing panel</Typography>
+
+                    
+                    {/* Title and chapter drawer button */}
+                    <Box sx={{display: 'flex', flexDirection: 'row', p: 1, m: 1}}>
+                       
+                        {/* Title */}
+                        <Box sx={{ width: '95%'}}>
+                            <Typography sx={{mt: 2, mb: 3, pl: '5%', textAlign: 'center'}} variant={'h5'}>Editing panel</Typography>
+                        </Box>
+
+                        {/* open button for chapter drawer */}
+                        <Box sx={{  width: '5%', display: 'flex', justifyContent: 'flex-end'}} >
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                edge="end"
+                                onClick={() => setDrawerOpen(true)}
+                                sx={{ px: 3}}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                        </Box>
+                        
+                    </Box>
+                    
 
                     {/* Editor panel box */}
-                    <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '75vh', justifyContent: 'center', bgcolor: '#1c1e26',  p: 1, m: 1}}>
+                    <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '77vh', justifyContent: 'center', bgcolor: '#1c1e26',  p: 1, m: 1}}>
 
                         {/* Tab pickers */}
-                        <Tabs orientation='vertical' variant='scrollable' value={openTab} onChange={handleTabChange} aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider'}}>
+                        <Tabs orientation='vertical' variant='scrollable' aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider'}} value={openTab} 
+                            onChange={(e, newValue) => {
+                                console.log(newValue);
+                                setOpenTab(newValue);
+                            }} 
+                        >
                             <Tab label="Summary"></Tab>
                             <Tab label="Lessons"></Tab>
                             <Tab label="Playground"></Tab>
@@ -295,15 +311,8 @@ const Dashboard = (props) => {
                                 <Typography>Playground editor coming Soon ™</Typography>    
                             </Box>
                         )}
-                        {/* <TabPanel tabValue={openTab} index={0}>
-                            Edit the summary and other metadata for this chapter
-                        </TabPanel>
-                        <TabPanel tabValue={openTab} index={1}>
-                            Update your lesson list for this chapter in this section
-                        </TabPanel>
-                        <TabPanel tabValue={openTab} index={2}>
-                            Playground editor coming Soon ™
-                        </TabPanel> */}
+                        
+                        {/*  Floating button that has options to create new chapter or lesson */}
                         <SpeedDial
                             ariaLabel="Create speedDial"
                             sx={{ position: 'absolute', bottom: '5vh', left: '70px' }}
