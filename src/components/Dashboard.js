@@ -9,6 +9,7 @@ import {db} from '../firebase';
 import { chapterObj, templateLesson} from './models/chapterModel';
 import { renderingLessonList } from './widgets/LessonList';
 import ChapterSummaryForm from './widgets/ChapterSummaryForm';
+import ChapterLessonForm from './widgets/ChapterLessonForm';
 import ChapterDrawer from './widgets/ChapterDrawer';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
@@ -36,12 +37,14 @@ const Dashboard = (props) => {
     const [sampleImg, setSampleImg] = useState(null)
     const {currentUser, logout} = useAuth()
     const [drawerOpen, setDrawerOpen] = useState(false)
+    const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
     const history = useHistory()
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
 
 
-    // temp state variables
-    const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
+    // put temp state variables here, for testing 
+   
+    
 
     // calls logout handler
     const handleLogout = dashboardViewModel.logoutHandler(setError, logout, history)    
@@ -50,7 +53,7 @@ const Dashboard = (props) => {
     const getAuthorsChapters = dashboardViewModel.retrieveChapters(setChapterList, setChaptersRetrieved)
 
     // function that gets the lessons associated to the currently chosen chapter (chosen chapter specified in selectedChapter state)
-    const getChapterLessons = dashboardViewModel.getCurrChapterLessons(selectedChapter, setSelectedChapter, setLessonContentRetrieved)
+    const getChapterLessons = dashboardViewModel.getCurrChapterLessons(selectedChapter, setSelectedChapter, setLessonContentRetrieved, setShowLoadingOverlay)
 
     /* 
     function that is triggered when a chapter tile on the right panel is clicked. 
@@ -88,13 +91,6 @@ const Dashboard = (props) => {
 
     // render tabs for the editor panel and store them in constant
     // const tabs = renderTabs(openTab, setOpenTab, selectedChapter, selectedLesson, lessonContentRetrieved, getChapterLessons)
-
-    // renders the options for the lesson selector dropdown
-    const lessonOptions = selectedChapter.lessons.map(lesson => {
-        return <option key={lesson.lesson_id} value={lesson.lesson_id}>
-            {lesson.lesson_title}
-        </option>
-    })
 
 
     // Grabs file from computer
@@ -262,7 +258,7 @@ const Dashboard = (props) => {
                        
                         {/* Title */}
                         <Box sx={{ width: '95%'}}>
-                            <Typography sx={{mt: 2, mb: 3, pl: '5%', textAlign: 'center'}} variant={'h5'}>Editing panel</Typography>
+                            <Typography sx={{mt: 2, mb: 3, pl: '15%', textAlign: 'center'}} variant={'h5'}>Editing panel</Typography>
                         </Box>
 
                         {/* open button for chapter drawer */}
@@ -285,10 +281,17 @@ const Dashboard = (props) => {
                     <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '77vh', justifyContent: 'center', bgcolor: '#1c1e26',  p: 1, m: 1}}>
 
                         {/* Tab pickers */}
-                        <Tabs orientation='vertical' variant='scrollable' aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider'}} value={openTab} 
+                        <Tabs orientation='vertical' variant='scrollable' aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider', width: '10%'}} value={openTab} 
                             onChange={(e, newValue) => {
-                                console.log(newValue);
                                 setOpenTab(newValue);
+                                // if selectedChapter not null, download lessons for that chapter
+                                if(newValue == 1 && selectedChapter.chapter_id != "") {
+                                    // but only download lessons if they havent been fetched already
+                                    if(!lessonContentRetrieved){
+                                        console.log("loading the lesson options")
+                                        getChapterLessons()
+                                    }
+                                }
                             }} 
                         >
                             <Tab label="Summary"></Tab>
@@ -301,10 +304,11 @@ const Dashboard = (props) => {
                             <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
-                            <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
-                                <Typography>Update the lessons of the chapter</Typography>    
+                            // <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
+                            //     <Typography>Update the lessons of the chapter</Typography>    
                                 
-                            </Box>
+                            // </Box>
+                            <ChapterLessonForm selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} />
                         )}
                         {openTab === 2 && (
                             <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>

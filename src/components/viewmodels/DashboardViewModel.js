@@ -336,11 +336,12 @@ export function getSelectedChapterDetails(setLessonContentRetrieved, setSelected
 }
 
 // used to get the lessons of the specified chapter
-export function getCurrChapterLessons(selectedChapter, setSelectedChapter, setLessonContentRetrieved) {
+export function getCurrChapterLessons(selectedChapter, setSelectedChapter, setLessonContentRetrieved, setShowLoadingOverlay) {
     return async () => {
         // only do this if the user isnt making a brand new chapter
         // if(!isCreatingChapter) {
         console.log("retrieving chapter's lessons...");
+        setShowLoadingOverlay(true)
         let chapterDocRef = doc(db, "Chapters", selectedChapter.chapter_id);
         const querySnapshot = await getDocs(collection(chapterDocRef, "lessons"));
         let lessons = [];
@@ -353,6 +354,7 @@ export function getCurrChapterLessons(selectedChapter, setSelectedChapter, setLe
         });
         setSelectedChapter({ ...selectedChapter, lessons: lessons });
         setLessonContentRetrieved(true);
+        setShowLoadingOverlay(false)
     };
 }
 

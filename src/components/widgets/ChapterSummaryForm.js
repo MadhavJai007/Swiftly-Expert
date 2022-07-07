@@ -181,16 +181,14 @@ const ChapterSummaryForm = ({
             px: 2,
           }}
         >
-          <InputLabel id="chap-diff-select-label">Difficulty</InputLabel>
+          <Typography>Difficulty</Typography>
           <Select
             sx={{
               m: 2,
               minWidth: 125,
             }}
-            labelId="chap-diff-select-label"
             id="chap-diff-select"
             value={selectedChapter.chapter_difficulty}
-            label="Difficulty"
             onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty', 0)}
           >
             <MenuItem value={1}>Easy</MenuItem>
