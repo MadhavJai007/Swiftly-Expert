@@ -76,6 +76,7 @@ const Dashboard = (props) => {
     // function used to insert new content into existing lessons.
     const insertContent = dashboardViewModel.insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleImg)
 
+    // TODO: REMOVE THIS
     // handler that triggers when a lesson is selected from the dropdown in the second tab of the editor panel
     const onLessonSelect = (e) => {
         let lessonId = e.target.value;
@@ -177,7 +178,7 @@ const Dashboard = (props) => {
      except when the selectedLesson state is set to null when the page is being rendered for the first tiem */
     useEffect(() => {
         if(selectedLesson){
-            renderLessonContent()
+            // renderLessonContent()
             console.log("lesson content re-rendered")
             console.log(selectedLesson)
         }
@@ -304,11 +305,7 @@ const Dashboard = (props) => {
                             <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
-                            // <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
-                            //     <Typography>Update the lessons of the chapter</Typography>    
-                                
-                            // </Box>
-                            <ChapterLessonForm selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} />
+                            <ChapterLessonForm selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} setOriginalLessonContent={setOriginalLessonContent}/>
                         )}
                         {openTab === 2 && (
                             <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>

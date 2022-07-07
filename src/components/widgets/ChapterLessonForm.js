@@ -26,17 +26,25 @@ import {
 
 
 
-const ChapterLessonForm = ({selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson}) => {
+const ChapterLessonForm = ({selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, setOriginalLessonContent}) => {
 
   // renders the options for the lesson selector dropdown
   const LessonOptions = selectedChapter.lessons.map(lesson => {
-    return (<MenuItem key={lesson.lesson_id} value={lesson.lesson_id}>
+    return (<MenuItem key={lesson.lesson_id} value={lesson}>
       {lesson.lesson_title}
     </MenuItem>)
-    // <option key={lesson.lesson_id} value={lesson.lesson_id}>
-    //     {lesson.lesson_title}
-    // </option>
   })
+
+  // handler that triggers when a lesson is selected from the dropdown in the second tab of the editor panel
+  const onLessonSelect = (e) => {
+    let lessonObj = e.target.value;
+    console.log("sdas")
+    // if(lessonObj !== ""){
+        var chosenLesson = selectedChapter.lessons.find(lesson => lesson.lesson_id == lessonObj['lesson_id'])
+        setSelectedLesson(chosenLesson)
+        setOriginalLessonContent(chosenLesson)
+    // }
+  }
 
   return (
     <Box sx={{display: "flex", flexDirection: "row", width: '90%'}}>
@@ -45,7 +53,7 @@ const ChapterLessonForm = ({selectedChapter, setSelectedChapter, selectedLesson,
       </Box>
 
       {/* Lesson drop down  */}
-      <Box sx={{backgroundColor: 'blue', width: '20%',p: 1, m: 1, display: 'flex', flexDirection: 'column'}}>
+      <Box sx={{backgroundColor: 'blue', maxWidth: '20%', minWidth: '20%', p: 1, m: 1, display: 'flex', flexDirection: 'column'}}>
         <Typography sx={{textAlign: 'center', fontSize: 'h6.fontSize', fontWeight: 'bold'}}>Lessons</Typography>
         <Select
           sx={{
@@ -54,14 +62,15 @@ const ChapterLessonForm = ({selectedChapter, setSelectedChapter, selectedLesson,
           }}
           id="chap-lesson-select"
           displayEmpty
-          value={selectedLesson ? selectedLesson.lesson_title : '' }
-          // onChange={(e) => onInputChange(e, 'chapter','chapter_difficulty', 0)}
+          defaultValue={""}
+          value={selectedLesson ? selectedLesson : '' }
+          onChange={(e) => onLessonSelect(e)}
           renderValue={(value) => {
             if (value == '') {
               return 'Select a lesson'
+            } else {
+              return value.lesson_title;
             }
-            console.log(value)
-            return value;
           }}
         >
           <MenuItem disabled value="">
