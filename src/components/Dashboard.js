@@ -14,7 +14,7 @@ import ChapterDrawer from './widgets/ChapterDrawer';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, AppBar, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress } from '@mui/material';
+import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, Button, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress } from '@mui/material';
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
@@ -43,8 +43,6 @@ const Dashboard = (props) => {
 
 
     // put temp state variables here, for testing 
-   
-    
 
     // calls logout handler
     const handleLogout = dashboardViewModel.logoutHandler(setError, logout, history)    
@@ -248,11 +246,6 @@ const Dashboard = (props) => {
                         marginTop: 4
                     }}
                     ></Box> */}
-
-                    {/* TODO: Extract speed dial as seperate component. */}
-                    {/* <Box sx={{ position: 'relative', mt: 3, height: 320}}>
-                    </Box> */}
-
                     
                     {/* Title and chapter drawer button */}
                     <Box sx={{display: 'flex', flexDirection: 'row', p: 1, m: 1}}>
@@ -305,7 +298,7 @@ const Dashboard = (props) => {
                             <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
-                            <ChapterLessonForm selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} setOriginalLessonContent={setOriginalLessonContent}/>
+                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} />
                         )}
                         {openTab === 2 && (
                             <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
@@ -313,11 +306,12 @@ const Dashboard = (props) => {
                             </Box>
                         )}
                         
+                         {/* TODO: Extract speed dial as seperate component. */}
                         {/*  Floating button that has options to create new chapter or lesson */}
                         <SpeedDial
                             ariaLabel="Create speedDial"
                             sx={{ position: 'absolute', bottom: '5vh', left: '70px' }}
-                            icon={<SpeedDialIcon openIcon={<CrossIcon/>} />}
+                            icon={<SpeedDialIcon />}
                             direction={'up'}
                         >
                             <SpeedDialAction
@@ -329,13 +323,6 @@ const Dashboard = (props) => {
                                 icon={<LessonIcon/>}
                                 tooltipTitle={'Create mew lesson'}
                             />
-                            {/* {actions.map((action) => (
-                                <SpeedDialAction
-                                key={action.name}
-                                icon={action.icon}
-                                tooltipTitle={action.name}
-                                />
-                            ))} */}
                         </SpeedDial>
                     
                     </Box>
