@@ -13,7 +13,7 @@ import {
 
 
 // Lesson editor interface widget.
-const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent}) => {
+const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent, lessonContentList}) => {
 
   const [showResetDialog, setShowResetDialog] = useState(false)
 
@@ -102,6 +102,13 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
                   //onInputChange(e, 'chapter','subscription_code', 0)}
               />
               <Button onClick={() => {setShowResetDialog(true)}}>Reset</Button>
+            </Box>
+
+            {/* Lesson content in list form */}
+
+            <Box sx={{ width: '80%'}}>
+              {lessonContentList}
+              
             </Box>
           </Box> 
         : 

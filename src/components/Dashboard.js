@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, MouseEvent } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
 import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections } from 'firebase/firestore'
@@ -38,6 +38,7 @@ const Dashboard = (props) => {
     const {currentUser, logout} = useAuth()
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
+
     const history = useHistory()
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
 
@@ -176,7 +177,7 @@ const Dashboard = (props) => {
      except when the selectedLesson state is set to null when the page is being rendered for the first tiem */
     useEffect(() => {
         if(selectedLesson){
-            // renderLessonContent()
+            renderLessonContent()
             console.log("lesson content re-rendered")
             console.log(selectedLesson)
         }
@@ -231,21 +232,6 @@ const Dashboard = (props) => {
 
                     {/* Chapter drawer */}
                     <ChapterDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} chapterCards={chapterCards}  />
-
-                    {/* <Box
-                    component="main"
-                    sx={{
-                        backgroundColor: (theme) => 
-                        theme.palette.mode === 'dark'
-                            ? theme.palette.grey[100]
-                            : theme.palette.grey[900],
-                        flexGrow: 1,
-                        height: '90vh',
-                        width: '50vw',
-                        overflow: 'auto',
-                        marginTop: 4
-                    }}
-                    ></Box> */}
                     
                     {/* Title and chapter drawer button */}
                     <Box sx={{display: 'flex', flexDirection: 'row', p: 1, m: 1}}>
@@ -298,7 +284,7 @@ const Dashboard = (props) => {
                             <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
-                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} />
+                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList} />
                         )}
                         {openTab === 2 && (
                             <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
