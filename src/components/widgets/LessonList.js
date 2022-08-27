@@ -23,7 +23,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                         {/* New Paragraph button */}
                         <Button variant="outlined" sx={{my: 1}} onClick={(e) => {
                             insertContent(e, "para", content_index, "before");
-                        } } className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                        } } >
                             <AddIcon/>
                             Paragraph
                         </Button>
@@ -31,7 +31,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                         {/* New Image button */}
                         <Button variant="outlined" sx={{my: 1}} onClick={(e) => {
                             insertContent(e, "img", content_index, "before");
-                        } } className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                        } } >
                             <AddIcon/>
                             Image
                         </Button>
@@ -55,7 +55,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                             {/* New Paragraph */}
                             <Button variant="outlined" sx={{my: 1}}  onClick={(e) => {
                                 insertContent(e, "para", content_index, "after");
-                            } } className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                            } } >
                                 <AddIcon/>
                                 Paragraph
                             </Button>
@@ -63,7 +63,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                             {/* New Image */}
                             <Button variant="outlined" sx={{my: 1}}  onClick={(e) => {
                                 insertContent(e, "img", content_index, "after");
-                            } } className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                            } } >
                                 <AddIcon/>
                                 Image
                             </Button>
@@ -99,7 +99,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                         <Box key={i} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                             <Button variant="outlined" sx={{my: 1}} onClick={(e) => {
                                 insertContent(e, "para", content_index, "after");
-                            } } className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                            } } >
                                 <AddIcon/>
                                 Paragraph
                             </Button>
@@ -107,7 +107,7 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                             {/* New Image */}
                             <Button variant="outlined" sx={{my: 1}} onClick={(e) => {
                                 insertContent(e, "img", content_index, "after");
-                            } } className="py-2 px-4 flex justify-center items-center bg-green-600 hover:bg-green-700 focus:ring-green-500 focus:ring-offset-green-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                            } } >
                                 <AddIcon/>
                                 Image
                             </Button>
