@@ -204,11 +204,11 @@ export function generateAndPublishChapter(chapterList, resetChapterStates, getAu
 }
 
 // generates a new lesson and adds them in the selected chapter's lesson list so it can be rendered
-export function generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson) {
+export function generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson, setOriginalLessonContent) {
     return async () => {
         let newLesson = null;
         let clonedChapter = null;
-        // if user is adding a chapter
+        // if user is currently creating a new chapter (not in database)
         if (isCreatingChapter) {
             clonedChapter = selectedChapter;
 
@@ -233,6 +233,7 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
             lessonArr.push(JSON.parse(JSON.stringify(newLesson)));
             setSelectedChapter({ ...clonedChapter, lessons: lessonArr });
             setSelectedLesson(selectedChapter.lessons[lessonNum - 1]);
+            // setOriginalLessonContent(selectedChapter.lessons[lessonNum - 1])
         }
 
         // if user is currently modifying an existing chapter in the database
@@ -261,6 +262,8 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
             lessonArr.push(JSON.parse(JSON.stringify(newLesson)));
             setSelectedChapter({ ...clonedChapter, lessons: lessonArr });
             setSelectedLesson(selectedChapter.lessons[lessonNum - 1]);
+
+            
         }
 
     };

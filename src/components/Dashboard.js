@@ -67,7 +67,7 @@ const Dashboard = (props) => {
     const resetChapterStates = dashboardViewModel.resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, setLessonContentRetrieved, setOriginalLessonContent, setLessonContentList, setIsCreatingChapter, setOpenTab)
 
     // creates a blank lesson and adds it to the chapter's lesson list
-    const createBlankLesson = dashboardViewModel.generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson)
+    const createBlankLesson = dashboardViewModel.generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson, setOriginalLessonContent)
 
     // Function that publishes the chapter
     const publishChapter = dashboardViewModel.generateAndPublishChapter(chapterList, resetChapterStates, getAuthorsChapters, isCreatingChapter)
@@ -226,7 +226,7 @@ const Dashboard = (props) => {
                     >
                         <CircularProgress color="inherit" />
                     </Backdrop>
-                    
+
                     {/* nav bar on the top */}
                     <SwiftlyAppBar handleLogout={handleLogout} />
 
@@ -308,6 +308,12 @@ const Dashboard = (props) => {
                             <SpeedDialAction
                                 icon={<LessonIcon/>}
                                 tooltipTitle={'Create mew lesson'}
+                                onClick={() => {
+                                    createBlankLesson()
+                                    setTimeout(()=> {
+                                        console.log(originalLessonContent)
+                                    }, 1500)
+                                }}
                             />
                         </SpeedDial>
                     
