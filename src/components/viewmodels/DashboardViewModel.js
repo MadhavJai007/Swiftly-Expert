@@ -233,7 +233,7 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
             lessonArr.push(JSON.parse(JSON.stringify(newLesson)));
             setSelectedChapter({ ...clonedChapter, lessons: lessonArr });
             setSelectedLesson(selectedChapter.lessons[lessonNum - 1]);
-            // setOriginalLessonContent(selectedChapter.lessons[lessonNum - 1])
+            setOriginalLessonContent(selectedChapter.lessons[lessonNum - 1])
         }
 
         // if user is currently modifying an existing chapter in the database
@@ -262,6 +262,7 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
             lessonArr.push(JSON.parse(JSON.stringify(newLesson)));
             setSelectedChapter({ ...clonedChapter, lessons: lessonArr });
             setSelectedLesson(selectedChapter.lessons[lessonNum - 1]);
+            setOriginalLessonContent(selectedChapter.lessons[lessonNum - 1])
 
             
         }
