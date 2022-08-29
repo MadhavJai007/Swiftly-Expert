@@ -14,7 +14,7 @@ import ChapterDrawer from './widgets/ChapterDrawer';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, Button, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress } from '@mui/material';
+import { Container, Box, Paper, useMediaQuery, CssBaseline, Button, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress, Card, CardMedia} from '@mui/material';
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
@@ -226,7 +226,7 @@ const Dashboard = (props) => {
                     >
                         <CircularProgress color="inherit" />
                     </Backdrop>
-
+                    
                     {/* nav bar on the top */}
                     <SwiftlyAppBar handleLogout={handleLogout} />
 
