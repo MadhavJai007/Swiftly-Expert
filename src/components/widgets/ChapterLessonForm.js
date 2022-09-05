@@ -52,8 +52,8 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
   }, [])
 
   return (
-    <Box sx={{display: "flex", flexDirection: "row", width: '90%'}}>
-
+    <Box sx={{display: "flex", flexDirection: "row", width: '90%', maxHeight: '77vh'}}>
+      
       {/* Reset confirmation box */}
       <ResetLessonDialog 
         open={showResetDialog}      
@@ -64,61 +64,66 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
         cancelAction={null}
       />
 
-      <Box sx={{ width: '80%',p: 1, m: 1,}} >
-        {selectedLesson ? 
-          <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flexGrow: 1,
-            p: 1,
-            m: 1,
-            alignItems: "center",
-          }}>
-            <Typography>
-              Create your lesson here
-            </Typography>
+      {/* lesson list panel */}
+      <Box sx={{ width: '80%', overflow: 'auto'}}>
+        <Box sx={{p: 1, m: 1,}} >
+          {selectedLesson ? 
             <Box
-              sx={{
-                "& .MuiTextField-root": {
-                  m: 2,
-                  mt: 4,
-                  width: "25ch",
-                },
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              flexGrow: 1,
+              p: 1,
+              m: 1,
+              alignItems: "center",
+            }}>
+              <Typography variant="h5" sx={{fontWeight: 'bold'}}>
+                Create your lesson here
+              </Typography>
+              <Box
+                sx={{
+                  "& .MuiTextField-root": {
+                    m: 2,
+                    mt: 4,
+                    width: "25ch",
+                  },
+                  
+                }}
+              >
+                <TextField
+                  disabled
+                  id="lesson_id_txt"
+                  label="Lesson ID"
+                  value={selectedLesson.lesson_id} 
+                />
+                <TextField
+                  id="lesson_title_txt"
+                  label="Lesson title"
+                  value={selectedLesson.lesson_title}
+                  onChange={(e) => onInputChange(e, 'lesson','lesson_title', 0)}
+                    //onInputChange(e, 'chapter','subscription_code', 0)}
+                />
+                <Button onClick={() => {setShowResetDialog(true)}}>Reset</Button>
+              </Box>
+
+              {/* Lesson content in list form */}
+
+              <Box sx={{ width: '80%'}}>
+                {lessonContentList}
                 
-              }}
-            >
-              <TextField
-                disabled
-                id="lesson_id_txt"
-                label="Lesson ID"
-                value={selectedLesson.lesson_id} 
-              />
-              <TextField
-                id="lesson_title_txt"
-                label="Lesson title"
-                value={selectedLesson.lesson_title}
-                onChange={(e) => onInputChange(e, 'lesson','lesson_title', 0)}
-                  //onInputChange(e, 'chapter','subscription_code', 0)}
-              />
-              <Button onClick={() => {setShowResetDialog(true)}}>Reset</Button>
-            </Box>
-
-            {/* Lesson content in list form */}
-
-            <Box sx={{ width: '80%'}}>
-              {lessonContentList}
-              
-            </Box>
-          </Box> 
-        : 
-          <Typography sx={{textAlign: 'center', fontSize: 'h6.fontSize', fontWeight: 'bold'}}>
-            Select/Create a lesson.
-          </Typography> 
-        } 
+              </Box>
+            </Box> 
+          : 
+            <Typography sx={{textAlign: 'center', fontSize: 'h6.fontSize', fontWeight: 'bold'}}>
+              Select/Create a lesson.
+            </Typography> 
+          } 
+        </Box>
       </Box>
+
       <Divider orientation="vertical" />
-      {/* Lesson drop down  */}
+
+      {/* Lesson drop down section  */}
       <Box sx={{ maxWidth: '20%', minWidth: '20%', p: 1, m: 1, display: 'flex', flexDirection: 'column'}}>
         <Typography sx={{textAlign: 'center', fontSize: 'h6.fontSize', fontWeight: 'bold'}}>Lessons</Typography>
         <Select
