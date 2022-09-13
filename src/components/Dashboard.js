@@ -7,6 +7,7 @@ import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections } fro
 import {db} from '../firebase';
 
 import { chapterObj, templateLesson} from './models/chapterModel';
+import { userObject } from './models/expertUserModel';
 import { renderingLessonList } from './widgets/LessonList';
 import ChapterSummaryForm from './widgets/ChapterSummaryForm';
 import ChapterLessonForm from './widgets/ChapterLessonForm';
@@ -35,7 +36,8 @@ const Dashboard = (props) => {
     const [isCreatingChapter, setIsCreatingChapter] = useState(true)
     const [openTab, setOpenTab] = useState(0);
     const [sampleImg, setSampleImg] = useState(null)
-    const {currentUser, logout} = useAuth()
+    const [profileDetails, setProfileDetails] = useState(userObject)
+    const {currentUser, currentUsername, getUserProfileDetails, logout} = useAuth()
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
 
@@ -152,10 +154,21 @@ const Dashboard = (props) => {
     */
 
     // acts as a component onMount method. triggers when the website and all its state variables initialize for the first time
-    useEffect(()=>{ 
+    useEffect(async()=>{ 
         console.log(currentUser.email)
+        console.log(currentUsername) // TODO: set the email's associated username trough a profile menu
         // if a currentUser exists (logged in)
         
+        try {
+            let response = await getUserProfileDetails(currentUser.email)
+            setProfileDetails(response.userDetails)
+        }
+        catch(err){
+            console.log("Error when executing getUserProfile function")
+            console.log(err)
+            setProfileDetails(null)
+        }
+
         if(currentUser && chapterList.length === 0){
             getAuthorsChapters(false)
         }
@@ -168,6 +181,22 @@ const Dashboard = (props) => {
         
     },[])
 
+
+    useEffect(() => {
+      return () => {
+        if(profileDetails && profileDetails.country != '') {
+            console.log('USER DETAILS')
+            console.log(profileDetails)
+        }
+        else if(profileDetails.country == '') {
+            console.log("its still blank user object.")
+        }
+        else {
+            console.log('USER DETAILS ARE NULL. MEANS FUNCTION TO GET PROFILE DETAILS FAILED.')
+        }
+      };
+    }, [profileDetails])
+
     // triggers following code when selectedChapter state variable changes in value at any point
     useEffect(() => {
         console.log(selectedChapter)
@@ -177,6 +206,7 @@ const Dashboard = (props) => {
      except when the selectedLesson state is set to null when the page is being rendered for the first tiem */
     useEffect(() => {
         if(selectedLesson){
+            console.log("this is happening on lesson reset")
             renderLessonContent()
             console.log("lesson content re-rendered")
             console.log(selectedLesson)
@@ -228,7 +258,7 @@ const Dashboard = (props) => {
                     </Backdrop>
 
                     {/* nav bar on the top */}
-                    <SwiftlyAppBar handleLogout={handleLogout} />
+                    <SwiftlyAppBar handleLogout={handleLogout} profileDetails={profileDetails} />
 
                     {/* Chapter drawer */}
                     <ChapterDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} chapterCards={chapterCards}  />
@@ -284,7 +314,7 @@ const Dashboard = (props) => {
                             <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
-                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList} />
+                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList} renderLessonContent={renderLessonContent}/>
                         )}
                         {openTab === 2 && (
                             <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>

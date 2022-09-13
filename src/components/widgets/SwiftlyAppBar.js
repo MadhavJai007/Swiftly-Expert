@@ -90,6 +90,7 @@ const SwiftlyAppBar = (props) => {
             </Menu>
           </Box> */}
 
+          {/* TODO: DELETE THIS */}
           {/* Swiftly icon and Text when viewport size = xs*/}
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} /> {/*Place holder icon*/}
           <Typography
@@ -123,12 +124,17 @@ const SwiftlyAppBar = (props) => {
               </Button>
             ))}
           </Box> */}
+
+          
+          <Typography variant='h5'>
+            Welcome, {props.profileDetails ? props.profileDetails.username : "{USER_NAME_NOT_FOUND}"}
+          </Typography>
             
             {/* User icon on right side with clickable menu */}
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar >{!props.username ? "USA" : "00"}</Avatar>
+                <Avatar >{props.profileDetails ? (props.profileDetails.firstname[0]+props.profileDetails.lastName[0]).toUpperCase() : "NaN"}</Avatar>
               </IconButton>
             </Tooltip>
             <Menu

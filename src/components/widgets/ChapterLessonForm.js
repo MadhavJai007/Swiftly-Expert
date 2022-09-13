@@ -11,9 +11,8 @@ import {
   Button,
 } from "@mui/material";
 
-
 // Lesson editor interface widget.
-const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent, lessonContentList}) => {
+const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent, lessonContentList, renderLessonContent}) => {
 
   const [showResetDialog, setShowResetDialog] = useState(false)
 
@@ -24,8 +23,18 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
 
   // method that will reset lesson before edits were made.
   const resetLesson = () => {
+    
+    // console.log("THIS IS THE OG LESSON CONTENT")
+    // console.log(originalLessonContent)
+    // console.log("AND THIS IS THE MODIFIED LESSON")
+    console.log(selectedLesson)
+    // setTimeout(()=> setSelectedLesson(originalLessonContent), 150)
+    // setTimeout(()=> console.log(selectedLesson.lesson_content), 200)
     setSelectedLesson(originalLessonContent)
     setShowResetDialog(false)
+    // renderLessonContent()
+
+    // OR setLessonContentList directly from here
   }
 
   // renders the options for the lesson selector dropdown
@@ -38,7 +47,7 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
   // handler that triggers when a lesson is selected from the dropdown in the second tab of the editor panel
   const onLessonSelect = (e) => {
     let lessonObj = e.target.value;
-    console.log("sdas")
+    
     // if(lessonObj !== ""){
         var chosenLesson = selectedChapter.lessons.find(lesson => lesson.lesson_id == lessonObj['lesson_id'])
         setSelectedLesson(chosenLesson)

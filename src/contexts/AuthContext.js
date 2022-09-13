@@ -35,6 +35,8 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+
+    // adds user to experts collection in firebase
     const addUserToExperts = async (email, username, firstname, lastname, country, dob) => {
         let returnCode;
         let expertsDocRef = doc(db, "Experts", username);
@@ -58,6 +60,7 @@ export const AuthProvider = ({ children }) => {
         })
     }
 
+    // function that is used in the loggin process. checks if the email used is an experts account.
     const getUserEmail = async email => {
         let returnCode;
         let expertsRef = collection(db, "Experts");
@@ -82,6 +85,30 @@ export const AuthProvider = ({ children }) => {
             returnCode = {"code": "LOGIN_FAIL", "details": "Username document was found in Experts collection but mismatch in associated email. The email being used is not an Expert account"}
         }
         return returnCode;
+    }
+
+    const getUserProfileDetails = async email => {
+        let returnCode;
+        let expertsRef = collection(db, "Experts");
+        const q = query(expertsRef, where("email", "==", email))
+        const querySnapshot = await getDocs(q);
+
+        
+        if(querySnapshot.docs.length === 0) {
+            returnCode = {"code": "USER_DETAILS_NOT_FOUND", "details": "Your profile details were not found in the experts collection."}
+            return returnCode;
+        }
+
+        let userDetails = querySnapshot.docs[0].data()
+
+        returnCode = {
+            "code": 'DETAILS_RETRIEVED',
+            "details": "User details retrieved",
+            "userDetails": userDetails
+        }
+
+        return returnCode;
+
     }
 
     const signup = async (email, password) => {
@@ -167,7 +194,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         getUserEmail,
         addUserToExperts,
-        checkUsername
+        checkUsername,
+        getUserProfileDetails
     }
 
     return (

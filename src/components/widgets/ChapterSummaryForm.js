@@ -60,7 +60,7 @@ const ChapterSummaryForm = ({
         alignItems: "center",
       }}
     >
-      <Typography>
+      <Typography variant="h6">
         Edit the summary and other metadata for this chapter
       </Typography>
 
