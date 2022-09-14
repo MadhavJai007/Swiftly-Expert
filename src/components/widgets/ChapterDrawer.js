@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import { Close as CrossIcon, Refresh } from '@mui/icons-material'; 
 
-const ChapterDrawer = ({ drawerOpen, setDrawerOpen, chapterCards }) => {
+const ChapterDrawer = ({ drawerOpen, setDrawerOpen, chapterCards, getAuthorsChapters }) => {
   return (
     <Drawer open={drawerOpen} anchor={"right"}>
       <Box
@@ -65,7 +65,7 @@ const ChapterDrawer = ({ drawerOpen, setDrawerOpen, chapterCards }) => {
           <IconButton
             color="inherit"
             aria-label="refresh drawer"
-            onClick={() => setDrawerOpen(false)}
+            onClick={() => getAuthorsChapters()}
             sx={{
               ...(!drawerOpen && {
                 display: "none",

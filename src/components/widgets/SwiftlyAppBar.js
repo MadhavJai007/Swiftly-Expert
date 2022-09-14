@@ -134,7 +134,7 @@ const SwiftlyAppBar = (props) => {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar >{props.profileDetails ? (props.profileDetails.firstname[0]+props.profileDetails.lastName[0]).toUpperCase() : "NaN"}</Avatar>
+                <Avatar >{props.profileDetails ? ( props.profileDetails.country == "" ? "BUTT" : (props.profileDetails.firstname[0]+props.profileDetails.lastName[0]).toUpperCase() ): "NaN"}</Avatar>
               </IconButton>
             </Tooltip>
             <Menu

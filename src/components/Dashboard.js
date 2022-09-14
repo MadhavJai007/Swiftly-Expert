@@ -51,7 +51,7 @@ const Dashboard = (props) => {
     const handleLogout = dashboardViewModel.logoutHandler(setError, logout, history)    
 
     // function that gets the chapters associated to the currently logged in user
-    const getAuthorsChapters = dashboardViewModel.retrieveChapters(setChapterList, setChaptersRetrieved)
+    const getAuthorsChapters = dashboardViewModel.retrieveChapters(setChapterList, setChaptersRetrieved, profileDetails)
 
     // function that gets the lessons associated to the currently chosen chapter (chosen chapter specified in selectedChapter state)
     const getChapterLessons = dashboardViewModel.getCurrChapterLessons(selectedChapter, setSelectedChapter, setLessonContentRetrieved, setShowLoadingOverlay)
@@ -170,7 +170,7 @@ const Dashboard = (props) => {
         }
 
         if(currentUser && chapterList.length === 0){
-            getAuthorsChapters(false)
+            // getAuthorsChapters(false)
         }
 
         getBase64FromUrl('https://pbs.twimg.com/profile_images/1026981625291190272/35O2KIRX_400x400.jpg')
@@ -261,7 +261,7 @@ const Dashboard = (props) => {
                     <SwiftlyAppBar handleLogout={handleLogout} profileDetails={profileDetails} />
 
                     {/* Chapter drawer */}
-                    <ChapterDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} chapterCards={chapterCards}  />
+                    <ChapterDrawer drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} chapterCards={chapterCards} getAuthorsChapters={getAuthorsChapters} />
                     
                     {/* Title and chapter drawer button */}
                     <Box sx={{display: 'flex', flexDirection: 'row', p: 1, m: 1}}>
@@ -277,7 +277,16 @@ const Dashboard = (props) => {
                                 color="inherit"
                                 aria-label="open drawer"
                                 edge="end"
-                                onClick={() => setDrawerOpen(true)}
+                                onClick={() => { 
+                                    if(!chaptersRetrieved){
+                                        console.log("chapter hasn't been retrieved yet. retrieving chapters...")
+                                        getAuthorsChapters()
+                                    }
+                                    else if(chaptersRetrieved){
+                                        console.log("chapter already retrieved.")
+                                    }
+                                    setDrawerOpen(true) 
+                                }}
                                 sx={{ px: 3}}
                             >
                                 <MenuIcon />

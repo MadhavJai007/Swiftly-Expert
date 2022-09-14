@@ -1,16 +1,24 @@
-import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections } from 'firebase/firestore'
+import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections, query, where } from 'firebase/firestore'
 import {db} from '../../firebase';
 
 import { chapterObj, templateLesson} from '../models/chapterModel'
 
 // retrieves chapters from firestore
-export function retrieveChapters(setChapterList, setChaptersRetrieved) {
+export function retrieveChapters(setChapterList, setChaptersRetrieved, profileDetails) {
     return async (isRefreshing) => {
         // if(isRefreshing) {
         //     setChaptersRetrieved(false)
         // }
-        const querySnapshot = await getDocs(collection(db, "Chapters"));
-        let _chapterList = [];
+        
+        console.log(profileDetails)
+        const authorName = profileDetails.username
+        console.log(authorName)
+        const chaptersRef = collection(db, 'Chapters');
+        console.log(authorName)
+        const q = query(chaptersRef, where('author', '==', authorName) ) //getDocs(collection(db, "Chapters"));
+        const querySnapshot = await getDocs(q);
+
+        let _chapterList = []
         querySnapshot.forEach(doc => {
             _chapterList.push({
                 chapterId: doc.id,
