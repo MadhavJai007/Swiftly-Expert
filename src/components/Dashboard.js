@@ -13,12 +13,13 @@ import ChapterSummaryForm from './widgets/ChapterSummaryForm';
 import ChapterLessonForm from './widgets/ChapterLessonForm';
 import ChapterDrawer from './widgets/ChapterDrawer';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
+import UserPromptDialog from './widgets/UserPromptDialog';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, useMediaQuery, CssBaseline, Button, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress, Card, CardMedia} from '@mui/material';
+import { Container, Box, Paper, useMediaQuery, CssBaseline, Button, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress, Fab} from '@mui/material';
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
-import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, Refresh } from '@mui/icons-material'; 
+import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, CloudUploadOutlined as UploadIcon } from '@mui/icons-material'; 
 import PropTypes from 'prop-types';
 
 // const tabSections = tabs;
@@ -40,6 +41,9 @@ const Dashboard = (props) => {
     const {currentUser, currentUsername, getUserProfileDetails, logout} = useAuth()
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [showLoadingOverlay, setShowLoadingOverlay] = useState(false)
+    const [showPromptDialog, setShowPromptDialog] = useState(false)
+    const [dialogTitleText, setDialogTitleText] = useState('')
+    const [dialogDescText, setDialogDescText] = useState('')
 
     const history = useHistory()
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
@@ -60,7 +64,7 @@ const Dashboard = (props) => {
     function that is triggered when a chapter tile on the right panel is clicked. 
     Retrieves chapter into and is set in selectedChapter state variable
     */
-    const getChapter = dashboardViewModel.getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen)
+    const getChapter = dashboardViewModel.getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen, setShowPromptDialog, setDialogTitleText, setDialogDescText)
 
     // general purpose text input handler that updates different text state variables appropriately
     const onInputChange = dashboardViewModel.dashboardTextInputHandler(selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson)
@@ -141,6 +145,10 @@ const Dashboard = (props) => {
     // function to render lesson content in html form
     const renderLessonContent = renderingLessonList(selectedLesson, insertContent, fileSelectedHandler, onInputChange, setLessonContentList)
 
+    const closeUserPromptDialog = () => {
+        setShowPromptDialog(false)
+    }
+    
     const resetLesson = () => {
         console.log("resetting changes")
         console.log(originalLessonContent)
@@ -257,6 +265,13 @@ const Dashboard = (props) => {
                         <CircularProgress color="inherit" />
                     </Backdrop>
 
+                    <UserPromptDialog 
+                        open={showPromptDialog}      
+                        onClose={closeUserPromptDialog}
+                        dialogTitle={dialogTitleText}
+                        dialogDesc={dialogDescText}
+                    />
+
                     {/* nav bar on the top */}
                     <SwiftlyAppBar handleLogout={handleLogout} profileDetails={profileDetails} />
 
@@ -300,7 +315,7 @@ const Dashboard = (props) => {
                     <Box sx={{ display: 'flex', flexGrow: 1, minHeight: '77vh', justifyContent: 'center', bgcolor: '#1c1e26',  p: 1, m: 1}}>
 
                         {/* Tab pickers */}
-                        <Tabs orientation='vertical' variant='scrollable' aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider', width: '10%'}} value={openTab} 
+                        <Tabs orientation='vertical' variant='scrollable' aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider', width: '11%'}} value={openTab} 
                             onChange={(e, newValue) => {
                                 setOpenTab(newValue);
                                 // if selectedChapter not null, download lessons for that chapter
@@ -335,7 +350,7 @@ const Dashboard = (props) => {
                         {/*  Floating button that has options to create new chapter or lesson */}
                         <SpeedDial
                             ariaLabel="Create speedDial"
-                            sx={{ position: 'absolute', bottom: '5vh', left: '70px' }}
+                            sx={{ position: 'absolute', bottom: '15vh', left: '3vw' }}
                             icon={<SpeedDialIcon />}
                             direction={'up'}
                         >
@@ -355,6 +370,53 @@ const Dashboard = (props) => {
                                 }}
                             />
                         </SpeedDial>
+
+                        {/* Publish chapter button */}
+                        <Fab 
+                            variant="extended" 
+                            size='medium' 
+                            color="success" 
+                            sx={{position: 'absolute', bottom: '7vh', left: '3vw'}} 
+                            aria-label="upload"
+                            onClick={()=>{
+                                let authorName = profileDetails.username
+
+                                let publishMode = "add"
+                                if(selectedChapter.chapter_id != ""){
+                                    publishMode = "update"
+                                }
+
+                                let publishPromise = publishChapter(selectedChapter, publishMode, authorName)
+                                publishPromise.then((res) => {
+                                    console.log(res)
+                                    if(res == 'CHAPTER_TITLE_MISSING'){
+                                        setShowPromptDialog(true)
+                                        setDialogTitleText('Chapter title missing!!')
+                                        setDialogDescText('You forgot to include a title for the chapter...')
+                                    }
+                                        else if(res == 'CHAPTER_DESC_MISSING'){
+                                        setShowPromptDialog(true)
+                                        setDialogTitleText('Empty chapter description!!')
+                                        setDialogDescText('Make sure to include a brief summary of this chapter.')
+                                    }
+                                    else if(res == 'CHAPTER_UPLOAD_FAILED') {
+                                        setShowPromptDialog(true)
+                                        setDialogTitleText('Chapter upload failed!!')
+                                        setDialogDescText('Contact an admin')
+                                    }
+                                    else if(res == 'CHAPTER_PUBLISHED' || res == 'CHAPTER_UPDATED'){
+                                        setShowPromptDialog(true)
+                                        setDialogTitleText('Chapter has been published!')
+                                        setDialogDescText(' ')
+                                    }
+                                })
+                            }
+                            }
+                        >
+                            <UploadIcon sx={{mr: 1}}/>
+                            Publish
+                        </Fab>
+
                     
                     </Box>
                     

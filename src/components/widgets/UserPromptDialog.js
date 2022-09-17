@@ -7,6 +7,7 @@ import { Container, Box, Paper, Grid, useMediaQuery, CssBaseline, Button, IconBu
     DialogTitle, } from '@mui/material';
 
 
+    // general use dialog box compoenent.
 function UserPromptDialog(props) {
     const {onClose, open} = props; // the dialog box's close handler and open state.
     const {dialogTitle, dialogDesc} = props;  // The dialog box's title and description text
@@ -30,6 +31,7 @@ function UserPromptDialog(props) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
+          {/* If there is no comfirm or cancel method provided, the close dialog action will trigger by default */}
           <Button onClick={cancelAction ? cancelAction : handleClose}>Cancel</Button>
           <Button onClick={confirmAction ? confirmAction : handleClose} autoFocus>
             Confirm

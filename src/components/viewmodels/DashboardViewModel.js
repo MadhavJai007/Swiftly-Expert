@@ -1,4 +1,5 @@
 import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections, query, where } from 'firebase/firestore'
+import { v4 as uuidv4 } from 'uuid';
 import {db} from '../../firebase';
 
 import { chapterObj, templateLesson} from '../models/chapterModel'
@@ -90,63 +91,50 @@ export function insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleI
 
 // function used to create a chapter object and publish it to firestore. along with any lessons within the chapter object
 export function generateAndPublishChapter(chapterList, resetChapterStates, getAuthorsChapters, isCreatingChapter) {
-    return async (chapter, mode) => {
-        //(selectedChapter.chapter_id, selectedChapter.chapter_number,selectedChapter.chapter_title, selectedChapter.subscription_code, selectedChapter.chapter_desc, selectedChapter.chapter_length, selectedChapter.chapter_difficulty, selectedChapter.lessons)
-        console.log(chapter);
-        let chapterId = chapter.chapter_id;
-        console.log(chapterId);
+    return async (chapter, mode, authorName) => {
 
-        // if adding chapter, generate a chapter id
-        if (mode == "add") {
-            let chapterNum = chapterList.length + 1;
-            if (chapterNum >= 100) {
-                chapterId = `chapter_${chapterNum}`;
-            }
-            else if (chapterNum >= 10) {
-                chapterId = `chapter_0${chapterNum}`;
-            }
-            else {
-                chapterId = `chapter_00${chapterNum}`;
-            }
-        }
-
-        console.log(chapterId);
-
-        // let returnCode;
-        let chaptersRefDoc = doc(db, "Chapters", chapterId);
-        let lessonsRefCollection = collection(chaptersRefDoc, "lessons");
-
+        // first check if chapter has title and summary
         let validInput = true;
         let chapterLength = parseInt(chapter.chapter_length);
         let chapterDifficulty = parseInt(chapter.chapter_difficulty);
+        let chapterSubCode = chapter.subscription_code == '' ? 'N/A' : chapter.subscription_code
 
         // Checking if chapter title and desc are not empty
         if (chapter.chapter_title.trim() == "") {
             validInput = false;
             console.log("chapter title is empty");
+            return "CHAPTER_TITLE_MISSING"
         }
 
         if (chapter.chapter_desc.trim() == "") {
             validInput = false;
             console.log("chapter description is empty");
+            return "CHAPTER_DESC_MISSING"
         }
 
-        // Only update doc if the data is valid
-        if (validInput == true) {
+        // if title and desc are present
+        if( validInput ) {
             var _chapter = chapter;
-            // _chapter.lessons = selectedLesson;
-            // console.log(_chapter);
-            // TODO: check if user wants to upload just general info from metadata page, just lessons from lessons page or everything
-            // for now upload everything
-            await setDoc(chaptersRefDoc, {
+            let chaptersRefDoc;
+            let lessonsRefCollection;
+            // object containing chapter's details
+            let chapterMetadata = {
+                "author": authorName,
                 "chapter_desc": chapter.chapter_desc,
                 "chapter_number": chapter.chapter_number,
                 "chapter_difficulty": chapterDifficulty,
                 "chapter_icon_name": "character.book.closed",
                 "chapter_length": chapterLength,
                 "chapter_title": chapter.chapter_title,
-                "subscription_code": chapter.subscription_code
-            })
+                "subscription_code": chapterSubCode
+            }
+            let chaptLessons = _chapter.lessons;
+            if(mode == "update") {
+                let chapterId = chapter.chapter_id;
+                chaptersRefDoc = doc(db, "Chapters", chapterId); // reference of firebase document with the chapter that will update
+                lessonsRefCollection = collection(chaptersRefDoc, "lessons"); // reference to the lessons subcollection inside of the chapter
+
+                await setDoc(chaptersRefDoc, chapterMetadata)
                 .then(res => {
                     console.log(res);
                 })
@@ -154,11 +142,10 @@ export function generateAndPublishChapter(chapterList, resetChapterStates, getAu
                     // TODO: identify possible error code. None found so far
                     console.log(err);
                     console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
+                    return "CHAPTER_UPLOAD_FAILED"
                 });
 
-
-            let chaptLessons = _chapter.lessons;
-            if (mode == "update") {
+                
                 // Looping over each lesson and writing it to the lessons collection
                 for (var i = 0; i < chaptLessons.length; i++) {
 
@@ -173,17 +160,32 @@ export function generateAndPublishChapter(chapterList, resetChapterStates, getAu
                     }
                     catch (err) {
                         console.log("updating lessons failed");
+                        return "CHAPTER_UPLOAD_FAILED"
                     }
                 }
                 // reset chapter editor related states 
                 resetChapterStates();
                 // refresh list of chapters in right panel
                 getAuthorsChapters(false);
+                return "CHAPTER_UPDATED"
+
             }
-            else if (mode == "add") {
-                console.log("add new lessons here");
-                // adding a brand new chapter
-                if (isCreatingChapter) {
+            else if(mode == "add") {
+                chaptersRefDoc = doc(collection(db, "Chapters"));
+                lessonsRefCollection = collection(chaptersRefDoc, "lessons");
+
+                await setDoc(chaptersRefDoc, chapterMetadata )
+                .then(res => {
+                    console.log(res); // this returns nothing
+                })
+                .catch(err => {
+                    // TODO: identify possible error code. None found so far
+                    console.log(err);
+                    console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
+                    return "CHAPTER_UPLOAD_FAILED"
+                });
+
+                if(isCreatingChapter) {
                     // Looping over each lesson and writing it to the lessons collection
                     for (var i = 0; i < chaptLessons.length; i++) {
 
@@ -191,23 +193,31 @@ export function generateAndPublishChapter(chapterList, resetChapterStates, getAu
                         let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id);
 
                         try {
-                            let updateLessonsOperation = await setDoc(lessonsRefDoc, {
+                            let addLessonsOperation = await setDoc(lessonsRefDoc, {
                                 "lesson_content": chaptLessons[i].lesson_content
                             });
-                            console.log(updateLessonsOperation);
+                            console.log(addLessonsOperation); // this returns nothuing
                         }
                         catch (err) {
                             console.log("updating lessons failed");
+                            return "CHAPTER_UPLOAD_FAILED"
                         }
                     }
                 }
+
                 // reset chapter editor related states 
                 resetChapterStates();
                 // refresh list of chapters in right panel
                 getAuthorsChapters(false);
-            }
+                return "CHAPTER_PUBLISHED"
 
+            }
+            else {
+                console.log("mode can only update or add")
+            }
         }
+
+    
     };
 }
 
@@ -216,24 +226,16 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
     return async () => {
         let newLesson = null;
         let clonedChapter = null;
+        
         // if user is currently creating a new chapter (not in database)
         if (isCreatingChapter) {
             clonedChapter = selectedChapter;
 
-            let newLessonId;
+            let lessonUuid =  uuidv4(); // generates unique id for lesson
+            console.log(lessonUuid)
             let lessonNum = clonedChapter.lessons.length + 1;
-            if (lessonNum >= 100) {
-                newLessonId = `lesson_${lessonNum}`;
-            }
-            else if (lessonNum >= 10) {
-                newLessonId = `lesson_0${lessonNum}`;
-            }
-            else {
-                newLessonId = `lesson_00${lessonNum}`;
-            }
-
             newLesson = templateLesson;
-            newLesson.lesson_id = newLessonId;
+            newLesson.lesson_id = lessonUuid;
             newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
             newLesson.lesson_content[0] = "Untitled lesson";
             newLesson.lesson_content[1] = "New textbox";
@@ -249,20 +251,12 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
             console.log("adding blank lesson to the existing chapter list");
             clonedChapter = selectedChapter;
 
-            let newLessonId;
+            let lessonUuid =  uuidv4();
+            console.log(lessonUuid)
             let lessonNum = clonedChapter.lessons.length + 1;
-            if (lessonNum >= 100) {
-                newLessonId = `lesson_${lessonNum}`;
-            }
-            else if (lessonNum >= 10) {
-                newLessonId = `lesson_0${lessonNum}`;
-            }
-            else {
-                newLessonId = `lesson_00${lessonNum}`;
-            }
 
             newLesson = templateLesson;
-            newLesson.lesson_id = newLessonId;
+            newLesson.lesson_id = lessonUuid;
             newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
             newLesson.lesson_content[0] = "Untitled lesson";
             newLesson.lesson_content[1] = "New textbox";
@@ -311,7 +305,7 @@ export function dashboardTextInputHandler(selectedChapter, setSelectedChapter, s
 }
 
 // gets the details of the specified chapter
-export function getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen) {
+export function getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen, setShowPromptDialog, setDialogTitleText, setDialogDescText) {
     return async (docId) => {
         setShowLoadingOverlay(true)
         setLessonContentRetrieved(false);
@@ -343,6 +337,10 @@ export function getSelectedChapterDetails(setLessonContentRetrieved, setSelected
         } else {
             // this shouldnt happen
             console.log("Requested document not found!!");
+            setShowPromptDialog(true)
+            setDialogTitleText('Requested lesson not found!')
+            setDialogDescText('This lesson was not found. Please refresh lesson list.')
+            setShowLoadingOverlay(false);
         }
     };
 }
