@@ -90,7 +90,7 @@ export function insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleI
 }
 
 // function used to create a chapter object and publish it to firestore. along with any lessons within the chapter object
-export function generateAndPublishChapter(chapterList, resetChapterStates, getAuthorsChapters, isCreatingChapter) {
+export function generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter) {
     return async (chapter, mode, authorName) => {
 
         // first check if chapter has title and summary

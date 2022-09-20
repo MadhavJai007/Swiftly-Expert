@@ -76,7 +76,7 @@ const Dashboard = (props) => {
     const createBlankLesson = dashboardViewModel.generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson, setOriginalLessonContent)
 
     // Function that publishes the chapter
-    const publishChapter = dashboardViewModel.generateAndPublishChapter(chapterList, resetChapterStates, getAuthorsChapters, isCreatingChapter)
+    const publishChapter = dashboardViewModel.generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter)
 
     // function used to insert new content into existing lessons.
     const insertContent = dashboardViewModel.insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleImg)
@@ -147,6 +147,41 @@ const Dashboard = (props) => {
 
     const closeUserPromptDialog = () => {
         setShowPromptDialog(false)
+    }
+
+    // function called when the publish button is pressed
+    const handlePublishAction = (profileDetails, selectedChapter, publishChapter, setShowPromptDialog, setDialogTitleText, setDialogDescText) => {
+        let authorName = profileDetails.username;
+    
+        let publishMode = "add";
+        if (selectedChapter.chapter_id != "") {
+            publishMode = "update";
+        }
+    
+        let publishPromise = publishChapter(selectedChapter, publishMode, authorName);
+        publishPromise.then((res) => {
+            console.log(res);
+            if (res == 'CHAPTER_TITLE_MISSING') {
+                setShowPromptDialog(true);
+                setDialogTitleText('Chapter title missing!!');
+                setDialogDescText('You forgot to include a title for the chapter...');
+            }
+            else if (res == 'CHAPTER_DESC_MISSING') {
+                setShowPromptDialog(true);
+                setDialogTitleText('Empty chapter description!!');
+                setDialogDescText('Make sure to include a brief summary of this chapter.');
+            }
+            else if (res == 'CHAPTER_UPLOAD_FAILED') {
+                setShowPromptDialog(true);
+                setDialogTitleText('Chapter upload failed!!');
+                setDialogDescText('Contact an admin');
+            }
+            else if (res == 'CHAPTER_PUBLISHED' || res == 'CHAPTER_UPDATED') {
+                setShowPromptDialog(true);
+                setDialogTitleText('Chapter has been published!');
+                setDialogDescText(' ');
+            }
+        });
     }
     
     const resetLesson = () => {
@@ -364,9 +399,7 @@ const Dashboard = (props) => {
                                 tooltipTitle={'Create mew lesson'}
                                 onClick={() => {
                                     createBlankLesson()
-                                    setTimeout(()=> {
-                                        console.log(originalLessonContent)
-                                    }, 1500)
+                                    setOpenTab(1)
                                 }}
                             />
                         </SpeedDial>
@@ -379,37 +412,7 @@ const Dashboard = (props) => {
                             sx={{position: 'absolute', bottom: '7vh', left: '3vw'}} 
                             aria-label="upload"
                             onClick={()=>{
-                                let authorName = profileDetails.username
-
-                                let publishMode = "add"
-                                if(selectedChapter.chapter_id != ""){
-                                    publishMode = "update"
-                                }
-
-                                let publishPromise = publishChapter(selectedChapter, publishMode, authorName)
-                                publishPromise.then((res) => {
-                                    console.log(res)
-                                    if(res == 'CHAPTER_TITLE_MISSING'){
-                                        setShowPromptDialog(true)
-                                        setDialogTitleText('Chapter title missing!!')
-                                        setDialogDescText('You forgot to include a title for the chapter...')
-                                    }
-                                        else if(res == 'CHAPTER_DESC_MISSING'){
-                                        setShowPromptDialog(true)
-                                        setDialogTitleText('Empty chapter description!!')
-                                        setDialogDescText('Make sure to include a brief summary of this chapter.')
-                                    }
-                                    else if(res == 'CHAPTER_UPLOAD_FAILED') {
-                                        setShowPromptDialog(true)
-                                        setDialogTitleText('Chapter upload failed!!')
-                                        setDialogDescText('Contact an admin')
-                                    }
-                                    else if(res == 'CHAPTER_PUBLISHED' || res == 'CHAPTER_UPDATED'){
-                                        setShowPromptDialog(true)
-                                        setDialogTitleText('Chapter has been published!')
-                                        setDialogDescText(' ')
-                                    }
-                                })
+                                handlePublishAction(profileDetails, selectedChapter, publishChapter, setShowPromptDialog, setDialogTitleText, setDialogDescText);
                             }
                             }
                         >
@@ -430,3 +433,5 @@ const Dashboard = (props) => {
 }
 
 export default Dashboard
+
+

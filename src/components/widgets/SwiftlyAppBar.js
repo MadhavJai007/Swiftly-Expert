@@ -2,8 +2,6 @@ import * as React from 'react';
 import {AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Avatar, Button, Tooltip, MenuItem, Grid} from '@mui/material';
 import {Menu as MenuIcon, Adb as AdbIcon} from '@mui/icons-material';
 
-const pages = ['Products', 'Pricing', 'Blog'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const SwiftlyAppBar = (props) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -51,45 +49,7 @@ const SwiftlyAppBar = (props) => {
             </Typography>
           </Box>
           
-            
-            {/* Three line menu icon with its associated popup. Only visible when viewport size is 'xs' */}
-          {/* <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
-              }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box> */}
-
+          
           {/* TODO: DELETE THIS */}
           {/* Swiftly icon and Text when viewport size = xs*/}
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} /> {/*Place holder icon*/}
@@ -153,14 +113,15 @@ const SwiftlyAppBar = (props) => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem key={'profile'} onClick={handleCloseUserMenu}>
+                <Typography textAlign="center">Profile</Typography>
+              </MenuItem>
+              <MenuItem key={'manage_account'} onClick={handleCloseUserMenu}>
+                <Typography textAlign="center">Manage account</Typography>
+              </MenuItem>
               <MenuItem key={'real_logout'} onClick={props.handleLogout}>
-                  <Typography textAlign="center">Real logout</Typography>
-                </MenuItem>
+                <Typography textAlign="center">logout</Typography>
+              </MenuItem>
             </Menu>
           </Box>
           </Grid>
