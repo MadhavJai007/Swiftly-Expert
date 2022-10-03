@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 
 // Lesson editor interface widget.
-const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent, lessonContentList, renderLessonContent}) => {
+const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent, lessonContentList}) => {
 
   const [showResetDialog, setShowResetDialog] = useState(false)
 
@@ -32,7 +32,7 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
     // setTimeout(()=> console.log(selectedLesson.lesson_content), 200)
     setSelectedLesson(originalLessonContent)
     setShowResetDialog(false)
-    // renderLessonContent()
+
 
     // OR setLessonContentList directly from here
   }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, MouseEvent } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
-import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections } from 'firebase/firestore'
+import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections, arrayRemove } from 'firebase/firestore'
 import {db} from '../firebase';
 
 import { chapterObj, templateLesson} from './models/chapterModel';
@@ -11,15 +11,53 @@ import { userObject } from './models/expertUserModel';
 import { renderingLessonList } from './widgets/LessonList';
 import ChapterSummaryForm from './widgets/ChapterSummaryForm';
 import ChapterLessonForm from './widgets/ChapterLessonForm';
+import PlaygroundEditor from './widgets/PlaygroundEditor';
 import ChapterDrawer from './widgets/ChapterDrawer';
 import SwiftlyAppBar from './widgets/SwiftlyAppBar';
 import UserPromptDialog from './widgets/UserPromptDialog';
 import { renderChapterCards } from './widgets/ChapterCards';
 import * as dashboardViewModel from './viewmodels/DashboardViewModel';
-import { Container, Box, Paper, useMediaQuery, CssBaseline, Button, IconButton, Typography, SpeedDialAction, useTheme, Tab, Tabs, Backdrop, CircularProgress, Fab} from '@mui/material';
+import {
+  Container,
+  Box,
+  Paper,
+  useMediaQuery,
+  CssBaseline,
+  Button,
+  IconButton,
+  Typography,
+  SpeedDialAction,
+  useTheme,
+  Tab,
+  Tabs,
+  Backdrop,
+  CircularProgress,
+  Fab,
+  MenuItem,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  List,
+  ListItem,
+  ListItemIcon,
+  Checkbox,
+  Divider
+} from "@mui/material";
 import SpeedDial, { SpeedDialProps } from '@mui/material/SpeedDial';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
-import { Menu as MenuIcon, Add as SpeedDialIcon, Close as CrossIcon, ArticleOutlined as LessonIcon, MenuBookOutlined as ChapterIcon, CloudUploadOutlined as UploadIcon } from '@mui/icons-material'; 
+import { 
+    Menu as MenuIcon, 
+    Add as SpeedDialIcon, 
+    Close as CrossIcon, 
+    ArticleOutlined as LessonIcon,
+    MenuBookOutlined as ChapterIcon, 
+    CloudUploadOutlined as UploadIcon, 
+    RefreshOutlined as RefreshIcon, 
+    AddOutlined as AddIcon, 
+    RemoveCircleOutlined as RemoveIcon,
+    QuizOutlined as QuestionIcon,    
+} from '@mui/icons-material'; 
 import PropTypes from 'prop-types';
 
 // const tabSections = tabs;
@@ -29,8 +67,10 @@ const Dashboard = (props) => {
     const [chapterList, setChapterList] = useState([]);
     const [chaptersRetrieved, setChaptersRetrieved] = useState(false)
     const [lessonContentRetrieved, setLessonContentRetrieved] = useState(false)
+    const [playgroundQuestionsRetrieved, setPlaygroundQuestionsRetrieved] = useState(false)
     const [selectedChapter, setSelectedChapter] = useState(chapterObj)
     const [selectedLesson, setSelectedLesson] = useState(null)
+    const [selectedPlaygroundQuestion, setSelectedPlaygroundQuestion] = useState(null)
     const [originalLessonContent, setOriginalLessonContent] = useState(null)
     const [updatedLesson, setUpdatedLesson] = useState(null)
     const [lessonContentList, setLessonContentList] = useState(null)
@@ -44,6 +84,9 @@ const Dashboard = (props) => {
     const [showPromptDialog, setShowPromptDialog] = useState(false)
     const [dialogTitleText, setDialogTitleText] = useState('')
     const [dialogDescText, setDialogDescText] = useState('')
+
+    // playgroundEditor state vars
+    const [mcqChecked, setMcqChecked] = useState([0]);
 
     const history = useHistory()
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
@@ -60,17 +103,20 @@ const Dashboard = (props) => {
     // function that gets the lessons associated to the currently chosen chapter (chosen chapter specified in selectedChapter state)
     const getChapterLessons = dashboardViewModel.getCurrChapterLessons(selectedChapter, setSelectedChapter, setLessonContentRetrieved, setShowLoadingOverlay)
 
+    // funciton that gets the chapter's playground questions
+    const getPlaygroundQuestions = dashboardViewModel.getChapterPlaygroundQuestions(selectedChapter, setSelectedChapter, setPlaygroundQuestionsRetrieved, setShowLoadingOverlay)
+
     /* 
     function that is triggered when a chapter tile on the right panel is clicked. 
     Retrieves chapter into and is set in selectedChapter state variable
     */
-    const getChapter = dashboardViewModel.getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen, setShowPromptDialog, setDialogTitleText, setDialogDescText)
+    const getChapter = dashboardViewModel.getSelectedChapterDetails(setLessonContentRetrieved, setPlaygroundQuestionsRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setSelectedPlaygroundQuestion, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen, setShowPromptDialog, setDialogTitleText, setDialogDescText)
 
     // general purpose text input handler that updates different text state variables appropriately
     const onInputChange = dashboardViewModel.dashboardTextInputHandler(selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson)
 
     // mini function that just clears states that are related to chapter editor panel
-    const resetChapterStates = dashboardViewModel.resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, setLessonContentRetrieved, setOriginalLessonContent, setLessonContentList, setIsCreatingChapter, setOpenTab)
+    const resetChapterStates = dashboardViewModel.resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, setLessonContentRetrieved, setSelectedPlaygroundQuestion, setPlaygroundQuestionsRetrieved, setOriginalLessonContent, setLessonContentList, setIsCreatingChapter, setOpenTab)
 
     // creates a blank lesson and adds it to the chapter's lesson list
     const createBlankLesson = dashboardViewModel.generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson, setOriginalLessonContent)
@@ -149,6 +195,8 @@ const Dashboard = (props) => {
         setShowPromptDialog(false)
     }
 
+    // const resetStudentProgress = dashboardViewModel.resetStudentPlaygroundProgress()
+
     // function called when the publish button is pressed
     const handlePublishAction = (profileDetails, selectedChapter, publishChapter, setShowPromptDialog, setDialogTitleText, setDialogDescText) => {
         let authorName = profileDetails.username;
@@ -189,7 +237,7 @@ const Dashboard = (props) => {
         console.log(originalLessonContent)
         setSelectedLesson(originalLessonContent)
     }
-
+    
 
     /*
         USE EFFECT HOOKS
@@ -352,6 +400,7 @@ const Dashboard = (props) => {
                         {/* Tab pickers */}
                         <Tabs orientation='vertical' variant='scrollable' aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider', width: '11%'}} value={openTab} 
                             onChange={(e, newValue) => {
+                                // TODO: extract to separate handler function
                                 setOpenTab(newValue);
                                 // if selectedChapter not null, download lessons for that chapter
                                 if(newValue == 1 && selectedChapter.chapter_id != "") {
@@ -359,6 +408,13 @@ const Dashboard = (props) => {
                                     if(!lessonContentRetrieved){
                                         console.log("loading the lesson options")
                                         getChapterLessons()
+                                    }
+                                }
+                                else if(newValue == 2 && selectedChapter.chapter_id != "") {
+                                    // only download playground questions if they werent fetched already
+                                    if(!playgroundQuestionsRetrieved){
+                                        console.log("loading the playground questions")
+                                        getPlaygroundQuestions()
                                     }
                                 }
                             }} 
@@ -373,12 +429,10 @@ const Dashboard = (props) => {
                             <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
-                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList} renderLessonContent={renderLessonContent}/>
+                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList}/>
                         )}
                         {openTab === 2 && (
-                            <Box sx={{display: 'flex', flexDirection: 'column', flexGrow: 1, p: 1, m: 1, alignItems: 'center'}}>
-                                <Typography>Playground editor coming Soon ™</Typography>    
-                            </Box>
+                            <PlaygroundEditor selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedPlaygroundQuestion={selectedPlaygroundQuestion} setSelectedPlaygroundQuestion={setSelectedPlaygroundQuestion} mcqChecked={mcqChecked} setMcqChecked={setMcqChecked}/>
                         )}
                         
                          {/* TODO: Extract speed dial as seperate component. */}
@@ -402,6 +456,14 @@ const Dashboard = (props) => {
                                     setOpenTab(1)
                                 }}
                             />
+                            <SpeedDialAction
+                                icon={<QuestionIcon/>}
+                                tooltipTitle={'Create new question'}
+                                onClick={() => {
+                                    setSelectedPlaygroundQuestion(null)
+                                    setOpenTab(2)
+                                }}
+                            />
                         </SpeedDial>
 
                         {/* Publish chapter button */}
@@ -413,6 +475,8 @@ const Dashboard = (props) => {
                             aria-label="upload"
                             onClick={()=>{
                                 handlePublishAction(profileDetails, selectedChapter, publishChapter, setShowPromptDialog, setDialogTitleText, setDialogDescText);
+                                // console.log(selectedChapter)
+                                // resetStudentProgress('chapter_006', ["96c5da32-aa69-482f-b722-aee8a5224215", "d4b9bad7-0e22-4a5f-9c63-42d638a2fa47"]);
                             }
                             }
                         >

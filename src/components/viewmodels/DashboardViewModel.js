@@ -38,11 +38,13 @@ export function retrieveChapters(setChapterList, setChaptersRetrieved, profileDe
 }
 
 // used to reset the various chapter related states in the dashboard
-export function resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, setLessonContentRetrieved, setOriginalLessonContent, setLessonContentList, setIsCreatingChapter, setOpenTab) {
+export function resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, setLessonContentRetrieved, setSelectedPlaygroundQuestion, setPlaygroundQuestionsRetrieved, setOriginalLessonContent, setLessonContentList, setIsCreatingChapter, setOpenTab) {
     return () => {
         setSelectedChapter({ ...chapterObj, lessons: [] });
         setSelectedLesson(null);
         setLessonContentRetrieved(false);
+        setSelectedPlaygroundQuestion(null);
+        setPlaygroundQuestionsRetrieved(false);
         setOriginalLessonContent(null);
         setLessonContentList(null);
         setIsCreatingChapter(true);
@@ -89,6 +91,76 @@ export function insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleI
     };
 }
 
+async function resetStudentPlaygroundProgress(chapterId, questionIdArr){
+    // return async (chapterId, questionIdArr) => {
+        // console.log(chapterId)
+        // console.log(questionIdArr)
+        let studentsRefCollection = collection(db,  'Students')
+        let studentRefDoc;
+        let studentClassroomsRef;
+        let classroom_1Ref;
+        let classroom_1ChaptersRef;
+        let studentChapterProgressQuery;
+        let chapter_id = chapterId;
+        const querySnapshot = await getDocs(studentsRefCollection);
+        querySnapshot.forEach(async (student) => {
+        // doc.data() is never undefined for query doc snapshots
+            // console.log(student.id, " => ", student.data());
+            studentRefDoc = doc(studentsRefCollection, student.id)
+            studentClassroomsRef = collection(studentRefDoc, 'Classrooms')
+            classroom_1Ref = doc(studentClassroomsRef, 'classroom_1')
+            classroom_1ChaptersRef = collection(classroom_1Ref,  'Chapters')
+
+            // find the chapter document that has the id of the published chapter
+            studentChapterProgressQuery = query(classroom_1ChaptersRef, where('chapter_id', "==", chapter_id))
+            var studentProgressSnapshot = await getDocs(studentChapterProgressQuery)
+
+            // var 
+            studentProgressSnapshot.forEach(async chapterProgress => {
+                console.log(student.id)
+                console.log(chapterProgress.id)
+                console.log(chapterProgress.data().playground_status)
+                if(chapterProgress.data().playground_status == 'inprogress'){
+                    console.log(`setting playground status of ${chapterProgress.id} to 'incomplete' for user ${student.id}`)
+                    var chapterRef = doc(classroom_1ChaptersRef, chapterProgress.id)
+                    var chapterSnap = await getDoc(chapterRef)
+                    if(chapterSnap.exists()){
+                        
+                        var chapterProgressData = chapterSnap.data()
+                        console.log(chapterSnap.data())
+                        var questionCount = questionIdArr.length
+                        chapterProgressData.playground_status = 'incomplete'
+                        chapterProgressData.question_ids =  questionIdArr
+                        chapterProgressData.total_questions = questionCount
+                        chapterProgressData.total_question_score = 0
+                        for (var x = 0; x<questionCount; x++ ) {
+                            console.log(x)
+                            chapterProgressData.question_progress[x] = 'incomplete'
+                            chapterProgressData.question_scores[x] = 0
+                            chapterProgressData[`question_${x+1}_answer`] = []
+                        }
+                        console.log(chapterProgressData)
+                        try{
+                            setDoc(chapterRef, chapterProgressData)
+                        }
+                        catch(err){
+                            console.log(err)
+                        }
+                    }
+                    else {
+                        console.log('Nothing was found?')
+                    }
+                   
+                    // questionIdArr.forEach((id, i) => {
+                        
+                    // })
+                }
+            })
+        });
+    // }
+    
+}
+
 // function used to create a chapter object and publish it to firestore. along with any lessons within the chapter object
 export function generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter) {
     return async (chapter, mode, authorName) => {
@@ -98,6 +170,7 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
         let chapterLength = parseInt(chapter.chapter_length);
         let chapterDifficulty = parseInt(chapter.chapter_difficulty);
         let chapterSubCode = chapter.subscription_code == '' ? 'N/A' : chapter.subscription_code
+        let questionIdArr = []
 
         // Checking if chapter title and desc are not empty
         if (chapter.chapter_title.trim() == "") {
@@ -117,6 +190,7 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
             var _chapter = chapter;
             let chaptersRefDoc;
             let lessonsRefCollection;
+            let playgroundRefCollection;
             // object containing chapter's details
             let chapterMetadata = {
                 "author": authorName,
@@ -129,11 +203,12 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                 "subscription_code": chapterSubCode
             }
             let chaptLessons = _chapter.lessons;
+            let chaptPlayground = _chapter.playground;
             if(mode == "update") {
                 let chapterId = chapter.chapter_id;
                 chaptersRefDoc = doc(db, "Chapters", chapterId); // reference of firebase document with the chapter that will update
                 lessonsRefCollection = collection(chaptersRefDoc, "lessons"); // reference to the lessons subcollection inside of the chapter
-
+                playgroundRefCollection = collection(chaptersRefDoc, 'playground') // reference to the playground subcollection
                 await setDoc(chaptersRefDoc, chapterMetadata)
                 .then(res => {
                     console.log(res);
@@ -163,8 +238,36 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                         return "CHAPTER_UPLOAD_FAILED"
                     }
                 }
+
+                // upload playground quesitions
+                for (var i = 0; i < chaptPlayground.length; i++) {
+                    questionIdArr.push(chaptPlayground[i].id)
+                    let playgroundRefDoc = doc(playgroundRefCollection, chaptPlayground[i].id)
+                    try {
+                        let playgroundObj = {
+                            code_blocks: chaptPlayground[i].code_blocks,
+                            id: chaptPlayground[i].id,
+                            question_description: chaptPlayground[i].question_description,
+                            question_title: chaptPlayground[i].question_title,
+                            question_type: chaptPlayground[i].question_type
+                        }
+                        if(chaptPlayground[i].mcq_answers) {
+                            playgroundObj['mcq_answers'] = chaptPlayground[i].mcq_answers
+                        }
+                        
+                        let updatePlaygroundOperation = await setDoc(playgroundRefDoc, playgroundObj);
+                        console.log(updatePlaygroundOperation);
+                    }
+                    catch (err) {
+                        console.log("updating playgrounds failed");
+                        return "CHAPTER_UPLOAD_FAILED"
+                    }
+                }
+
                 // reset chapter editor related states 
                 resetChapterStates();
+                // reset student progress in chapter
+                resetStudentPlaygroundProgress(chapterId, questionIdArr)
                 // refresh list of chapters in right panel
                 getAuthorsChapters(false);
                 return "CHAPTER_UPDATED"
@@ -173,7 +276,7 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
             else if(mode == "add") {
                 chaptersRefDoc = doc(collection(db, "Chapters"));
                 lessonsRefCollection = collection(chaptersRefDoc, "lessons");
-
+                playgroundRefCollection = collection(chaptersRefDoc, 'playground')
                 await setDoc(chaptersRefDoc, chapterMetadata )
                 .then(res => {
                     console.log(res); // this returns nothing
@@ -202,6 +305,29 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                             console.log("updating lessons failed");
                             return "CHAPTER_UPLOAD_FAILED"
                         }
+                    }
+                }
+
+                // upload playground quesitions
+                for (var i = 0; i < chaptPlayground.length; i++) {
+                    let playgroundRefDoc = doc(playgroundRefCollection, chaptPlayground[i].id)
+                    try {
+                        let playgroundObj = {
+                            code_blocks: chaptPlayground[i].code_blocks,
+                            id: chaptPlayground[i].id,
+                            question_description: chaptPlayground[i].question_description,
+                            question_title: chaptPlayground[i].question_title,
+                            question_type: chaptPlayground[i].question_type
+                        }
+                        if(chaptPlayground[i].mcq_answers) {
+                            playgroundObj['mcq_answers'] = chaptPlayground[i].mcq_answers
+                        }
+                        let updatePlaygroundOperation = await setDoc(playgroundRefDoc, playgroundObj);
+                        console.log(updatePlaygroundOperation);
+                    }
+                    catch (err) {
+                        console.log("updating playgrounds failed");
+                        return "CHAPTER_UPLOAD_FAILED"
                     }
                 }
 
@@ -254,7 +380,6 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
             let lessonUuid =  uuidv4();
             console.log(lessonUuid)
             let lessonNum = clonedChapter.lessons.length + 1;
-
             newLesson = templateLesson;
             newLesson.lesson_id = lessonUuid;
             newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
@@ -305,10 +430,11 @@ export function dashboardTextInputHandler(selectedChapter, setSelectedChapter, s
 }
 
 // gets the details of the specified chapter
-export function getSelectedChapterDetails(setLessonContentRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen, setShowPromptDialog, setDialogTitleText, setDialogDescText) {
+export function getSelectedChapterDetails(setLessonContentRetrieved, setPlaygroundQuestionsRetrieved, setSelectedChapter, setOpenTab, setSelectedLesson, setSelectedPlaygroundQuestion, setIsCreatingChapter, setShowLoadingOverlay, setDrawerOpen, setShowPromptDialog, setDialogTitleText, setDialogDescText) {
     return async (docId) => {
         setShowLoadingOverlay(true)
         setLessonContentRetrieved(false);
+        setPlaygroundQuestionsRetrieved(false);
         setSelectedChapter(chapterObj);
         setOpenTab(0);
         const chapterDocRef = doc(db, "Chapters", docId);
@@ -330,6 +456,7 @@ export function getSelectedChapterDetails(setLessonContentRetrieved, setSelected
             // console.log(chapterDocSnap.data().author)
             setSelectedChapter(_chapterObj);
             setSelectedLesson(null);
+            setSelectedPlaygroundQuestion(null);
             // disabling the creatingMode flag (only when creating a new chapter)
             setIsCreatingChapter(false);
             setShowLoadingOverlay(false);
@@ -366,6 +493,38 @@ export function getCurrChapterLessons(selectedChapter, setSelectedChapter, setLe
         setLessonContentRetrieved(true);
         setShowLoadingOverlay(false)
     };
+}
+
+// function to get current chapter's playground questions
+export function getChapterPlaygroundQuestions(selectedChapter, setSelectedChapter, setPlaygroundQuestionsRetrieved, setShowLoadingOverlay){
+    return async () => {
+        setShowLoadingOverlay(true)
+        let chapterDocRef = doc(db, "Chapters", selectedChapter.chapter_id);
+        const querySnapshot = await getDocs(collection(chapterDocRef, "playground"));
+        let playgroundQuestions = [];
+        let questionObj;
+        querySnapshot.forEach(doc => {
+            
+            questionObj = {
+                "question_title": doc.data().question_title,
+                "question_type": doc.data().question_type,
+                "id": doc.data().id,
+                "question_description": doc.data().question_description,
+                "code_blocks": doc.data().code_blocks
+            }
+
+            if(questionObj.question_type == "mcq"){
+                questionObj['mcq_answers'] = doc.data().mcq_answers
+            }
+
+            playgroundQuestions.push(questionObj)
+            
+        });
+        console.log(playgroundQuestions);
+        setSelectedChapter({...selectedChapter, playground: playgroundQuestions})
+        setPlaygroundQuestionsRetrieved(true)
+        setShowLoadingOverlay(false)
+    }
 }
 
 // used to logout 
