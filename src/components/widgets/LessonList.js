@@ -50,9 +50,31 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
                         
                         <Box sx={{m: 1, p:1}}>
                             <Paper sx={{display: "flex", justifyContent: 'space-between', borderStyle: "solid", borderWidth: '1px', borderColor: '#525252'}} >
-                                <IconButton size="large">
+                                {/* <IconButton size="large"  >
                                     <AddIcon/>
-                                </IconButton>
+                                </IconButton> */}
+                                {/* <input type={'file'} onClick={(e) => {fileSelectedHandler(e, content_index)}}>
+                                </input> */}
+                                <input
+                                    accept="image/*"
+                                    style={{display: 'none'}}
+                                    id="contained-button-file"
+                                    type="file"
+                                    onChange={(e) => {
+                                        // console.log(content_index)
+                                        fileSelectedHandler(e, content_index)
+                                    }}
+                                />
+
+                                <label htmlFor="contained-button-file">
+                                    <IconButton component="span" onClick={() => {
+                                        // console.log(i)
+                                        console.log(content_index)
+                                    }}>
+                                        <AddIcon />
+                                    </IconButton>
+                                </label>
+
                                 <Typography sx={{alignSelf: 'center'}}>
                                     Image block
                                 </Typography>

@@ -149,16 +149,20 @@ const Dashboard = (props) => {
 
     // Grabs file from computer
     const fileSelectedHandler = async (event, content_index) => {
-        event.preventDefault();
-        let selectedFile = event.target.files[0] 
+        // event.preventDefault();
+        let selectedFile = event.target.files[0]
+        console.log(content_index)
+        // console.log(await getBase64(selectedFile))
         let tempLesson = {...selectedLesson}
+        console.log(tempLesson)
         if (selectedFile != null){
             try{
                 var imageData = await getBase64(selectedFile);
                 tempLesson.lesson_content[content_index] = imageData;
+                console.log(tempLesson)
                 // used a state variable called updatedLesson. used its associated function (setUpdatedLesson) to set the value of the updated lesson
-                setUpdatedLesson(tempLesson);
-                console.log(selectedLesson)
+              setSelectedLesson(tempLesson)
+                renderLessonContent()
             }
             catch(err) {
                 console.log("error uploading data")
