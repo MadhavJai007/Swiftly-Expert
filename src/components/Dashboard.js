@@ -124,6 +124,8 @@ const Dashboard = (props) => {
     // Function that publishes the chapter
     const publishChapter = dashboardViewModel.generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter)
 
+    const deletePlaygroundQuestion = dashboardViewModel.deletePlaygroundQuestion(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText)
+
     // function used to insert new content into existing lessons.
     const insertContent = dashboardViewModel.insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleImg)
 
@@ -432,7 +434,7 @@ const Dashboard = (props) => {
                             <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList}/>
                         )}
                         {openTab === 2 && (
-                            <PlaygroundEditor selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedPlaygroundQuestion={selectedPlaygroundQuestion} setSelectedPlaygroundQuestion={setSelectedPlaygroundQuestion} mcqChecked={mcqChecked} setMcqChecked={setMcqChecked}/>
+                            <PlaygroundEditor selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedPlaygroundQuestion={selectedPlaygroundQuestion} setSelectedPlaygroundQuestion={setSelectedPlaygroundQuestion} mcqChecked={mcqChecked} setMcqChecked={setMcqChecked} deletePlaygroundQuestion={deletePlaygroundQuestion}/>
                         )}
                         
                          {/* TODO: Extract speed dial as seperate component. */}

@@ -20,7 +20,7 @@ import {
     Checkbox,
 
   } from "@mui/material";
-  import {RefreshOutlined as RefreshIcon, AddOutlined as AddIcon, RemoveCircleOutlined as RemoveIcon} from '@mui/icons-material';
+  import {RefreshOutlined as RefreshIcon, AddOutlined as AddIcon, RemoveCircleOutlined as RemoveIcon, DeleteOutline as DeleteIcon} from '@mui/icons-material';
 
 
   
@@ -36,13 +36,24 @@ import {
         let originalQuestionIndex = questionsArray.indexOf(originalQuestion)
         // console.log(questionsArray[originalQuestionIndex])
 
-        setTimeout(() => {
+        // TODO: put all this in the selectedPlaygroundQuestion useEffect in dashboard.js
+        // setTimeout(() => {
             console.log(props.selectedPlaygroundQuestion)
             questionsArray[originalQuestionIndex] = props.selectedPlaygroundQuestion
             console.log(questionsArray)
             props.setSelectedChapter({ ...clonedChapter, playground: questionsArray})
-        }, 2000)
+        // }, 2000)
         
+    }
+
+    const handleDeleteAction = () => {
+        let clonedChapter = props.selectedChapter
+        let questionsArray = clonedChapter.playground
+        let originalQuestion = questionsArray.find(question => question.id ==  props.selectedPlaygroundQuestion.id )
+        let originalQuestionIndex = questionsArray.indexOf(originalQuestion)
+        props.setSelectedPlaygroundQuestion(null)
+        props.deletePlaygroundQuestion(questionsArray[originalQuestionIndex].id)
+        questionsArray.splice(originalQuestionIndex, 1)
     }
 
     // handler funciton when option's answer checkbox is checked
@@ -295,7 +306,7 @@ import {
                             Edit your question here
                         </Typography> 
                         
-                        {/* question id and title text box */}
+                        {/* question id and title text box and question type select and delete button*/}
                         <Box
                             sx={{
                             "& .MuiTextField-root": {
@@ -339,6 +350,10 @@ import {
                                 </Select>
                                 </FormControl>
                             </Box>
+
+                            <IconButton color="error" onClick={() => {handleDeleteAction()}}>
+                                <DeleteIcon />
+                            </IconButton>
                         </Box>
                         
                         {/* Question desc textbox */}

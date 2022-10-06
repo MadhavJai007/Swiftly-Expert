@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections, query, where } from 'firebase/firestore'
+import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections, query, where, deleteDoc, updateDoc } from 'firebase/firestore'
 import { v4 as uuidv4 } from 'uuid';
 import {db} from '../../firebase';
 
@@ -40,7 +40,7 @@ export function retrieveChapters(setChapterList, setChaptersRetrieved, profileDe
 // used to reset the various chapter related states in the dashboard
 export function resetChaptersAndLessons(setSelectedChapter, setSelectedLesson, setLessonContentRetrieved, setSelectedPlaygroundQuestion, setPlaygroundQuestionsRetrieved, setOriginalLessonContent, setLessonContentList, setIsCreatingChapter, setOpenTab) {
     return () => {
-        setSelectedChapter({ ...chapterObj, lessons: [] });
+        setSelectedChapter({ ...chapterObj, lessons: [], playground: [] });
         setSelectedLesson(null);
         setLessonContentRetrieved(false);
         setSelectedPlaygroundQuestion(null);
@@ -91,74 +91,135 @@ export function insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleI
     };
 }
 
+// used to reset progress of students when changes are made.
 async function resetStudentPlaygroundProgress(chapterId, questionIdArr){
-    // return async (chapterId, questionIdArr) => {
-        // console.log(chapterId)
-        // console.log(questionIdArr)
-        let studentsRefCollection = collection(db,  'Students')
-        let studentRefDoc;
-        let studentClassroomsRef;
-        let classroom_1Ref;
-        let classroom_1ChaptersRef;
-        let studentChapterProgressQuery;
-        let chapter_id = chapterId;
-        const querySnapshot = await getDocs(studentsRefCollection);
-        querySnapshot.forEach(async (student) => {
-        // doc.data() is never undefined for query doc snapshots
-            // console.log(student.id, " => ", student.data());
-            studentRefDoc = doc(studentsRefCollection, student.id)
-            studentClassroomsRef = collection(studentRefDoc, 'Classrooms')
-            classroom_1Ref = doc(studentClassroomsRef, 'classroom_1')
-            classroom_1ChaptersRef = collection(classroom_1Ref,  'Chapters')
+    console.log(questionIdArr)
+    let studentsRefCollection = collection(db,  'Students')
+    let studentRefDoc;
+    let studentClassroomsRef;
+    let classroom_1Ref;
+    let classroom_1ChaptersRef;
+    let studentChapterProgressQuery;
+    let chapter_id = chapterId;
+    const querySnapshot = await getDocs(studentsRefCollection);
+    querySnapshot.forEach(async (student) => {
+    // doc.data() is never undefined for query doc snapshots
+        // console.log(student.id, " => ", student.data());
+        studentRefDoc = doc(studentsRefCollection, student.id)
+        studentClassroomsRef = collection(studentRefDoc, 'Classrooms')
+        classroom_1Ref = doc(studentClassroomsRef, 'classroom_1')
+        classroom_1ChaptersRef = collection(classroom_1Ref,  'Chapters')
 
-            // find the chapter document that has the id of the published chapter
-            studentChapterProgressQuery = query(classroom_1ChaptersRef, where('chapter_id', "==", chapter_id))
-            var studentProgressSnapshot = await getDocs(studentChapterProgressQuery)
+        // find the chapter document that has the id of the published chapter
+        studentChapterProgressQuery = query(classroom_1ChaptersRef, where('chapter_id', "==", chapter_id))
+        var studentProgressSnapshot = await getDocs(studentChapterProgressQuery)
 
-            // var 
-            studentProgressSnapshot.forEach(async chapterProgress => {
-                console.log(student.id)
-                console.log(chapterProgress.id)
-                console.log(chapterProgress.data().playground_status)
-                if(chapterProgress.data().playground_status == 'inprogress'){
-                    console.log(`setting playground status of ${chapterProgress.id} to 'incomplete' for user ${student.id}`)
-                    var chapterRef = doc(classroom_1ChaptersRef, chapterProgress.id)
-                    var chapterSnap = await getDoc(chapterRef)
-                    if(chapterSnap.exists()){
-                        
-                        var chapterProgressData = chapterSnap.data()
-                        console.log(chapterSnap.data())
-                        var questionCount = questionIdArr.length
-                        chapterProgressData.playground_status = 'incomplete'
-                        chapterProgressData.question_ids =  questionIdArr
-                        chapterProgressData.total_questions = questionCount
-                        chapterProgressData.total_question_score = 0
-                        for (var x = 0; x<questionCount; x++ ) {
-                            console.log(x)
-                            chapterProgressData.question_progress[x] = 'incomplete'
-                            chapterProgressData.question_scores[x] = 0
-                            chapterProgressData[`question_${x+1}_answer`] = []
-                        }
-                        console.log(chapterProgressData)
-                        try{
-                            setDoc(chapterRef, chapterProgressData)
-                        }
-                        catch(err){
-                            console.log(err)
-                        }
+        // var 
+        studentProgressSnapshot.forEach(async chapterProgress => {
+            console.log(student.id)
+            console.log(chapterProgress.id)
+            console.log(chapterProgress.data().playground_status)
+            if(chapterProgress.data().playground_status == 'inprogress' || chapterProgress.data().playground_status == 'incomplete'){
+                console.log(`setting playground status of ${chapterProgress.id} to 'incomplete' for user ${student.id}`)
+                var chapterRef = doc(classroom_1ChaptersRef, chapterProgress.id)
+                var chapterSnap = await getDoc(chapterRef)
+                if(chapterSnap.exists()){
+                    
+                    var chapterProgressData = chapterSnap.data()
+                    console.log(chapterSnap.data())
+                    var questionCount = questionIdArr.length
+                    chapterProgressData.playground_status = 'incomplete'
+                    chapterProgressData.question_ids =  questionIdArr
+                    chapterProgressData.total_questions = questionCount
+                    chapterProgressData.total_question_score = 0
+                    var question_progress_arr = []
+                    var question_scores_arr = []
+                    for (var x = 0; x<questionCount; x++ ) {
+                        console.log(x)
+                        question_progress_arr.splice(x, 0, 'incomplete')
+                        question_scores_arr.splice(x, 0, 0)
+                        // chapterProgressData.question_progress[x] = 'incomplete'
+                        // chapterProgressData.question_scores[x] = 0
+                        chapterProgressData[`question_${x+1}_answer`] = []
                     }
-                    else {
-                        console.log('Nothing was found?')
+                    chapterProgressData.question_progress = question_progress_arr
+                    chapterProgressData.question_scores = question_scores_arr
+                    console.log(chapterProgressData)
+                    try{
+                        setDoc(chapterRef, chapterProgressData)
+                        // TODO: make return statements??
                     }
-                   
-                    // questionIdArr.forEach((id, i) => {
-                        
-                    // })
+                    catch(err){
+                        console.log(err)
+                    }
                 }
-            })
-        });
-    // }
-    
+                else {
+                    console.log('Nothing was found?')
+                }
+            }
+        })
+    });
+}
+
+async function recountChapterNumbers() {
+    let chaptersCollection = await getDocs(collection(db, 'Chapters'))
+    let count = 0
+    chaptersCollection.forEach((chapter) => {
+        count++
+        var chapterRef = doc(db, 'Chapters', chapter.id)
+        updateDoc(chapterRef, {chapter_number: count})
+    });
+
+}
+
+// function to delete playground question
+export function deletePlaygroundQuestion(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText) {
+    return async (questionId) => {
+
+        setShowLoadingOverlay(true)
+        let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
+        let questionRef = doc(chaptersRefDoc, 'playground', questionId)
+        let questionSnap = await getDoc(questionRef)
+        if(questionSnap.exists()){
+            console.log(questionSnap.data())
+            try{
+                // if the question was found, delete it and then show confirmation
+                await deleteDoc(questionRef).then(val => {
+                    console.log(val)
+                    setShowPromptDialog(true)
+                    setDialogTitleText('Question was deleted!!')
+                    setDialogDescText('This question has been deleted')
+
+                    // generate an array of the question ids in the playground section
+                    let questionIdArr = []
+                    let playgroundObj = selectedChapter.playground
+                    playgroundObj.forEach(question => {
+                        questionIdArr.push(question.id);
+                    })
+
+                    // reset the student progress if they are currently taking the test
+                    resetStudentPlaygroundProgress(selectedChapter.chapter_id, questionIdArr)
+                })
+                
+            }
+            catch(err){
+                // show prompt that question couldnt be deleted 
+                console.log(err)
+                setShowPromptDialog(true)
+                setDialogTitleText('Error deleting question!!')
+                setDialogDescText('This question couldnt be deleted for some reason: ' + err)
+            }
+            
+        }
+        else {
+            // show
+            setShowPromptDialog(true)
+            setDialogTitleText('Question wasnt found!!')
+            setDialogDescText('This question wasnt found, please refresh the chapter.')
+            
+        }
+        setShowLoadingOverlay(false);
+    }
 }
 
 // function used to create a chapter object and publish it to firestore. along with any lessons within the chapter object
@@ -333,6 +394,8 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
 
                 // reset chapter editor related states 
                 resetChapterStates();
+                // update chapter numbers
+                recountChapterNumbers();
                 // refresh list of chapters in right panel
                 getAuthorsChapters(false);
                 return "CHAPTER_PUBLISHED"
