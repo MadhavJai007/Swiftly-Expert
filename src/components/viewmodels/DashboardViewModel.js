@@ -1,3 +1,4 @@
+import { async } from '@firebase/util';
 import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections, query, where, deleteDoc, updateDoc } from 'firebase/firestore'
 import { v4 as uuidv4 } from 'uuid';
 import {db} from '../../firebase';
@@ -216,6 +217,44 @@ export function deletePlaygroundQuestion(selectedChapter, setShowLoadingOverlay,
             setShowPromptDialog(true)
             setDialogTitleText('Question wasnt found!!')
             setDialogDescText('This question wasnt found, please refresh the chapter.')
+            
+        }
+        setShowLoadingOverlay(false);
+    }
+}
+
+// function to delete lesson
+export function deleteLesson(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText){
+    return async(lessonId) => {
+        setShowLoadingOverlay(true)
+        let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
+        let lessonRef = doc(chaptersRefDoc, 'lessons', lessonId)
+        let lessonSnap = await getDoc(lessonRef)
+        if(lessonSnap.exists()){
+            console.log(lessonSnap.data())
+            try{
+                // if the question was found, delete it and then show confirmation
+                await deleteDoc(lessonRef).then(val => {
+                    console.log(val)
+                    setShowPromptDialog(true)
+                    setDialogTitleText('Lesosn was deleted!!')
+                    setDialogDescText('This lesson has been deleted')
+                })
+                
+            }
+            catch(err){
+                // show prompt that question couldnt be deleted 
+                console.log(err)
+                setShowPromptDialog(true)
+                setDialogTitleText('Error deleting lesson!!')
+                setDialogDescText('This lesson couldnt be deleted for some reason: ' + err)
+            }
+        }
+        else {
+            // show
+            setShowPromptDialog(true)
+            setDialogTitleText('Lesson wasnt found!!')
+            setDialogDescText('This lesson wasnt found, please refresh the chapter.')
             
         }
         setShowLoadingOverlay(false);

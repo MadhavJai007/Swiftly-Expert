@@ -124,7 +124,11 @@ const Dashboard = (props) => {
     // Function that publishes the chapter
     const publishChapter = dashboardViewModel.generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter)
 
+    // function to delete selected playground question
     const deletePlaygroundQuestion = dashboardViewModel.deletePlaygroundQuestion(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText)
+
+    //function to delete selecgted lesson
+    const deleteLesson = dashboardViewModel.deleteLesson(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText)
 
     // function used to insert new content into existing lessons.
     const insertContent = dashboardViewModel.insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleImg)
@@ -435,7 +439,7 @@ const Dashboard = (props) => {
                             <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
                         )}
                         {openTab === 1 && (
-                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList}/>
+                            <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList} deleteLesson={deleteLesson}/>
                         )}
                         {openTab === 2 && (
                             <PlaygroundEditor selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedPlaygroundQuestion={selectedPlaygroundQuestion} setSelectedPlaygroundQuestion={setSelectedPlaygroundQuestion} mcqChecked={mcqChecked} setMcqChecked={setMcqChecked} deletePlaygroundQuestion={deletePlaygroundQuestion}/>
@@ -482,7 +486,6 @@ const Dashboard = (props) => {
                             onClick={()=>{
                                 handlePublishAction(profileDetails, selectedChapter, publishChapter, setShowPromptDialog, setDialogTitleText, setDialogDescText);
                                 // console.log(selectedChapter)
-                                // resetStudentProgress('chapter_006', ["96c5da32-aa69-482f-b722-aee8a5224215", "d4b9bad7-0e22-4a5f-9c63-42d638a2fa47"]);
                             }
                             }
                         >

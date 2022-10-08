@@ -9,10 +9,12 @@ import {
   Select,
   MenuItem,
   Button,
+  IconButton,
 } from "@mui/material";
+import { DeleteOutline as DeleteIcon } from "@mui/icons-material";
 
 // Lesson editor interface widget.
-const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent, lessonContentList}) => {
+const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, selectedLesson, setSelectedLesson, originalLessonContent, setOriginalLessonContent, lessonContentList, deleteLesson}) => {
 
   const [showResetDialog, setShowResetDialog] = useState(false)
 
@@ -35,6 +37,18 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
 
 
     // OR setLessonContentList directly from here
+  }
+
+  const handleDeleteAction = () => {
+    let clonedChapter = selectedChapter
+    let lessonsArray = clonedChapter.lessons
+    console.log(lessonsArray)
+    let originalLesson = lessonsArray.find(lesson => lesson.lesson_id ==  selectedLesson.lesson_id )
+    let originalLessonIndex = lessonsArray.indexOf(originalLesson)
+    setSelectedLesson(null)
+    deleteLesson(lessonsArray[originalLessonIndex].lesson_id)
+    lessonsArray.splice(originalLessonIndex, 1)
+    setSelectedChapter({ ...selectedChapter, lessons: lessonsArray})
   }
 
   // renders the options for the lesson selector dropdown
@@ -113,6 +127,9 @@ const ChapterLessonForm = ({onInputChange, selectedChapter, setSelectedChapter, 
                     //onInputChange(e, 'chapter','subscription_code', 0)}
                 />
                 <Button onClick={() => {setShowResetDialog(true)}}>Reset</Button>
+                <IconButton color="error" size="large" onClick={() => handleDeleteAction()}>
+                  <DeleteIcon fontSize="inherit"/>
+                </IconButton>
               </Box>
 
               {/* Lesson content in list form */}

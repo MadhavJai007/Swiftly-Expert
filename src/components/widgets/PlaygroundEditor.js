@@ -54,6 +54,7 @@ import {
         props.setSelectedPlaygroundQuestion(null)
         props.deletePlaygroundQuestion(questionsArray[originalQuestionIndex].id)
         questionsArray.splice(originalQuestionIndex, 1)
+        props.setSelectedChapter({ ...props.selectedChapter, playground: questionsArray})
     }
 
     // handler funciton when option's answer checkbox is checked
