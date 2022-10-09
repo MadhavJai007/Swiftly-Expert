@@ -130,6 +130,9 @@ const Dashboard = (props) => {
     //function to delete selecgted lesson
     const deleteLesson = dashboardViewModel.deleteLesson(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText)
 
+    // function to delete selcted chapter
+    const deleteChapter = dashboardViewModel.deleteChapter(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText)
+
     // function used to insert new content into existing lessons.
     const insertContent = dashboardViewModel.insertAndDeleteBlocks(selectedLesson, setSelectedLesson, sampleImg)
 
@@ -436,7 +439,7 @@ const Dashboard = (props) => {
                         
                         {/* summary tab form  */}
                         {openTab === 0 && (
-                            <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} />
+                            <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} deleteChapter={deleteChapter} />
                         )}
                         {openTab === 1 && (
                             <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList} deleteLesson={deleteLesson}/>

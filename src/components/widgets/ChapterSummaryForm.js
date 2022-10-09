@@ -23,12 +23,15 @@ import {
   MenuItem,
   Button,
 } from "@mui/material";
+import { DeleteOutline as DeleteIcon } from "@mui/icons-material";
+import { chapterObj } from "../models/chapterModel";
 
 
 const ChapterSummaryForm = ({
     onInputChange,
     selectedChapter,
     setSelectedChapter,
+    deleteChapter
 }) => {
 
     /* chapter length slider */
@@ -46,6 +49,12 @@ const ChapterSummaryForm = ({
             _chapterObj['chapter_length'] = 121;
             setSelectedChapter(_chapterObj);
         }
+    }
+
+    const handleDeleteAction = () => {
+      deleteChapter()
+      setSelectedChapter(chapterObj)
+      
     }
 
 
@@ -92,6 +101,9 @@ const ChapterSummaryForm = ({
           value={selectedChapter.subscription_code}
           onChange={(e) => onInputChange(e, 'chapter','subscription_code', 0)}
         />
+        <IconButton color='error' size='large' onClick={() => {handleDeleteAction()}}>
+          <DeleteIcon fontSize="inherit" />
+        </IconButton>
       </Box>
 
       {/* second row: description box */}
