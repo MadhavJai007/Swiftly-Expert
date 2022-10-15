@@ -93,10 +93,10 @@ const Login = (props) => {
                     Login to Swiftly
 
                      {/* ignore these Box elements */}
-                    <Box sx={{ color: 'error.main' }}>error.main</Box>
+                    {/* <Box sx={{ color: 'error.main' }}>error.main</Box>
                     <Box sx={{ color: 'warning.main' }}>warning.main</Box>
                     <Box sx={{ color: 'info.main' }}>info.main</Box>
-                    <Box sx={{ color: 'success.main' }}>success.main</Box>
+                    <Box sx={{ color: 'success.main' }}>success.main</Box> */}
                 </Typography>
 
                 <br/>
@@ -150,7 +150,7 @@ const Login = (props) => {
                     <Grid container>
                     <Grid item xs>
                         <MaterialLink href="#" variant="body2">
-                        Forgot password? (currently useless)
+                        Forgot password? 
                         </MaterialLink>
                     </Grid>
                     <Grid item>
