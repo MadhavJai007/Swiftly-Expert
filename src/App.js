@@ -1,23 +1,22 @@
 import logo from './logo.svg';
 import './App.css';
 import React, {Component, useState, useEffect, useRef, useMemo} from 'react';
-import Splash from './components/Splash';
-import LoginPage from './components/LoginPage';
-import Login from './components/Login';
-import Signup from './components/Signup';
+import LoginView from './components/LoginView';
+import SignupView from './components/SignupView';
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
+import BrowseChaptersView from './components/BrowseChapters';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter as Router, Switch, Route} from 'react-router-dom'
 import { createTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 
-
+// main app component
 const App = () => {
   const isMounted = useRef(false);
-  const [isDoneLoading, setIsDoneLoading] = useState(false);
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // bool flag representing dark mode preference in browser.
   
+  // creates theme based on darkmode variable
   const theme = useMemo(() => 
     createTheme(
         {
@@ -29,74 +28,36 @@ const App = () => {
     [prefersDarkMode],
   );
 
-  // mimics component.onMount
+  // mimics component.onMount and mounts the component when rendered
   useEffect(() => {
     isMounted.current = true;
     document.title = "Swiftly";
-    // startSplashTimer(1000);
   }, []);
   
-
-  const startSplashTimer = (time) => {
-    setTimeout(() => {
-      setIsDoneLoading(true);
-    }, time);
-  }
-  
-  //when timer is not done loading, it will show splash screen
-  // if(!isDoneLoading){
-  //   return (
-  //     <>
-  //       <div className=""> 
-  //         <Splash/>
-  //       </div>
-        
-  //     </>
-  //   )
-  // }
-  // else {
-    // return component view that shows a login page
     return (
       <div>
+        {/* Router used as index for navigation */}
         <Router>
-            <AuthProvider>
+            {/* Authprovider wrapper used to authentication */}
+            <AuthProvider> 
               <Switch>
                 <PrivateRoute exact path="/">
-                  <Dashboard theme={theme}/>
+                  <Dashboard theme={theme}/> {/*dashboard componenet*/}
+                </PrivateRoute>
+                <PrivateRoute exact path='/browse' >
+                  <BrowseChaptersView theme={theme} /> {/* browse chapters view component */}
                 </PrivateRoute>
                 <Route path="/signup">
-                  <Signup theme={theme}/>
+                  <SignupView theme={theme}/> {/* signup page view */}
                 </Route>
                 <Route path="/login">
-                  <Login theme={theme}/>
+                   <LoginView theme={theme}/> {/* login page view */}
                 </Route>
               </Switch>
             </AuthProvider>
         </Router>  
       </div>
     )
-  // }
-    // <div className="App" > 
-    //   <div className="bg-purple-600 bg-opacity-100">
-
-    //   </div>
-    //   {/* <h1 className="text-red-500">Heyyyyy</h1> */}
-    //   {/* <header className="App-header"> */}
-    //   {/* <header style={backgroundStyle}>
-        
-    //     <p className="text-red-500">
-    //       Make <code>src/App.js</code> the splash screen (shows Swiftly logo and stuff).
-    //     </p>
-    //     <a
-    //       className="App-link"
-    //       href="https://reactjs.org"
-    //       target="_blank"
-    //       rel="noopener noreferrer"
-    //     >
-    //       Learn React
-    //     </a>
-    //   </header> */}
-    // </div>
 }
 
 const backgroundStyle = {

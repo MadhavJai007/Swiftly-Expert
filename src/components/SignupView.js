@@ -8,7 +8,7 @@ import { Container, Box, Avatar, Typography, TextField, FormControlLabel,
     InputAdornment, Button, Grid, Checkbox, Link as MaterialLink, IconButton, useMediaQuery, MenuItem } from '@mui/material';
 
 
-const Signup = (props) => {
+const SignupView = (props) => {
     //reference variables
     const emailRef = useRef();
     const passwordRef = useRef();
@@ -292,4 +292,4 @@ const Signup = (props) => {
     )
 }
 
-export default Signup
+export default SignupView

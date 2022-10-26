@@ -244,14 +244,6 @@ const Dashboard = (props) => {
             }
         });
     }
-    
-    const resetLesson = () => {
-        console.log("resetting changes")
-        console.log(originalLessonContent)
-        setSelectedLesson(originalLessonContent)
-    }
-    
-
     /*
         USE EFFECT HOOKS
         used to trigger something when a change to a state variable occurs
@@ -439,7 +431,7 @@ const Dashboard = (props) => {
                         
                         {/* summary tab form  */}
                         {openTab === 0 && (
-                            <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} deleteChapter={deleteChapter} />
+                            <ChapterSummaryForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} deleteChapter={deleteChapter} resetChapter={resetChapterStates}/>
                         )}
                         {openTab === 1 && (
                             <ChapterLessonForm onInputChange={onInputChange} selectedChapter={selectedChapter} setSelectedChapter={setSelectedChapter} selectedLesson={selectedLesson} setSelectedLesson={setSelectedLesson} originalLessonContent={originalLessonContent} setOriginalLessonContent={setOriginalLessonContent} lessonContentList={lessonContentList} deleteLesson={deleteLesson}/>
@@ -495,8 +487,6 @@ const Dashboard = (props) => {
                             <UploadIcon sx={{mr: 1}}/>
                             Publish
                         </Fab>
-
-                    
                     </Box>
                     
                 </Box>

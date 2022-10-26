@@ -31,7 +31,8 @@ const ChapterSummaryForm = ({
     onInputChange,
     selectedChapter,
     setSelectedChapter,
-    deleteChapter
+    deleteChapter,
+    resetChapter
 }) => {
 
     /* chapter length slider */
@@ -53,8 +54,7 @@ const ChapterSummaryForm = ({
 
     const handleDeleteAction = () => {
       deleteChapter()
-      setSelectedChapter(chapterObj)
-      
+      resetChapter()
     }
 
 

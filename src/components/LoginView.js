@@ -10,7 +10,7 @@ import { Container, CssBaseline, Box, Avatar, Typography, TextField, FormControl
 
 
 
-const Login = (props) => {
+const LoginView = (props) => {
     const emailRef = useRef();
     const passwordRef = useRef();
     const {login, getUserEmail, currentUser} = useAuth();
@@ -169,5 +169,5 @@ const Login = (props) => {
     )
 }
 
-export default Login
+export default LoginView
 

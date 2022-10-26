@@ -180,46 +180,61 @@ export function deletePlaygroundQuestion(selectedChapter, setShowLoadingOverlay,
     return async (questionId) => {
 
         setShowLoadingOverlay(true)
-        let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
-        let questionRef = doc(chaptersRefDoc, 'playground', questionId)
-        let questionSnap = await getDoc(questionRef)
-        if(questionSnap.exists()){
-            console.log(questionSnap.data())
-            try{
-                // if the question was found, delete it and then show confirmation
-                await deleteDoc(questionRef).then(val => {
-                    console.log(val)
-                    setShowPromptDialog(true)
-                    setDialogTitleText('Question was deleted!!')
-                    setDialogDescText('This question has been deleted')
 
-                    // generate an array of the question ids in the playground section
-                    let questionIdArr = []
-                    let playgroundObj = selectedChapter.playground
-                    playgroundObj.forEach(question => {
-                        questionIdArr.push(question.id);
+        //if question is created in a new chapter 
+        if(selectedChapter.chapter_id == ""){
+            console.log('current chapter not in firestore')
+            setShowPromptDialog(true)
+            setDialogTitleText('Question was deleted!!')
+            setDialogDescText('This question has been deleted')
+        }
+        // only if existing chapter is already in firestore
+        else{
+            let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
+            let questionRef = doc(chaptersRefDoc, 'playground', questionId)
+            let questionSnap = await getDoc(questionRef)
+            if(questionSnap.exists()){
+                console.log(questionSnap.data())
+                try{
+                    // if the question was found, delete it and then show confirmation
+                    await deleteDoc(questionRef).then(val => {
+                        console.log(val)
+                        setShowPromptDialog(true)
+                        setDialogTitleText('Question was deleted!!')
+                        setDialogDescText('This question has been deleted')
+
+                        // generate an array of the question ids in the playground section
+                        let questionIdArr = []
+                        let playgroundObj = selectedChapter.playground
+                        playgroundObj.forEach(question => {
+                            questionIdArr.push(question.id);
+                        })
+
+                        // reset the student progress if they are currently taking the test
+                        resetStudentPlaygroundProgress(selectedChapter.chapter_id, questionIdArr)
+                        // TODO: set return statement
+
                     })
+                    
+                }
+                catch(err){
+                    // show prompt that question couldnt be deleted 
+                    console.log(err)
+                    setShowPromptDialog(true)
+                    setDialogTitleText('Error deleting question!!')
+                    setDialogDescText('This question couldnt be deleted for some reason. Please refresh the chapter.: ' + err)
+                    // TODO: set return statement
 
-                    // reset the student progress if they are currently taking the test
-                    resetStudentPlaygroundProgress(selectedChapter.chapter_id, questionIdArr)
-                })
+                }
+            }
+            else {
+                // if its a new question thats not in firestore
+                setShowPromptDialog(true)
+                setDialogTitleText('Question was deleted!!')
+                setDialogDescText('This question has been deleted')
+                // TODO: set return statement
                 
             }
-            catch(err){
-                // show prompt that question couldnt be deleted 
-                console.log(err)
-                setShowPromptDialog(true)
-                setDialogTitleText('Error deleting question!!')
-                setDialogDescText('This question couldnt be deleted for some reason: ' + err)
-            }
-            
-        }
-        else {
-            // show
-            setShowPromptDialog(true)
-            setDialogTitleText('Question wasnt found!!')
-            setDialogDescText('This question wasnt found, please refresh the chapter.')
-            
         }
         setShowLoadingOverlay(false);
     }
@@ -229,36 +244,49 @@ export function deletePlaygroundQuestion(selectedChapter, setShowLoadingOverlay,
 export function deleteLesson(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText){
     return async(lessonId) => {
         setShowLoadingOverlay(true)
-        let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
-        let lessonRef = doc(chaptersRefDoc, 'lessons', lessonId)
-        let lessonSnap = await getDoc(lessonRef)
-        if(lessonSnap.exists()){
-            console.log(lessonSnap.data())
-            try{
-                // if the lesson was found, delete it and then show confirmation
-                await deleteDoc(lessonRef).then(val => {
-                    console.log(val)
+
+        // if the current chapter is new and not in firestore
+        if(selectedChapter.chapter_id == '') {
+            console.log('current chapter not in firestore')
+            setShowPromptDialog(true)
+            setDialogTitleText('Lesosn was deleted!')
+            setDialogDescText('This lesson has been deleted')
+        }
+
+        // only if existing chapter is already in firestore
+        else{
+            let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
+            let lessonRef = doc(chaptersRefDoc, 'lessons', lessonId)
+            let lessonSnap = await getDoc(lessonRef)
+            if(lessonSnap.exists()){
+                console.log(lessonSnap.data())
+                try{
+                    // if the lesson was found, delete it and then show confirmation
+                    await deleteDoc(lessonRef).then(val => {
+                        console.log(val)
+                        setShowPromptDialog(true)
+                        setDialogTitleText('Lesosn was deleted!!')
+                        setDialogDescText('This lesson has been deleted')
+                    })
+                    
+                }
+                catch(err){
+                    // show prompt that lesson couldnt be deleted 
+                    console.log(err)
                     setShowPromptDialog(true)
-                    setDialogTitleText('Lesosn was deleted!!')
-                    setDialogDescText('This lesson has been deleted')
-                })
+                    setDialogTitleText('Error deleting lesson!!')
+                    setDialogDescText('This lesson couldnt be deleted for some reason: ' + err)
+                }
+            }
+            else {
+                // if its a new lesson thats not in firestore
+                setShowPromptDialog(true)
+                setDialogTitleText('Lesson has been deleted!')
+                setDialogDescText('This lesson has been deleted.')
                 
             }
-            catch(err){
-                // show prompt that lesson couldnt be deleted 
-                console.log(err)
-                setShowPromptDialog(true)
-                setDialogTitleText('Error deleting lesson!!')
-                setDialogDescText('This lesson couldnt be deleted for some reason: ' + err)
-            }
         }
-        else {
-            // show
-            setShowPromptDialog(true)
-            setDialogTitleText('Lesson wasnt found!!')
-            setDialogDescText('This lesson wasnt found, please refresh the chapter.')
-            
-        }
+        
         setShowLoadingOverlay(false);
     }
 }
@@ -267,63 +295,72 @@ export function deleteChapter (selectedChapter, setShowLoadingOverlay, setShowPr
     return async () => {
         setShowLoadingOverlay(true)
         console.log(selectedChapter.chapter_id)
-        let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
-        let chapterSnap = await getDoc(chaptersRefDoc)
-        if(chapterSnap.exists()){
-            console.log(chapterSnap.data())
-            // delete from chapters collection
-            try{
-                await deleteDoc(chaptersRefDoc).then(val => {
-                    console.log(val)
-                    setShowPromptDialog(true)
-                    setDialogTitleText('Chapter was deleted!!')
-                    setDialogDescText('This chapter has been deleted')
-                })
-
-                // recount chapter numbers
-                recountChapterNumbers()
-
-                // then remove the chapter's associated progress from students
-                let studentsRefCollection = collection(db,  'Students')
-                let studentRefDoc;
-                let studentClassroomsRef;
-                let classroom_1Ref;
-                let classroom_1ChaptersRef;
-                let studentChapterProgressQuery;
-                let chapter_id = selectedChapter.chapter_id;
-                const querySnapshot = await getDocs(studentsRefCollection);
-                querySnapshot.forEach(async (student) => {
-                // doc.data() is never undefined for query doc snapshots
-                    // console.log(student.id, " => ", student.data());
-                    studentRefDoc = doc(studentsRefCollection, student.id)
-                    studentClassroomsRef = collection(studentRefDoc, 'Classrooms')
-                    classroom_1Ref = doc(studentClassroomsRef, 'classroom_1')
-                    classroom_1ChaptersRef = collection(classroom_1Ref,  'Chapters')
-
-                    // find the chapter document that has the id of the published chapter
-                    studentChapterProgressQuery = query(classroom_1ChaptersRef, where('chapter_id', "==", chapter_id))
-                    var studentProgressSnapshot = await getDocs(studentChapterProgressQuery)
-
-                    if(studentProgressSnapshot.length == 0) {
-                        console.log('No students have progress in chapter: ' + selectedChapter.chapter_id)
-                    }
-                    
-                    studentProgressSnapshot.forEach(async chapterProgress => {
-                        var chapterProgressRef = doc(classroom_1ChaptersRef, chapterProgress.id)
-                        await deleteDoc(chapterProgressRef).then(val => {
-                            console.log('Deleting from ' + student.id + '...')
-                            console.log(chapterProgress.id + ' progress deleted!')
-                        })
+        if(selectedChapter.chapter_id == '') {
+            setShowPromptDialog(true)
+            setDialogTitleText('Chapter has been deleted!')
+            setDialogDescText('This chapter has been deleted')
+        }
+        else{
+            let chaptersRefDoc = doc(db, "Chapters", selectedChapter.chapter_id);
+            let chapterSnap = await getDoc(chaptersRefDoc)
+            if(chapterSnap.exists()){
+                console.log(chapterSnap.data())
+                // delete from chapters collection
+                try{
+                    await deleteDoc(chaptersRefDoc).then(val => {
+                        console.log(val)
+                        setShowPromptDialog(true)
+                        setDialogTitleText('Chapter was deleted!!')
+                        setDialogDescText('This chapter has been deleted')
                     })
-                });
+
+                    // recount chapter numbers
+                    recountChapterNumbers()
+
+                    // then remove the chapter's associated progress from students
+                    let studentsRefCollection = collection(db,  'Students')
+                    let studentRefDoc;
+                    let studentClassroomsRef;
+                    let classroom_1Ref;
+                    let classroom_1ChaptersRef;
+                    let studentChapterProgressQuery;
+                    let chapter_id = selectedChapter.chapter_id;
+                    const querySnapshot = await getDocs(studentsRefCollection);
+                    querySnapshot.forEach(async (student) => {
+                    // doc.data() is never undefined for query doc snapshots
+                        // console.log(student.id, " => ", student.data());
+                        studentRefDoc = doc(studentsRefCollection, student.id)
+                        studentClassroomsRef = collection(studentRefDoc, 'Classrooms')
+                        classroom_1Ref = doc(studentClassroomsRef, 'classroom_1')
+                        classroom_1ChaptersRef = collection(classroom_1Ref,  'Chapters')
+
+                        // find the chapter document that has the id of the published chapter
+                        studentChapterProgressQuery = query(classroom_1ChaptersRef, where('chapter_id', "==", chapter_id))
+                        var studentProgressSnapshot = await getDocs(studentChapterProgressQuery)
+
+                        if(studentProgressSnapshot.length == 0) {
+                            console.log('No students have progress in chapter: ' + selectedChapter.chapter_id)
+                        }
+                        // if there are students found to have progress in that chapter, delete the progress.,
+                        else {
+                            studentProgressSnapshot.forEach(async chapterProgress => {
+                                var chapterProgressRef = doc(classroom_1ChaptersRef, chapterProgress.id)
+                                await deleteDoc(chapterProgressRef).then(val => {
+                                    console.log('Deleting from ' + student.id + '...')
+                                    console.log(chapterProgress.id + ' progress deleted!')
+                                })
+                            })
+                        }
+                    });
+                }
+                catch(err){
+                    // show prompt that lesson couldnt be deleted if something goes wrong
+                    console.log(err)
+                    setShowPromptDialog(true)
+                    setDialogTitleText('Error deleting chapter!!')
+                    setDialogDescText('This chapter couldnt be deleted for some reason: ' + err)
+                }   
             }
-            catch(err){
-                // show prompt that lesson couldnt be deleted 
-                console.log(err)
-                setShowPromptDialog(true)
-                setDialogTitleText('Error deleting chapter!!')
-                setDialogDescText('This chapter couldnt be deleted for some reason: ' + err)
-            }   
         }
         setShowLoadingOverlay(false)
     }
