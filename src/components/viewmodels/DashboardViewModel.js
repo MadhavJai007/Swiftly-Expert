@@ -6,13 +6,12 @@ import {db} from '../../firebase';
 import { chapterObj, templateLesson} from '../models/chapterModel'
 
 // retrieves chapters from firestore
-export function retrieveChapters(setChapterList, setChaptersRetrieved, profileDetails) {
+export function retrieveChapters(setChapterList, setChaptersRetrieved, profileDetails, isTestMode) {
     return async (isRefreshing) => {
         // if(isRefreshing) {
         //     setChaptersRetrieved(false)
         // }
         
-        console.log(profileDetails)
         const authorName = profileDetails.username
         console.log(authorName)
         const chaptersRef = collection(db, 'Chapters');
@@ -33,6 +32,10 @@ export function retrieveChapters(setChapterList, setChaptersRetrieved, profileDe
                 chapterAuth: doc.data()["author"]
             });
         });
+        if(isTestMode){
+            console.log(_chapterList)
+            return _chapterList;
+        }
         setChapterList(_chapterList);
         setChaptersRetrieved(true);
     };
