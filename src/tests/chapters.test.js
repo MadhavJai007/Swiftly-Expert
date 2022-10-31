@@ -1,5 +1,6 @@
 const { FakeFirestore } = require('firestore-jest-mock');
 const { mockCollection, mockDoc, mockWhere, mockDelete } = require('firestore-jest-mock/mocks/firestore');
+const firestoreMockedData = require('./mockedFirestore.js')
 import {initializeApp} from "firebase/app";
 
 describe('Queries', () => {
@@ -8,139 +9,8 @@ describe('Queries', () => {
     jest.clearAllMocks();
   });
 
-  const db = (simulateQueryFilters = false) =>
-    new FakeFirestore(
-      {
-        Chapters: [
-          {
-            id: "chapter_002",
-            chapter_title: "Organizing code",
-            author: "user19",
-            chapter_desc: "Chapter 002 desc",
-            chapter_difficulty: 2,
-            chapter_length: 25,
-            chapter_number: 2,
-            _collections: {
-              playground: [
-                { id: '01e508cf-6ead-41e1-845a-fc5250cf677a', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
-                { id: '2a13842f-dc13-4e73-bb9f-31d1f46789f2', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
-              ],
-              lessons: [
-                {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
-                {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
-              ]
-            }
-          },
-          {
-            id: "chapter_004",
-            chapter_title: "page navigation",
-            author: "user19",
-            chapter_desc: "Chapter 004 desc",
-            chapter_difficulty: 1,
-            chapter_length: 15,
-            chapter_number: 1,
-            _collections: {
-              playground: [
-                { id: 'question_1', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
-                { id: 'question_2', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
-              ],
-              lessons: [
-                {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
-                {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
-              ]
-            }
-          },
-          {
-            id: "chapter_006",
-            chapter_title: "test chapter",
-            author: "user19",
-            chapter_desc: "Chapter 006 desc",
-            chapter_difficulty: 3,
-            chapter_length: 55,
-            chapter_number: 3,
-            _collections: {
-              playground: [
-                { id: '73cc71fc-64c2-46c1-9562-a7bc51b7e58b', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
-                { id: '96c5da32-aa69-482f-b722-aee8a5224215', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
-              ],
-              lessons: [
-                {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
-                {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
-              ]
-            }
-          },
-        ]
-      },
-      { simulateQueryFilters },
-      { mutable: true }
-    );
-
-    const mdb = () =>
-    new FakeFirestore(
-      {
-        Chapters: [
-          {
-            id: "chapter_002",
-            chapter_title: "Organizing code",
-            author: "user19",
-            chapter_desc: "Chapter 002 desc",
-            chapter_difficulty: 2,
-            chapter_length: 25,
-            chapter_number: 2,
-            _collections: {
-              playground: [
-                { id: '01e508cf-6ead-41e1-845a-fc5250cf677a', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
-                { id: '2a13842f-dc13-4e73-bb9f-31d1f46789f2', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
-              ],
-              lessons: [
-                {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
-                {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
-              ]
-            }
-          },
-          {
-            id: "chapter_004",
-            chapter_title: "page navigation",
-            author: "user19",
-            chapter_desc: "Chapter 004 desc",
-            chapter_difficulty: 1,
-            chapter_length: 15,
-            chapter_number: 1,
-            _collections: {
-              playground: [
-                { id: 'question_1', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
-                { id: 'question_2', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
-              ],
-              lessons: [
-                {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
-                {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
-              ]
-            }
-          },
-          {
-            id: "chapter_006",
-            chapter_title: "test chapter",
-            author: "user19",
-            chapter_desc: "Chapter 006 desc",
-            chapter_difficulty: 3,
-            chapter_length: 55,
-            chapter_number: 3,
-            _collections: {
-              playground: [
-                { id: '73cc71fc-64c2-46c1-9562-a7bc51b7e58b', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
-                { id: '96c5da32-aa69-482f-b722-aee8a5224215', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
-              ],
-              lessons: [
-                {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
-                {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
-              ]
-            }
-          },
-        ]
-      },
-      { mutable: true }
-    );
-
+  const db = (simulateQueryFilters = false) => new FakeFirestore(firestoreMockedData.firestoreMockData, { simulateQueryFilters });
+  const mdb = () => new FakeFirestore(firestoreMockedData.firestoreMockData, { mutable: true })
 
   // tests related to chapters   
   describe('Chapter tests', () => {
@@ -284,10 +154,16 @@ describe('Queries', () => {
           "chapter_desc": "chapter desc",
           "chapter_number": 3,
           "chapter_difficulty": 2,
-          "chapter_length": 23,
+          "chapter_length": 232321,
           "chapter_title": 'mock chapter',
-          "lessons" : [],
-          "playground": []
+          "lessons" : [
+            {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
+            {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
+          ],
+          "playground": [
+            { id: 'question_1', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
+            { id: 'question_2', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
+          ]
         }
       }
 
@@ -307,6 +183,7 @@ describe('Queries', () => {
       const newChapter = await chaptersRef.add(chapterDetails)
       const checkNewChapter = await newChapter.get()
       expect(checkNewChapter.exists).toBe(true);
+
     })
 
     // test to edit existing chapter
@@ -320,8 +197,14 @@ describe('Queries', () => {
           "chapter_difficulty": 2,
           "chapter_length": 23,
           "chapter_title": 'mock chapter',
-          "lessons" : [],
-          "playground": []
+          "lessons" : [
+            {id: 'lesson_001', lesson_content: ['lesosn title', 'new text', 'image url']},
+            {id: 'lesson_002', lesson_content: ['lesosn title', 'new text', 'image url']}
+          ],
+          "playground": [
+            { id: 'question_1', code_blocks: ['True', 'False'], mcq_answers: ['True'], question_desc: "question desc", question_title: 'Xcode files', question_type: 'mcq'   },
+            { id: 'question_2', code_blocks: ['New option 1', 'New option 2'], question_desc: "question desc", question_title: 'The question of your title', question_type: 'code_blocks'   },
+          ]
         }
       }
       expect(params.chapter.chapter_desc).not.toBe("")
