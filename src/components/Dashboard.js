@@ -84,6 +84,7 @@ const Dashboard = (props) => {
     const [showPromptDialog, setShowPromptDialog] = useState(false)
     const [dialogTitleText, setDialogTitleText] = useState('')
     const [dialogDescText, setDialogDescText] = useState('')
+    const [dialogMoreDetails, setDialogMoreDetails] = useState('none')
 
     // playgroundEditor state vars
     const [mcqChecked, setMcqChecked] = useState([0]);
@@ -222,25 +223,31 @@ const Dashboard = (props) => {
         let publishPromise = publishChapter(selectedChapter, publishMode, authorName);
         publishPromise.then((res) => {
             console.log(res);
-            if (res == 'CHAPTER_TITLE_MISSING') {
+            if (res.code == 'CHAPTER_TITLE_MISSING') {
                 setShowPromptDialog(true);
                 setDialogTitleText('Chapter title missing!!');
                 setDialogDescText('You forgot to include a title for the chapter...');
             }
-            else if (res == 'CHAPTER_DESC_MISSING') {
+            else if (res.code == 'CHAPTER_DESC_MISSING') {
                 setShowPromptDialog(true);
                 setDialogTitleText('Empty chapter description!!');
                 setDialogDescText('Make sure to include a brief summary of this chapter.');
             }
-            else if (res == 'CHAPTER_UPLOAD_FAILED') {
+            else if (res.code == 'CHAPTER_UPLOAD_FAILED') {
                 setShowPromptDialog(true);
                 setDialogTitleText('Chapter upload failed!!');
                 setDialogDescText('Contact an admin');
             }
-            else if (res == 'CHAPTER_PUBLISHED' || res == 'CHAPTER_UPDATED') {
+            else if (res.code == 'CHAPTER_PUBLISHED' || res == 'CHAPTER_UPDATED') {
                 setShowPromptDialog(true);
                 setDialogTitleText('Chapter has been published!');
                 setDialogDescText(' ');
+            }
+            else if(res.code == "PROFANITY_FOUND"){
+                setShowPromptDialog(true);
+                setDialogTitleText('There was profanity found.')
+                setDialogDescText("Please revise your chapter.") //(`Profanity count: ${res.profanity_count} ${JSON.stringify(res.profanity_details)}`)
+                setDialogMoreDetails(res)
             }
         });
     }
@@ -358,6 +365,7 @@ const Dashboard = (props) => {
                         onClose={closeUserPromptDialog}
                         dialogTitle={dialogTitleText}
                         dialogDesc={dialogDescText}
+                        moreDetails={dialogMoreDetails}
                     />
 
                     {/* nav bar on the top */}
@@ -405,8 +413,17 @@ const Dashboard = (props) => {
                         {/* Tab pickers */}
                         <Tabs orientation='vertical' variant='scrollable' aria-label="editing tabs" sx={{borderRight: 1, borderColor: 'divider', width: '11%'}} value={openTab} 
                             onChange={(e, newValue) => {
+                                console.log(dialogMoreDetails)
                                 // TODO: extract to separate handler function
-                                setOpenTab(newValue);
+                                try{
+                                    setOpenTab(newValue);
+                                    console.log('we good')
+                                    setDialogMoreDetails('none')
+                                }
+                                catch(err) {
+                                    console.log(err)
+                                }
+                                
                                 // if selectedChapter not null, download lessons for that chapter
                                 if(newValue == 1 && selectedChapter.chapter_id != "") {
                                     // but only download lessons if they havent been fetched already
@@ -422,6 +439,7 @@ const Dashboard = (props) => {
                                         getPlaygroundQuestions()
                                     }
                                 }
+                                console.log(dialogMoreDetails)
                             }} 
                         >
                             <Tab label="Summary"></Tab>

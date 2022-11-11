@@ -2,6 +2,7 @@ import { async } from '@firebase/util';
 import { collection, doc, setDoc, getDocs, getDoc, addDoc, listCollections, query, where, deleteDoc, updateDoc } from 'firebase/firestore'
 import { v4 as uuidv4 } from 'uuid';
 import {db} from '../../firebase';
+import Filter from 'bad-words';
 
 import { chapterObj, templateLesson} from '../models/chapterModel'
 
@@ -176,6 +177,80 @@ async function recountChapterNumbers() {
         updateDoc(chapterRef, {chapter_number: count})
     });
 
+}
+
+//function to check profanity in chapter content
+async function checkProfanity(chapter) {
+    let chaptLessons = chapter.lessons;
+    let chaptPlayground = chapter.playground;
+    let profanityCount = 0;
+    let profanityDetails = {
+        chapterTitleProfanity: [],
+        chapterDescProfanity: [],
+        chapterLessonsProfanity: [],
+        chapterPlaygroundProfanity: [],
+    }
+    var filter = new Filter();
+    if(filter.isProfane(chapter.chapter_title)){
+        profanityCount++;
+        profanityDetails.chapterTitleProfanity.push(filter.clean(chapter.chapter_title))
+    }
+    if(filter.isProfane(chapter.chapter_desc)){
+        profanityCount++;
+        profanityDetails.chapterDescProfanity.push(filter.clean(chapter.chapter_desc))
+    }
+    for (var i = 0; i < chaptLessons.length; i++) {
+        var lessonsArray = chaptLessons[i].lesson_content
+        lessonsArray.forEach((lessonText, idx)=> {
+            if(filter.isProfane(lessonText)){
+                profanityCount++;
+                profanityDetails.chapterLessonsProfanity.push({
+                    lesson_id: chaptLessons[i].lesson_id,
+                    isTitle: (idx==0),
+                    profaneContent: filter.clean(lessonText)
+                })
+            }
+        })
+    }
+    for (var i = 0; i < chaptPlayground.length; i++) {
+        let playgroundObj = {
+            code_blocks: chaptPlayground[i].code_blocks,
+            id: chaptPlayground[i].id,
+            question_description: chaptPlayground[i].question_description,
+            question_title: chaptPlayground[i].question_title,
+        }
+        if(filter.isProfane(playgroundObj.question_title)){
+            profanityCount++;
+            profanityDetails.chapterPlaygroundProfanity.push({
+                question_id: playgroundObj.id,
+                isTitle: true,
+                profaneContent: filter.clean(playgroundObj.question_title)
+            })
+        }
+        if(filter.isProfane(playgroundObj.question_description)){
+            profanityCount++;
+            profanityDetails.chapterPlaygroundProfanity.push({
+                question_id: playgroundObj.id,
+                isDesc: true,
+                profaneContent: filter.clean(playgroundObj.question_description)
+            })
+        }
+        playgroundObj.code_blocks.forEach((optionText, idx) => {
+            if(filter.isProfane(optionText)){
+                profanityCount++;
+                profanityDetails.chapterPlaygroundProfanity.push({
+                    question_id: playgroundObj.id,
+                    isOption: true,
+                    optionIndex: idx,
+                    profaneContent: filter.clean(optionText)
+                })
+            }
+        })
+    }
+    return {
+        profanityCount,
+        profanityDetails
+    };
 }
 
 // function to delete playground question
@@ -373,130 +448,80 @@ export function deleteChapter (selectedChapter, setShowLoadingOverlay, setShowPr
 export function generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter) {
     return async (chapter, mode, authorName) => {
 
-        // first check if chapter has title and summary
-        let validInput = true;
-        let chapterLength = parseInt(chapter.chapter_length);
-        let chapterDifficulty = parseInt(chapter.chapter_difficulty);
-        let chapterSubCode = chapter.subscription_code == '' ? 'N/A' : chapter.subscription_code
-        let questionIdArr = []
-
-        // Checking if chapter title and desc are not empty
-        if (chapter.chapter_title.trim() == "") {
-            validInput = false;
-            console.log("chapter title is empty");
-            return "CHAPTER_TITLE_MISSING"
+        let contentCheckResponse = await checkProfanity(chapter)
+        if(contentCheckResponse.profanityCount > 0){
+            let returnRes = {
+                code: 'PROFANITY_FOUND',
+                profanity_count: contentCheckResponse.profanityCount,
+                profanity_details: contentCheckResponse.profanityDetails
+            }
+            console.log(returnRes)
+            return returnRes;
         }
 
-        if (chapter.chapter_desc.trim() == "") {
-            validInput = false;
-            console.log("chapter description is empty");
-            return "CHAPTER_DESC_MISSING"
-        }
+        else {
+            // first check if chapter has title and summary
+            let validInput = true;
+            let chapterLength = parseInt(chapter.chapter_length);
+            let chapterDifficulty = parseInt(chapter.chapter_difficulty);
+            let chapterSubCode = chapter.subscription_code == '' ? 'N/A' : chapter.subscription_code
+            let questionIdArr = []
 
-        // if title and desc are present
-        if( validInput ) {
-            var _chapter = chapter;
-            let chaptersRefDoc;
-            let lessonsRefCollection;
-            let playgroundRefCollection;
-            // object containing chapter's details
-            let chapterMetadata = {
-                "author": authorName,
-                "chapter_desc": chapter.chapter_desc,
-                "chapter_number": chapter.chapter_number,
-                "chapter_difficulty": chapterDifficulty,
-                "chapter_icon_name": "character.book.closed",
-                "chapter_length": chapterLength,
-                "chapter_title": chapter.chapter_title,
-                "subscription_code": chapterSubCode
-            }
-            let chaptLessons = _chapter.lessons;
-            let chaptPlayground = _chapter.playground;
-            if(mode == "update") {
-                let chapterId = chapter.chapter_id;
-                chaptersRefDoc = doc(db, "Chapters", chapterId); // reference of firebase document with the chapter that will update
-                lessonsRefCollection = collection(chaptersRefDoc, "lessons"); // reference to the lessons subcollection inside of the chapter
-                playgroundRefCollection = collection(chaptersRefDoc, 'playground') // reference to the playground subcollection
-                await setDoc(chaptersRefDoc, chapterMetadata)
-                .then(res => {
-                    console.log(res);
-                })
-                .catch(err => {
-                    // TODO: identify possible error code. None found so far
-                    console.log(err);
-                    console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
-                    return "CHAPTER_UPLOAD_FAILED"
-                });
-
-                
-                // Looping over each lesson and writing it to the lessons collection
-                for (var i = 0; i < chaptLessons.length; i++) {
-
-                    // Grabbing the specific lessonn
-                    let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id);
-
-                    try {
-                        let updateLessonsOperation = await setDoc(lessonsRefDoc, {
-                            "lesson_content": chaptLessons[i].lesson_content
-                        });
-                        console.log(updateLessonsOperation);
-                    }
-                    catch (err) {
-                        console.log("updating lessons failed");
-                        return "CHAPTER_UPLOAD_FAILED"
-                    }
+            // Checking if chapter title and desc are not empty
+            if (chapter.chapter_title.trim() == "") {
+                validInput = false;
+                console.log("chapter title is empty");
+                return {
+                    code: "CHAPTER_TITLE_MISSING"
                 }
-
-                // upload playground quesitions
-                for (var i = 0; i < chaptPlayground.length; i++) {
-                    questionIdArr.push(chaptPlayground[i].id)
-                    let playgroundRefDoc = doc(playgroundRefCollection, chaptPlayground[i].id)
-                    try {
-                        let playgroundObj = {
-                            code_blocks: chaptPlayground[i].code_blocks,
-                            id: chaptPlayground[i].id,
-                            question_description: chaptPlayground[i].question_description,
-                            question_title: chaptPlayground[i].question_title,
-                            question_type: chaptPlayground[i].question_type
-                        }
-                        if(chaptPlayground[i].mcq_answers) {
-                            playgroundObj['mcq_answers'] = chaptPlayground[i].mcq_answers
-                        }
-                        
-                        let updatePlaygroundOperation = await setDoc(playgroundRefDoc, playgroundObj);
-                        console.log(updatePlaygroundOperation);
-                    }
-                    catch (err) {
-                        console.log("updating playgrounds failed");
-                        return "CHAPTER_UPLOAD_FAILED"
-                    }
-                }
-
-                // reset chapter editor related states 
-                resetChapterStates();
-                // reset student progress in chapter
-                resetStudentPlaygroundProgress(chapterId, questionIdArr)
-                // refresh list of chapters in right panel
-                getAuthorsChapters(false);
-                return "CHAPTER_UPDATED"
-
             }
-            else if(mode == "add") {
-                chaptersRefDoc = doc(collection(db, "Chapters"));
-                lessonsRefCollection = collection(chaptersRefDoc, "lessons");
-                playgroundRefCollection = collection(chaptersRefDoc, 'playground')
-                await setDoc(chaptersRefDoc, chapterMetadata )
-                .then(res => {
-                    console.log(res); // this returns nothing
-                })
-                .catch(err => {
-                    // TODO: identify possible error code. None found so far
-                    console.log(err);
-                    console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
-                    return "CHAPTER_UPLOAD_FAILED"
-                });
 
-                if(isCreatingChapter) {
+            if (chapter.chapter_desc.trim() == "") {
+                validInput = false;
+                console.log("chapter description is empty");
+                return {
+                    code: "CHAPTER_DESC_MISSING"
+                }
+            }
+
+            // if title and desc are present
+            if( validInput ) {
+                var _chapter = chapter;
+                let chaptersRefDoc;
+                let lessonsRefCollection;
+                let playgroundRefCollection;
+                // object containing chapter's details
+                let chapterMetadata = {
+                    "author": authorName,
+                    "chapter_desc": chapter.chapter_desc,
+                    "chapter_number": chapter.chapter_number,
+                    "chapter_difficulty": chapterDifficulty,
+                    "chapter_icon_name": "character.book.closed",
+                    "chapter_length": chapterLength,
+                    "chapter_title": chapter.chapter_title,
+                    "subscription_code": chapterSubCode
+                }
+                let chaptLessons = _chapter.lessons;
+                let chaptPlayground = _chapter.playground;
+                if(mode == "update") {
+                    let chapterId = chapter.chapter_id;
+                    chaptersRefDoc = doc(db, "Chapters", chapterId); // reference of firebase document with the chapter that will update
+                    lessonsRefCollection = collection(chaptersRefDoc, "lessons"); // reference to the lessons subcollection inside of the chapter
+                    playgroundRefCollection = collection(chaptersRefDoc, 'playground') // reference to the playground subcollection
+                    await setDoc(chaptersRefDoc, chapterMetadata)
+                    .then(res => {
+                        console.log(res);
+                    })
+                    .catch(err => {
+                        // TODO: identify possible error code. None found so far
+                        console.log(err);
+                        console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
+                        return {
+                            code: "CHAPTER_UPLOAD_FAILED"
+                        }
+                    });
+
+                    
                     // Looping over each lesson and writing it to the lessons collection
                     for (var i = 0; i < chaptLessons.length; i++) {
 
@@ -504,55 +529,138 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                         let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id);
 
                         try {
-                            let addLessonsOperation = await setDoc(lessonsRefDoc, {
+                            let updateLessonsOperation = await setDoc(lessonsRefDoc, {
                                 "lesson_content": chaptLessons[i].lesson_content
                             });
-                            console.log(addLessonsOperation); // this returns nothuing
+                            console.log(updateLessonsOperation);
                         }
                         catch (err) {
                             console.log("updating lessons failed");
-                            return "CHAPTER_UPLOAD_FAILED"
+                            return {
+                                code: "CHAPTER_UPLOAD_FAILED"
+                            }
                         }
                     }
+
+                    // upload playground quesitions
+                    for (var i = 0; i < chaptPlayground.length; i++) {
+                        questionIdArr.push(chaptPlayground[i].id)
+                        let playgroundRefDoc = doc(playgroundRefCollection, chaptPlayground[i].id)
+                        try {
+                            let playgroundObj = {
+                                code_blocks: chaptPlayground[i].code_blocks,
+                                id: chaptPlayground[i].id,
+                                question_description: chaptPlayground[i].question_description,
+                                question_title: chaptPlayground[i].question_title,
+                                question_type: chaptPlayground[i].question_type
+                            }
+                            if(chaptPlayground[i].mcq_answers) {
+                                playgroundObj['mcq_answers'] = chaptPlayground[i].mcq_answers
+                            }
+                            
+                            let updatePlaygroundOperation = await setDoc(playgroundRefDoc, playgroundObj);
+                            console.log(updatePlaygroundOperation);
+                        }
+                        catch (err) {
+                            console.log("updating playgrounds failed");
+                            return {
+                                code: "CHAPTER_UPLOAD_FAILED"
+                            }
+                        }
+                    }
+
+                    // reset chapter editor related states 
+                    resetChapterStates();
+                    // reset student progress in chapter
+                    resetStudentPlaygroundProgress(chapterId, questionIdArr)
+                    // refresh list of chapters in right panel
+                    getAuthorsChapters(false);
+                    return {
+                        code: "CHAPTER_UPDATED"
+                    }
+
                 }
+                else if(mode == "add") {
+                    chaptersRefDoc = doc(collection(db, "Chapters"));
+                    lessonsRefCollection = collection(chaptersRefDoc, "lessons");
+                    playgroundRefCollection = collection(chaptersRefDoc, 'playground')
+                    await setDoc(chaptersRefDoc, chapterMetadata )
+                    .then(res => {
+                        console.log(res); // this returns nothing
+                    })
+                    .catch(err => {
+                        // TODO: identify possible error code. None found so far
+                        console.log(err);
+                        console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
+                        return { 
+                            code: "CHAPTER_UPLOAD_FAILED"
+                        }
+                    });
 
-                // upload playground quesitions
-                for (var i = 0; i < chaptPlayground.length; i++) {
-                    let playgroundRefDoc = doc(playgroundRefCollection, chaptPlayground[i].id)
-                    try {
-                        let playgroundObj = {
-                            code_blocks: chaptPlayground[i].code_blocks,
-                            id: chaptPlayground[i].id,
-                            question_description: chaptPlayground[i].question_description,
-                            question_title: chaptPlayground[i].question_title,
-                            question_type: chaptPlayground[i].question_type
+                    if(isCreatingChapter) {
+                        // Looping over each lesson and writing it to the lessons collection
+                        for (var i = 0; i < chaptLessons.length; i++) {
+
+                            // Grabbing the specific lessonn
+                            let lessonsRefDoc = doc(lessonsRefCollection, chaptLessons[i].lesson_id);
+
+                            try {
+                                let addLessonsOperation = await setDoc(lessonsRefDoc, {
+                                    "lesson_content": chaptLessons[i].lesson_content
+                                });
+                                console.log(addLessonsOperation); // this returns nothuing
+                            }
+                            catch (err) {
+                                console.log("updating lessons failed");
+                                return {
+                                    code: "CHAPTER_UPLOAD_FAILED"
+                                }
+                            }
                         }
-                        if(chaptPlayground[i].mcq_answers) {
-                            playgroundObj['mcq_answers'] = chaptPlayground[i].mcq_answers
+                    }
+
+                    // upload playground quesitions
+                    for (var i = 0; i < chaptPlayground.length; i++) {
+                        let playgroundRefDoc = doc(playgroundRefCollection, chaptPlayground[i].id)
+                        try {
+                            let playgroundObj = {
+                                code_blocks: chaptPlayground[i].code_blocks,
+                                id: chaptPlayground[i].id,
+                                question_description: chaptPlayground[i].question_description,
+                                question_title: chaptPlayground[i].question_title,
+                                question_type: chaptPlayground[i].question_type
+                            }
+                            if(chaptPlayground[i].mcq_answers) {
+                                playgroundObj['mcq_answers'] = chaptPlayground[i].mcq_answers
+                            }
+                            let updatePlaygroundOperation = await setDoc(playgroundRefDoc, playgroundObj);
+                            console.log(updatePlaygroundOperation);
                         }
-                        let updatePlaygroundOperation = await setDoc(playgroundRefDoc, playgroundObj);
-                        console.log(updatePlaygroundOperation);
+                        catch (err) {
+                            console.log("updating playgrounds failed");
+                            return {
+                                code:"CHAPTER_UPLOAD_FAILED"
+                            }
+
+                        }
                     }
-                    catch (err) {
-                        console.log("updating playgrounds failed");
-                        return "CHAPTER_UPLOAD_FAILED"
+
+                    // reset chapter editor related states 
+                    resetChapterStates();
+                    // update chapter numbers
+                    recountChapterNumbers();
+                    // refresh list of chapters in right panel
+                    getAuthorsChapters(false);
+                    return {
+                        code: "CHAPTER_PUBLISHED"
                     }
+
                 }
-
-                // reset chapter editor related states 
-                resetChapterStates();
-                // update chapter numbers
-                recountChapterNumbers();
-                // refresh list of chapters in right panel
-                getAuthorsChapters(false);
-                return "CHAPTER_PUBLISHED"
-
-            }
-            else {
-                console.log("mode can only update or add")
+                else {
+                    console.log("mode can only update or add")
+                }
             }
         }
-
     
     };
 }
