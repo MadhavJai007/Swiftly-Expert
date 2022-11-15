@@ -6,7 +6,8 @@ import { Container, Box, Paper, Grid, useMediaQuery,
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle, } from '@mui/material';
+    DialogTitle, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+  import { ExpandMore } from '@mui/icons-material';
 import JSONPretty from 'react-json-pretty'
 
 
@@ -86,7 +87,18 @@ function UserPromptDialog(props) {
             }
           });
         }
-        return <JSONPretty id="more-details" data={info}></JSONPretty>
+        return <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMore />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography>More info: </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <JSONPretty id="more-details" data={info}></JSONPretty>
+          </AccordionDetails>
+        </Accordion>
       }
       else{
         return <br/>

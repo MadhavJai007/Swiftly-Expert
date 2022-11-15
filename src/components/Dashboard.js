@@ -207,6 +207,7 @@ const Dashboard = (props) => {
 
     const closeUserPromptDialog = () => {
         setShowPromptDialog(false)
+        setDialogMoreDetails('none')
     }
 
     // const resetStudentProgress = dashboardViewModel.resetStudentPlaygroundProgress()

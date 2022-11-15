@@ -191,6 +191,7 @@ async function checkProfanity(chapter) {
         chapterPlaygroundProfanity: [],
     }
     var filter = new Filter();
+    filter.addWords('bot')
     if(filter.isProfane(chapter.chapter_title)){
         profanityCount++;
         profanityDetails.chapterTitleProfanity.push(filter.clean(chapter.chapter_title))
