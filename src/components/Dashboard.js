@@ -123,7 +123,7 @@ const Dashboard = (props) => {
     const createBlankLesson = dashboardViewModel.generateNewLesson(isCreatingChapter, selectedChapter, setSelectedChapter, setSelectedLesson, setOriginalLessonContent)
 
     // Function that publishes the chapter
-    const publishChapter = dashboardViewModel.generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter)
+    const publishChapter = dashboardViewModel.generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter, setShowLoadingOverlay)
 
     // function to delete selected playground question
     const deletePlaygroundQuestion = dashboardViewModel.deletePlaygroundQuestion(selectedChapter, setShowLoadingOverlay, setShowPromptDialog, setDialogDescText, setDialogTitleText)
@@ -239,10 +239,10 @@ const Dashboard = (props) => {
                 setDialogTitleText('Chapter upload failed!!');
                 setDialogDescText('Contact an admin');
             }
-            else if (res.code == 'CHAPTER_PUBLISHED' || res == 'CHAPTER_UPDATED') {
+            else if (res.code == 'CHAPTER_PUBLISHED' || res.code == 'CHAPTER_UPDATED') {
                 setShowPromptDialog(true);
                 setDialogTitleText('Chapter has been published!');
-                setDialogDescText(' ');
+                setDialogDescText('been published ');
             }
             else if(res.code == "PROFANITY_FOUND"){
                 setShowPromptDialog(true);
@@ -314,6 +314,7 @@ const Dashboard = (props) => {
             renderLessonContent()
             console.log("lesson content re-rendered")
             console.log(selectedLesson)
+            console.log(selectedChapter)
         }
     }, [selectedLesson])
 
@@ -498,6 +499,7 @@ const Dashboard = (props) => {
                             sx={{position: 'absolute', bottom: '7vh', left: '3vw'}} 
                             aria-label="upload"
                             onClick={()=>{
+                                console.log(showPromptDialog)
                                 handlePublishAction(profileDetails, selectedChapter, publishChapter, setShowPromptDialog, setDialogTitleText, setDialogDescText);
                                 // console.log(selectedChapter)
                             }

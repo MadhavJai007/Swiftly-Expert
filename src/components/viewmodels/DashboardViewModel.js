@@ -191,7 +191,7 @@ async function checkProfanity(chapter) {
         chapterPlaygroundProfanity: [],
     }
     var filter = new Filter();
-    filter.addWords('bot')
+    // filter.addWords('bot')
     if(filter.isProfane(chapter.chapter_title)){
         profanityCount++;
         profanityDetails.chapterTitleProfanity.push(filter.clean(chapter.chapter_title))
@@ -446,9 +446,9 @@ export function deleteChapter (selectedChapter, setShowLoadingOverlay, setShowPr
 }
 
 // function used to create a chapter object and publish it to firestore. along with any lessons within the chapter object
-export function generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter) {
+export function generateAndPublishChapter( resetChapterStates, getAuthorsChapters, isCreatingChapter, setShowLoadingOverlay) {
     return async (chapter, mode, authorName) => {
-
+        setShowLoadingOverlay(true)
         let contentCheckResponse = await checkProfanity(chapter)
         if(contentCheckResponse.profanityCount > 0){
             let returnRes = {
@@ -456,6 +456,7 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                 profanity_count: contentCheckResponse.profanityCount,
                 profanity_details: contentCheckResponse.profanityDetails
             }
+            setShowLoadingOverlay(false)
             console.log(returnRes)
             return returnRes;
         }
@@ -472,6 +473,7 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
             if (chapter.chapter_title.trim() == "") {
                 validInput = false;
                 console.log("chapter title is empty");
+                setShowLoadingOverlay(false)
                 return {
                     code: "CHAPTER_TITLE_MISSING"
                 }
@@ -480,6 +482,7 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
             if (chapter.chapter_desc.trim() == "") {
                 validInput = false;
                 console.log("chapter description is empty");
+            setShowLoadingOverlay(false)
                 return {
                     code: "CHAPTER_DESC_MISSING"
                 }
@@ -517,12 +520,13 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                         // TODO: identify possible error code. None found so far
                         console.log(err);
                         console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
+                        setShowLoadingOverlay(false)
                         return {
                             code: "CHAPTER_UPLOAD_FAILED"
                         }
                     });
 
-                    
+                    console.log('lessons array length: ' + chaptLessons.length)
                     // Looping over each lesson and writing it to the lessons collection
                     for (var i = 0; i < chaptLessons.length; i++) {
 
@@ -537,12 +541,15 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                         }
                         catch (err) {
                             console.log("updating lessons failed");
+            setShowLoadingOverlay(false)
+
                             return {
                                 code: "CHAPTER_UPLOAD_FAILED"
                             }
                         }
                     }
 
+                    console.log('playground array length: ' + chaptPlayground.length)
                     // upload playground quesitions
                     for (var i = 0; i < chaptPlayground.length; i++) {
                         questionIdArr.push(chaptPlayground[i].id)
@@ -564,6 +571,8 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                         }
                         catch (err) {
                             console.log("updating playgrounds failed");
+            setShowLoadingOverlay(false)
+
                             return {
                                 code: "CHAPTER_UPLOAD_FAILED"
                             }
@@ -576,6 +585,8 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                     resetStudentPlaygroundProgress(chapterId, questionIdArr)
                     // refresh list of chapters in right panel
                     getAuthorsChapters(false);
+            setShowLoadingOverlay(false)
+
                     return {
                         code: "CHAPTER_UPDATED"
                     }
@@ -593,6 +604,8 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                         // TODO: identify possible error code. None found so far
                         console.log(err);
                         console.log({ "code": "UNEXPECTED_UPLOAD_ERR", "details": "unexpected chapter uploade rror" });
+            setShowLoadingOverlay(false)
+
                         return { 
                             code: "CHAPTER_UPLOAD_FAILED"
                         }
@@ -613,6 +626,8 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                             }
                             catch (err) {
                                 console.log("updating lessons failed");
+            setShowLoadingOverlay(false)
+
                                 return {
                                     code: "CHAPTER_UPLOAD_FAILED"
                                 }
@@ -639,6 +654,8 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                         }
                         catch (err) {
                             console.log("updating playgrounds failed");
+            setShowLoadingOverlay(false)
+
                             return {
                                 code:"CHAPTER_UPLOAD_FAILED"
                             }
@@ -652,6 +669,8 @@ export function generateAndPublishChapter( resetChapterStates, getAuthorsChapter
                     recountChapterNumbers();
                     // refresh list of chapters in right panel
                     getAuthorsChapters(false);
+            setShowLoadingOverlay(false)
+
                     return {
                         code: "CHAPTER_PUBLISHED"
                     }
@@ -671,10 +690,8 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
     return async () => {
         let newLesson = null;
         let clonedChapter = null;
-        
-        // if user is currently creating a new chapter (not in database)
-        if (isCreatingChapter) {
-            clonedChapter = selectedChapter;
+
+        clonedChapter = selectedChapter;
 
             let lessonUuid =  uuidv4(); // generates unique id for lesson
             console.log(lessonUuid)
@@ -689,30 +706,6 @@ export function generateNewLesson(isCreatingChapter, selectedChapter, setSelecte
             setSelectedChapter({ ...clonedChapter, lessons: lessonArr });
             setSelectedLesson(selectedChapter.lessons[lessonNum - 1]);
             setOriginalLessonContent(selectedChapter.lessons[lessonNum - 1])
-        }
-
-        // if user is currently modifying an existing chapter in the database
-        else {
-            console.log("adding blank lesson to the existing chapter list");
-            clonedChapter = selectedChapter;
-
-            let lessonUuid =  uuidv4();
-            console.log(lessonUuid)
-            let lessonNum = clonedChapter.lessons.length + 1;
-            newLesson = templateLesson;
-            newLesson.lesson_id = lessonUuid;
-            newLesson.lesson_title = `Untitled lesson ${lessonNum}`;
-            newLesson.lesson_content[0] = "Untitled lesson";
-            newLesson.lesson_content[1] = "New textbox";
-            var lessonArr = clonedChapter.lessons;
-            lessonArr.push(JSON.parse(JSON.stringify(newLesson)));
-            setSelectedChapter({ ...clonedChapter, lessons: lessonArr });
-            setSelectedLesson(selectedChapter.lessons[lessonNum - 1]);
-            setOriginalLessonContent(selectedChapter.lessons[lessonNum - 1])
-
-            
-        }
-
     };
 }
 
