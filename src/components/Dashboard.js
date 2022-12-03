@@ -277,7 +277,7 @@ const Dashboard = (props) => {
             // getAuthorsChapters(false)
         }
 
-        getBase64FromUrl('https://pbs.twimg.com/profile_images/1026981625291190272/35O2KIRX_400x400.jpg')
+        getBase64FromUrl('https://t3.ftcdn.net/jpg/03/45/05/92/360_F_345059232_CPieT8RIWOUk4JqBkkWkIETYAkmz2b75.jpg')
         .then(res => {
             console.log(res)
             setSampleImg(res)

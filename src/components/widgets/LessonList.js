@@ -48,44 +48,9 @@ export const renderingLessonList = (selectedLesson, insertContent, fileSelectedH
 
                     <Box key={`lesson_info_${i}`} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} >
                         
-                        <Box sx={{m: 1, p:1}}>
-                            <Paper sx={{display: "flex", justifyContent: 'space-between', borderStyle: "solid", borderWidth: '1px', borderColor: '#525252'}} >
-                                {/* <IconButton size="large"  >
-                                    <AddIcon/>
-                                </IconButton> */}
-                                {/* <input type={'file'} onClick={(e) => {fileSelectedHandler(e, content_index)}}>
-                                </input> */}
-                                <input
-                                    accept="image/*"
-                                    style={{display: 'none'}}
-                                    id="contained-button-file"
-                                    type="file"
-                                    onChange={(e) => {
-                                        // console.log(content_index)
-                                        fileSelectedHandler(e, content_index)
-                                    }}
-                                />
-
-                                <label htmlFor="contained-button-file">
-                                    <IconButton component="span" onClick={() => {
-                                        // console.log(i)
-                                        console.log(content_index)
-                                    }}>
-                                        <AddIcon />
-                                    </IconButton>
-                                </label>
-
-                                <Typography sx={{alignSelf: 'center'}}>
-                                    Image block
-                                </Typography>
-                                <IconButton size="large" onClick={(e) => insertContent(e, "delete", content_index, "before") }>
-                                    <DeleteIcon color="error"/>
-                                </IconButton>
-                            </Paper>
+                        <Box sx={{m: 1, p:1}}>                            
                             {/* Img card block thing which shows the image */}
-                            <Button onClick={() =>  window.open(selectedLesson.lesson_content[content_index], '_blank', 'noopener,noreferrer')}>
-                                <LessonImgBlock imgData={selectedLesson.lesson_content[content_index]} imgAlt={"bottom text"}/>
-                            </Button>
+                                <LessonImgBlock imgData={selectedLesson.lesson_content[content_index]} content_index={content_index} insertContent={insertContent} fileSelectedHandler={fileSelectedHandler} imgAlt={"bottom text"}/>
                         </Box>
 
                         {/* ADD NEW CONTENT BUTTONS */}
